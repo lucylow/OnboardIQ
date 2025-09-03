@@ -238,10 +238,11 @@ class VonageApiService {
   private retryDelay: number;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_VONAGE_API_BASE_URL || 'http://localhost:3001/api/vonage';
+    // Use Supabase edge function instead of localhost
+    this.baseUrl = 'https://pnvrtfrtwbzndglakxvj.supabase.co/functions/v1/vonage-api';
     this.apiKey = import.meta.env.VITE_VONAGE_API_KEY || '';
     this.apiSecret = import.meta.env.VITE_VONAGE_API_SECRET || '';
-    this.isMockMode = !this.apiKey || import.meta.env.VITE_USE_MOCK_VONAGE === 'true';
+    this.isMockMode = false; // Let edge function handle mock mode
     this.cache = new Map();
     this.retryAttempts = 3;
     this.retryDelay = 1000;
@@ -267,8 +268,7 @@ class VonageApiService {
 
     const defaultHeaders = {
       'Content-Type': 'application/json',
-      'x-api-key': this.apiKey,
-      'x-api-secret': this.apiSecret,
+      'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBudnJ0ZnJ0d2J6bmRnbGFreHZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NjQ0MjcsImV4cCI6MjA3MjM0MDQyN30.Z1ZzaXFgU_tr9bXjkFYhyTkrnTpnTVR1aCFhKspaf3Y`,
       'X-API-Version': 'v2',
       'X-Request-ID': this.generateRequestId(),
     };
@@ -346,16 +346,16 @@ class VonageApiService {
   // Start verification process
   async startVerification(request: VonageVerifyRequest): Promise<VonageVerifyResponse> {
     const payload = {
-      number: request.phoneNumber,
+      phone_number: request.phoneNumber,
       brand: request.brand || 'OnboardIQ',
-      codeLength: request.codeLength || 6,
-      workflowId: request.workflowId || 6,
+      code_length: request.codeLength || 6,
+      workflow_id: request.workflowId || 6,
       language: request.language || 'en-us',
-      pinExpiry: request.pinExpiry || 300,
-      nextEventWait: request.nextEventWait || 60
+      pin_expiry: request.pinExpiry || 300,
+      next_event_wait: request.nextEventWait || 60
     };
 
-    return this.makeRequest<VonageVerifyResponse>('/verify/start', {
+    return this.makeRequest<VonageVerifyResponse>('/start-verification', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
@@ -368,7 +368,7 @@ class VonageApiService {
       code: request.code
     };
 
-    return this.makeRequest<VonageVerifyCheckResponse>('/verify/check', {
+    return this.makeRequest<VonageVerifyCheckResponse>('/check-verification', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
@@ -421,7 +421,7 @@ class VonageApiService {
       callback_url: request.options?.callbackUrl
     };
 
-    return this.makeRequest<VonageSMSResponse>('/sms/send', {
+    return this.makeRequest<VonageSMSResponse>('/send-sms', {
       method: 'POST',
       body: JSON.stringify(payload)
     });

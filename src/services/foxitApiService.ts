@@ -132,9 +132,10 @@ class FoxitApiService {
   private retryDelay: number;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_FOXIT_API_BASE_URL || 'http://localhost:3001/api/foxit';
+    // Use Supabase edge function instead of localhost
+    this.baseUrl = 'https://pnvrtfrtwbzndglakxvj.supabase.co/functions/v1/foxit-api';
     this.apiKey = import.meta.env.VITE_FOXIT_API_KEY || '';
-    this.isMockMode = !this.apiKey || import.meta.env.VITE_USE_MOCK_FOXIT === 'true';
+    this.isMockMode = false; // Let edge function handle mock mode
     this.cache = new Map();
     this.retryAttempts = 3;
     this.retryDelay = 1000; // 1 second
@@ -160,7 +161,7 @@ class FoxitApiService {
 
     const defaultHeaders = {
       'Content-Type': 'application/json',
-      'x-api-key': this.apiKey,
+      'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBudnJ0ZnJ0d2J6bmRnbGFreHZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NjQ0MjcsImV4cCI6MjA3MjM0MDQyN30.Z1ZzaXFgU_tr9bXjkFYhyTkrnTpnTVR1aCFhKspaf3Y`,
       'X-API-Version': 'v2',
       'X-Request-ID': this.generateRequestId(),
     };
@@ -277,7 +278,7 @@ class FoxitApiService {
       }
     };
 
-    return this.makeRequest<PDFWorkflowResponse>('/process-pdf-workflow', {
+    return this.makeRequest<PDFWorkflowResponse>('/process-workflow', {
       method: 'POST',
       body: JSON.stringify(payload)
     });

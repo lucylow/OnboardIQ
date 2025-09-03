@@ -9,6 +9,8 @@ export interface DocumentGenerationRequest {
     includeWatermark?: boolean;
     compression?: boolean;
     security?: 'standard' | 'high' | 'enterprise';
+    include_metadata?: boolean;
+    watermark?: boolean;
   };
 }
 
@@ -244,12 +246,12 @@ class FoxitApiService {
   // Generate document with progress tracking
   async generateDocument(request: DocumentGenerationRequest): Promise<DocumentGenerationResponse> {
     const payload = {
-      template_id: request.templateId,
+      templateId: request.templateId,
       data: request.data,
       output_format: request.options?.format || 'pdf',
       options: {
-        include_metadata: true,
-        watermark: request.options?.includeWatermark || false,
+        include_metadata: request.options?.include_metadata ?? true,
+        includeWatermark: request.options?.includeWatermark || false,
         compression_level: request.options?.compression ? 'high' : 'none',
         security: request.options?.security || 'standard'
       }
@@ -264,8 +266,8 @@ class FoxitApiService {
   // Process PDF workflow with enhanced options
   async processPdfWorkflow(request: PDFWorkflowRequest): Promise<PDFWorkflowResponse> {
     const payload = {
-      workflow_id: request.workflowId,
-      document_ids: request.documentIds,
+      workflowId: request.workflowId,
+      documentIds: request.documentIds,
       operations: request.operations,
       options: {
         watermark_text: request.options?.watermark_text,

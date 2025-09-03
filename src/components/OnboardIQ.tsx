@@ -260,7 +260,7 @@ const OnboardIQ: React.FC = () => {
         const updated = prev.map(doc => {
           if (doc.status === 'generating') {
             const newProgress = Math.min(doc.progress + Math.random() * 20, 100);
-            const newStatus: 'completed' | 'generating' = newProgress >= 100 ? 'completed' : 'generating';
+            const newStatus: DocumentStatus['status'] = newProgress >= 100 ? 'completed' : 'generating';
             return {
               ...doc,
               progress: newProgress,

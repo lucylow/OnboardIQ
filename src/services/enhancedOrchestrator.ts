@@ -368,9 +368,8 @@ class DocumentAgent implements BaseAgent {
   private async generateDocument(data: any) {
     try {
       await foxitApiService.generateDocument({
-        template_id: data.template_id,
-        data: data.data,
-        output_format: data.options?.format || 'pdf'
+        templateId: data.template_id,
+        data: data.data
       });
     } catch (error) {
       console.error('Failed to generate document:', error);

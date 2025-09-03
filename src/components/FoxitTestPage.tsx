@@ -35,7 +35,7 @@ export const FoxitTestPage: React.FC = () => {
   const checkApiStatus = async () => {
     try {
       setApiStatus('loading');
-      const status = await foxitApiService.getConnectionStatus();
+      const status = await foxitApiService.healthCheck();
       setApiStatus(status.connected ? 'connected' : 'error');
     } catch (error) {
       console.error('API status check failed:', error);

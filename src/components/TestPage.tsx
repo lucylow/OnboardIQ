@@ -166,7 +166,7 @@ const TestPage = () => {
                   onClick={async () => {
                     try {
                       const health = await foxitApiService.healthCheck();
-                      alert(`Foxit API: ${health.status === 'healthy' ? 'Connected' : 'Error'}`);
+                      alert(`Foxit API: ${health.connected ? 'Connected' : 'Error'}`);
                     } catch (error) {
                       alert('Foxit API not reachable');
                     }
@@ -196,13 +196,7 @@ const TestPage = () => {
                   size="sm"
                   onClick={async () => {
                     try {
-                      const result = await foxitApiService.createWelcomePacketForUser('test_user_123', {
-                        name: 'Test User',
-                        company: 'Test Company',
-                        plan: 'Premium Plan',
-                        email: 'test@example.com',
-                        phone: '+1234567890'
-                      });
+                      const result = await foxitApiService.createWelcomePacketForUser('test_user_123');
                       if (result.success) {
                         alert('Welcome packet generated successfully!');
                         if (result.document_url) {
@@ -227,12 +221,7 @@ const TestPage = () => {
                   size="sm"
                   onClick={async () => {
                     try {
-                      const result = await foxitApiService.createOnboardingGuideForUser('test_user_123', {
-                        name: 'Test User',
-                        company: 'Test Company',
-                        plan: 'Premium Plan',
-                        features: ['AI Personalization', 'Multi-Channel Support']
-                      });
+                      const result = await foxitApiService.createOnboardingGuideForUser('test_user_123');
                       if (result.success) {
                         alert('Onboarding guide created successfully!');
                         if (result.document_url) {
@@ -257,13 +246,7 @@ const TestPage = () => {
                   size="sm"
                   onClick={async () => {
                     try {
-                      const result = await foxitApiService.createInvoiceForUser('test_user_123', {
-                        customer_name: 'Test User',
-                        company_name: 'Test Company',
-                        plan_name: 'Premium Plan',
-                        amount: 299.99,
-                        currency: 'USD'
-                      });
+                      const result = await foxitApiService.createInvoiceForUser('test_user_123');
                       if (result.success) {
                         alert('Invoice generated successfully!');
                         if (result.document_url) {

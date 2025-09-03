@@ -169,7 +169,7 @@ class DocumentGenerationService {
 
       // Generate document via Foxit API
       const foxitResponse = await foxitApiService.generateDocument({
-        template_id: templateId,
+        templateId: templateId,
         data: {
           ...variables,
           personalization,

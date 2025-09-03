@@ -227,9 +227,8 @@ Your OnboardIQ Contract Specialist`;
     let documentUrl = '';
     try {
       const response = await foxitApiService.generateDocument({
-        template_id: 'custom_contract_template',
-        data: contractData,
-        output_format: 'pdf'
+        templateId: 'custom_contract_template',
+        data: contractData
       });
       documentUrl = response.document_url || '';
     } catch (error) {

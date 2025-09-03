@@ -89,7 +89,7 @@ const FoxitDocumentWorkflow: React.FC<FoxitDocumentWorkflowProps> = ({ userId })
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const initialDoc = await foxitApiService.generateDocument({
-        template_id: workflowConfig.workflowType === 'onboarding_package' ? 'welcome_packet' : 'contract',
+        templateId: workflowConfig.workflowType === 'onboarding_package' ? 'welcome_packet' : 'contract',
         data: {
           customer_name: workflowConfig.customerName,
           company_name: workflowConfig.companyName,
@@ -97,7 +97,7 @@ const FoxitDocumentWorkflow: React.FC<FoxitDocumentWorkflowProps> = ({ userId })
           start_date: new Date().toISOString().split('T')[0]
         },
         options: {
-          watermark: workflowConfig.addWatermark
+          includeWatermark: workflowConfig.addWatermark
         }
       });
 
@@ -109,7 +109,7 @@ const FoxitDocumentWorkflow: React.FC<FoxitDocumentWorkflowProps> = ({ userId })
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const contractDoc = await foxitApiService.generateDocument({
-          template_id: 'contract',
+          templateId: 'contract',
           data: {
             client_name: workflowConfig.customerName,
             service_type: 'OnboardIQ Platform',
@@ -118,7 +118,7 @@ const FoxitDocumentWorkflow: React.FC<FoxitDocumentWorkflowProps> = ({ userId })
             end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
           },
           options: {
-            watermark: workflowConfig.addWatermark
+            includeWatermark: workflowConfig.addWatermark
           }
         });
 
@@ -131,8 +131,8 @@ const FoxitDocumentWorkflow: React.FC<FoxitDocumentWorkflowProps> = ({ userId })
       
       const documentIds = workflowResults.map(r => r.result.document_id);
       const processedDoc = await foxitApiService.processPdfWorkflow({
-        workflow_id: 'secure_delivery',
-        document_ids: documentIds,
+        workflowId: 'secure_delivery',
+        documentIds: documentIds,
         operations: workflowConfig.compressOutput ? ['compress', 'watermark'] : ['watermark'],
         options: {
           watermark_text: `${workflowConfig.companyName} - Confidential`,

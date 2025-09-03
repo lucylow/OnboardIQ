@@ -76,7 +76,7 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
 
       // Call Foxit API
       const response = await foxitApiService.generateDocument({
-        template_id: formData.templateId,
+        templateId: formData.templateId,
         data: {
           customer_name: formData.customerName,
           company_name: formData.companyName,
@@ -86,9 +86,7 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
           start_date: formData.startDate
         },
         options: {
-          include_metadata: true,
-          watermark: true,
-          compression_level: 'high'
+          includeWatermark: true
         }
       });
 

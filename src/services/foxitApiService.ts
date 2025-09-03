@@ -218,11 +218,6 @@ class FoxitApiService {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Delay utility for retry logic
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   // Clear cache
   public clearCache(): void {
     this.cache.clear();
@@ -500,6 +495,65 @@ class FoxitApiService {
     };
 
     return mockResponses[endpoint] || { success: false, error: 'Mock endpoint not found' };
+  }
+
+  // Health check for API connectivity
+  async healthCheck(): Promise<{ connected: boolean; response_time?: number; version?: string }> {
+    try {
+      const startTime = Date.now();
+      const response = await this.makeRequest<{ status: string; version: string }>('/health', {
+        method: 'GET'
+      });
+      const responseTime = Date.now() - startTime;
+      
+      return {
+        connected: true,
+        response_time: responseTime,
+        version: response.version
+      };
+    } catch (error) {
+      return {
+        connected: false
+      };
+    }
+  }
+
+  // Create welcome packet for user
+  async createWelcomePacketForUser(userId: string): Promise<DocumentGenerationResponse> {
+    return this.generateDocument({
+      templateId: 'welcome_packet',
+      data: {
+        user_id: userId,
+        generated_at: new Date().toISOString()
+      }
+    });
+  }
+
+  // Create onboarding guide for user  
+  async createOnboardingGuideForUser(userId: string): Promise<DocumentGenerationResponse> {
+    return this.generateDocument({
+      templateId: 'onboarding_guide',
+      data: {
+        user_id: userId,
+        generated_at: new Date().toISOString()
+      }
+    });
+  }
+
+  // Create invoice for user
+  async createInvoiceForUser(userId: string): Promise<DocumentGenerationResponse> {
+    return this.generateDocument({
+      templateId: 'invoice',
+      data: {
+        user_id: userId,
+        generated_at: new Date().toISOString()
+      }
+    });
+  }
+
+  // Utility method for delays
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

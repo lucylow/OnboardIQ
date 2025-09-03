@@ -2,12 +2,11 @@
 // Enhanced service with comprehensive error handling and type safety
 
 export interface DocumentGenerationRequest {
-  template_id: string;
+  templateId: string;
   data: Record<string, any>;
   output_format?: 'pdf' | 'docx' | 'html';
   options?: {
-    include_metadata?: boolean;
-    watermark?: boolean;
+    includeWatermark?: boolean;
     compression_level?: 'low' | 'medium' | 'high';
   };
 }
@@ -24,7 +23,9 @@ export interface DocumentGenerationResponse {
 }
 
 export interface PDFWorkflowRequest {
-  document_urls: string[];
+  workflowId?: string;
+  documentIds?: string[];
+  document_urls?: string[];
   workflow_config?: {
     compress?: boolean;
     compression_level?: 'low' | 'medium' | 'high';

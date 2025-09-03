@@ -107,7 +107,7 @@ class MuleSoftApiService {
 
     // Check cache for GET requests
     if (options.method === 'GET' && this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey);
+      return this.cache.get(cacheKey) as T;
     }
 
     const config: RequestInit = {
@@ -317,8 +317,12 @@ class MuleSoftApiService {
       }
     };
 
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 100));
+    // Simulate network delay synchronously
+    const delay = Math.random() * 500 + 100;
+    const start = Date.now();
+    while (Date.now() - start < delay) {
+      // Busy wait for simulation
+    }
 
     const response = mockResponses[endpoint] || {
       success: false,

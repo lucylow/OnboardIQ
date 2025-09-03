@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnboardIQ - Welcome Video Tour</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+            min-height: 100vh;
+        }
+        .video-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .video-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            text-align: center;
+        }
+        .video-header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 300;
+        }
+        .video-content {
+            padding: 20px;
+            text-align: center;
+        }
+        .video-placeholder {
+            background: #000;
+            border-radius: 8px;
+            padding: 40px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .video-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+        }
+        .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .play-button::after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-left: 15px solid #667eea;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 3px;
+        }
+        .session-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .control-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        .control-btn:hover {
+            background: #5a6fd8;
+        }
+        .control-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        .demo-note {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="video-header">
+            <h1>🎥 OnboardIQ Welcome Video Tour</h1>
+        </div>
+        
+        <div class="video-content">
+            <div class="demo-note">
+                <strong>Demo Mode:</strong> This simulates a Vonage Video API session. In production, this would be a real video call with your onboarding specialist.
+            </div>
+
+            <div class="video-placeholder">
+                <div class="play-button" onclick="startVideo()"></div>
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: #999;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 10px;">📹</div>
+                        <div>Welcome Video Session</div>
+                        <div style="font-size: 0.8em; margin-top: 5px;">Click play to start</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="session-info">
+                <strong>Session ID:</strong> <span id="session-id"></span><br>
+                <strong>Token:</strong> <span id="token"></span><br>
+                <strong>Status:</strong> <span id="status">Ready</span>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="startVideo()" id="play-btn">▶️ Play</button>
+                <button class="control-btn" onclick="pauseVideo()" id="pause-btn" disabled>⏸️ Pause</button>
+                <button class="control-btn" onclick="stopVideo()" id="stop-btn" disabled>⏹️ Stop</button>
+                <button class="control-btn" onclick="toggleMute()" id="mute-btn">🔊 Mute</button>
+            </div>
+
+            <div class="status" id="status-message">
+                Welcome to OnboardIQ! Your personalized video onboarding session is ready to begin.
+            </div>
+
+            <div style="margin-top: 30px; text-align: left;">
+                <h3>What to Expect:</h3>
+                <ul>
+                    <li><strong>Personalized Introduction</strong> - Your onboarding specialist will greet you by name</li>
+                    <li><strong>Dashboard Walkthrough</strong> - Step-by-step tour of your customized dashboard</li>
+                    <li><strong>Feature Overview</strong> - Learn about AI-powered features tailored to your needs</li>
+                    <li><strong>Q&A Session</strong> - Ask questions and get immediate answers</li>
+                    <li><strong>Next Steps</strong> - Clear guidance on what to do after the session</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate random session ID and token
+        document.getElementById('session-id').textContent = 'session_' + Math.random().toString(36).substr(2, 9);
+        document.getElementById('token').textContent = 'token_' + Math.random().toString(36).substr(2, 12);
+
+        let isPlaying = false;
+        let isMuted = false;
+
+        function startVideo() {
+            isPlaying = true;
+            document.getElementById('status').textContent = 'Playing';
+            document.getElementById('status-message').textContent = 'Video session started! Your onboarding specialist is joining...';
+            document.getElementById('play-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = false;
+        }
+
+        function pauseVideo() {
+            isPlaying = false;
+            document.getElementById('status').textContent = 'Paused';
+            document.getElementById('status-message').textContent = 'Video session paused. Click play to resume.';
+            document.getElementById('play-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+        }
+
+        function stopVideo() {
+            isPlaying = false;
+            document.getElementById('status').textContent = 'Stopped';
+            document.getElementById('status-message').textContent = 'Video session ended. Thank you for completing your onboarding!';
+            document.getElementById('play-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = true;
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('mute-btn');
+            if (isMuted) {
+                btn.textContent = '🔇 Unmute';
+                btn.style.background = '#dc3545';
+            } else {
+                btn.textContent = '🔊 Mute';
+                btn.style.background = '#667eea';
+            }
+        }
+    </script>
+</body>
+</html>

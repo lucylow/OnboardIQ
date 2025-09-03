@@ -18,6 +18,7 @@ import {
   FileText,
   MessageSquare
 } from 'lucide-react';
+import analyticsService from '@/services/analyticsService';
 
 interface AnalyticsData {
   funnel?: Array<{
@@ -61,48 +62,21 @@ const AnalyticsDashboard: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const [funnelRes, channelsRes, realtimeRes, atRiskRes, insightsRes] = await Promise.all([
-        fetch(`http://localhost:3000/api/analytics/funnel?startDate=${getStartDate()}`),
-        fetch(`http://localhost:3000/api/analytics/channels?startDate=${getStartDate()}`),
-        fetch('http://localhost:3000/api/analytics/realtime'),
-        fetch('http://localhost:3000/api/analytics/at-risk'),
-        fetch('http://localhost:3000/api/analytics/insights')
-      ]);
-
-      const [funnelData, channelsData, realtimeData, atRiskData, insightsData] = await Promise.all([
-        funnelRes.json(),
-        channelsRes.json(),
-        realtimeRes.json(),
-        atRiskRes.json(),
-        insightsRes.json()
-      ]);
-
-      setData({
-        funnel: funnelData.data,
-        channels: channelsData.data,
-        realtime: realtimeData.data,
-        atRisk: atRiskData.data,
-        insights: insightsData.data
-      });
+      setError(null);
+      
+      // Use mock analytics service instead of backend API calls
+      const analyticsData = await analyticsService.fetchAllAnalytics(timeRange);
+      
+      if (analyticsData.success) {
+        setData(analyticsData.data);
+      } else {
+        setError('Failed to fetch analytics data');
+      }
     } catch (err) {
       setError('Failed to fetch analytics data');
       console.error('Analytics fetch error:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getStartDate = () => {
-    const now = new Date();
-    switch (timeRange) {
-      case '1d':
-        return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-      case '7d':
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      case '30d':
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      default:
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     }
   };
 
@@ -156,7 +130,10 @@ const AnalyticsDashboard: React.FC = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-sm text-gray-600 mt-1">MVP POC - Using Mock Data</p>
+        </div>
         <div className="flex gap-2">
           {['1d', '7d', '30d'].map((range) => (
             <Button
@@ -227,6 +204,15 @@ const AnalyticsDashboard: React.FC = () => {
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Mock Data Indicator */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-blue-700 font-medium">Live Mock Data</span>
+          <span className="text-xs text-blue-600">Data refreshes every 30 seconds</span>
+        </div>
       </div>
 
       <Tabs defaultValue="funnel" className="space-y-4">

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Brain, 
   TrendingUp, 
@@ -51,6 +52,7 @@ const AdaptiveOnboarding: React.FC = () => {
   const [userBehavior, setUserBehavior] = useState<UserBehavior | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('recommendations');
+  const { toast } = useToast();
 
   useEffect(() => {
     loadUserBehaviorAndRecommendations();
@@ -154,6 +156,12 @@ const AdaptiveOnboarding: React.FC = () => {
 
   const handleRecommendationAction = async (recommendation: Recommendation) => {
     try {
+      // Show loading toast
+      toast({
+        title: "Starting recommendation...",
+        description: `Preparing ${recommendation.title} for you.`,
+      });
+
       // Track the action for AI learning
       await fetch('/api/ai/track-action', {
         method: 'POST',
@@ -165,12 +173,42 @@ const AdaptiveOnboarding: React.FC = () => {
         })
       });
 
-      // Navigate to the action URL or trigger the action
-      if (recommendation.actionUrl) {
-        window.location.href = recommendation.actionUrl;
-      }
+      // Map recommendation types to existing routes
+      const routeMap: Record<string, string> = {
+        'video': '/onboarding',
+        'document': '/foxit-workflow',
+        'interaction': '/onboarding',
+        'learning': '/analytics'
+      };
+
+      // Get the appropriate route based on recommendation type
+      const targetRoute = routeMap[recommendation.type] || '/dashboard';
+      
+      // Show success toast
+      toast({
+        title: "Recommendation started!",
+        description: `Redirecting you to ${recommendation.title}.`,
+      });
+      
+      // Navigate to the appropriate route after a short delay
+      setTimeout(() => {
+        window.location.href = targetRoute;
+      }, 1000);
+      
     } catch (error) {
       console.error('Error tracking action:', error);
+      
+      // Show error toast
+      toast({
+        title: "Something went wrong",
+        description: "Unable to start the recommendation. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Fallback navigation
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 2000);
     }
   };
 

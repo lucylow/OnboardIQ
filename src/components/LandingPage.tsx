@@ -200,7 +200,7 @@ const LandingPage: React.FC = () => {
               Get Started Free
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+            <Button size="lg" variant="outline" className="border-white text-blue-300 hover:bg-white hover:text-blue-600">
               Schedule Demo
             </Button>
           </div>

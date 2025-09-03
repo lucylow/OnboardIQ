@@ -32,6 +32,8 @@ import MuleSoftDemoPage from "./components/MuleSoftDemoPage";
 import OnboardIQ from "./components/OnboardIQ";
 import OnboardIQCore from "./components/OnboardIQCore";
 import DocumentGeneration from "./components/DocumentGeneration";
+import ChurnPrediction from "./components/ChurnPrediction";
+import UserProfiling from "./components/UserProfiling";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -47,14 +49,16 @@ const queryClient = new QueryClient({
 const AppContent = () => {
   const location = useLocation();
   const isLandingPage = location.pathname === '/' || location.pathname === '/landing';
+  const isAuthPage = location.pathname === '/signup' || location.pathname === '/login' || location.pathname === '/get-started';
+  const shouldShowNavigation = !isLandingPage && !isAuthPage;
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Global Navigation - only show on non-landing pages */}
-      {!isLandingPage && <Navigation variant="default" showAuthButtons={true} />}
+      {/* Global Navigation - only show on non-landing and non-auth pages */}
+      {shouldShowNavigation && <Navigation variant="default" showAuthButtons={true} />}
       
       {/* Main Content */}
-      <main className={isLandingPage ? '' : 'pt-16'}>
+      <main className={isLandingPage || isAuthPage ? '' : 'pt-16'}>
         {/* AI Chatbot - Global Component */}
         <AIChatbot />
         <Routes>
@@ -80,9 +84,10 @@ const AppContent = () => {
           <Route path="/real-time-analytics" element={<RealTimeAnalytics />} />
           <Route path="/security-monitoring" element={<SecurityMonitoring />} />
           <Route path="/adaptive-onboarding" element={<AdaptiveOnboarding />} />
-          <Route path="/user-profiling" element={<AdaptiveOnboarding />} />
+          <Route path="/user-profiling" element={<UserProfiling />} />
           <Route path="/risk-monitoring" element={<ContinuousRiskMonitoring />} />
           <Route path="/documents" element={<DocumentGeneration userId="demo_user" />} />
+          <Route path="/churn-prediction" element={<ChurnPrediction />} />
           
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />

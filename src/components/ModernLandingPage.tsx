@@ -410,7 +410,7 @@ const ModernLandingPage: React.FC = () => {
             <Button
               variant="outline"
               onClick={handleDemo}
-              className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-blue-600 transition-all duration-300"
+              className="px-8 py-4 text-lg font-semibold border-2 border-white text-blue-300 hover:bg-white hover:text-blue-600 transition-all duration-300"
             >
               Schedule Demo
             </Button>

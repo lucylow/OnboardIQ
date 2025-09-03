@@ -20,7 +20,6 @@ import RealTimeAnalytics from "./components/RealTimeAnalytics";
 import AIChatbot from "./components/AIChatbot";
 import SecurityMonitoring from "./components/SecurityMonitoring";
 import AdaptiveOnboarding from "./components/AdaptiveOnboarding";
-import VideoOnboarding from "./components/VideoOnboarding";
 import ContinuousRiskMonitoring from "./components/ContinuousRiskMonitoring";
 import MuleSoftMCPDashboard from "./components/MuleSoftMCPDashboard";
 import FoxitDemoPage from "./components/FoxitDemoPage";
@@ -32,7 +31,6 @@ import VonageDemoPage from "./components/VonageDemoPage";
 import MuleSoftDemoPage from "./components/MuleSoftDemoPage";
 import OnboardIQ from "./components/OnboardIQ";
 import OnboardIQCore from "./components/OnboardIQCore";
-import ChurnPrediction from "./components/ChurnPrediction";
 import DocumentGeneration from "./components/DocumentGeneration";
 import NotFound from "./pages/NotFound";
 
@@ -89,7 +87,6 @@ const AppContent = () => {
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />
           <Route path="/foxit-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
-          <Route path="/foxit-pdf-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
           <Route path="/foxit-workflow" element={<FoxitDocumentWorkflow userId="demo_user" />} />
           
           {/* Vonage Integration Routes */}

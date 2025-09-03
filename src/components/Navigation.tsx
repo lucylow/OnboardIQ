@@ -382,7 +382,7 @@ const Navigation: React.FC<NavigationProps> = ({
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {authState.user?.name || 'User'}
+                          {authState.user?.firstName || 'User'}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {authState.user?.email}
@@ -528,7 +528,7 @@ const Navigation: React.FC<NavigationProps> = ({
               <div className="pt-4 border-t">
                 <div className="px-3 py-2 bg-gray-50 rounded-lg">
                   <p className="text-sm font-medium text-gray-900">
-                    {authState.user?.name || 'User'}
+                    {authState.user?.firstName || 'User'}
                   </p>
                   <p className="text-xs text-gray-500">
                     {authState.user?.email}

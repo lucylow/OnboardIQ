@@ -14,7 +14,7 @@ import {
   Activity, 
   Settings, 
   Play, 
-  Stop, 
+  PauseCircle, 
   RefreshCw,
   CheckCircle,
   XCircle,
@@ -282,7 +282,7 @@ const MuleSoftMCPDashboard: React.FC = () => {
           >
             {mcpStatus?.connected ? (
               <>
-                <Stop className="w-4 h-4 mr-2" />
+                <PauseCircle className="w-4 h-4 mr-2" />
                 Disconnect
               </>
             ) : (

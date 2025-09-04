@@ -25,8 +25,7 @@ import {
   Settings,
   RefreshCw,
   Download,
-  Share2,
-  Monitor
+  Share2
 } from 'lucide-react';
 
 interface UserProfile {

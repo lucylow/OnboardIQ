@@ -249,10 +249,12 @@ const SettingsPage: React.FC = () => {
       ...prev,
       preferences: {
         ...prev.preferences,
-        [category]: {
-          ...prev.preferences[category],
-          [field]: value
-        }
+        [category]: typeof prev.preferences[category] === 'object' && prev.preferences[category] !== null
+          ? {
+              ...(prev.preferences[category] as object),
+              [field]: value
+            }
+          : value
       }
     }));
   };

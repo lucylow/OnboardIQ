@@ -82,20 +82,7 @@ export const ProductFeatures: React.FC<ProductFeaturesProps> = ({ userId }) => {
           />
         );
       case 'video':
-        return (
-          <VideoOnboarding
-            userId={userId}
-            onSessionScheduled={(session) => {
-              console.log('Video session scheduled:', session);
-            }}
-            onSessionStarted={(session) => {
-              console.log('Video session started:', session);
-            }}
-            onSessionCompleted={(session) => {
-              console.log('Video session completed:', session);
-            }}
-          />
-        );
+        return <VideoOnboarding />;
       case 'documents':
         return (
           <DocumentGeneration

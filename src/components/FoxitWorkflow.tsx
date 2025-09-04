@@ -699,61 +699,61 @@ const FoxitWorkflow: React.FC = () => {
             ) : (
               <div className="grid gap-4">
                 {workflows.map((workflow, index) => (
-                <motion.div
-                  key={workflow.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 * index }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-gray-100 rounded-lg">
-                            {getTypeIcon(workflow.type)}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{workflow.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge className={getStatusColor(workflow.status)}>
-                                {getStatusIcon(workflow.status)}
-                                {workflow.status}
-                              </Badge>
+                  <motion.div
+                    key={workflow.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-100 rounded-lg">
+                              {getTypeIcon(workflow.type)}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">{workflow.name}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge className={getStatusColor(workflow.status)}>
+                                  {getStatusIcon(workflow.status)}
+                                  {workflow.status}
+                                </Badge>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Progress value={workflow.progress} className="w-24" />
-                          <span className="text-sm text-gray-600">{workflow.progress}%</span>
-                        </div>
-                      </div>
-                      
-                      {workflow.result && (
-                        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-gray-600">Result:</span>
-                            <div className="flex gap-2">
-                              {workflow.result.documentId && (
-                                <Button size="sm" variant="outline" onClick={() => generateEmbedToken(workflow.result.documentId)}>
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  Preview
-                                </Button>
-                              )}
-                              {workflow.result.documentUrl && (
-                                <Button size="sm" variant="outline" onClick={() => window.open(workflow.result.documentUrl, '_blank')}>
-                                  <Download className="w-4 h-4 mr-1" />
-                                  Download
-                                </Button>
-                              )}
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <Progress value={workflow.progress} className="w-24" />
+                            <span className="text-sm text-gray-600">{workflow.progress}%</span>
                           </div>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                        
+                        {workflow.result && (
+                          <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">Result:</span>
+                              <div className="flex gap-2">
+                                {workflow.result.documentId && (
+                                  <Button size="sm" variant="outline" onClick={() => generateEmbedToken(workflow.result.documentId)}>
+                                    <Eye className="w-4 h-4 mr-1" />
+                                    Preview
+                                  </Button>
+                                )}
+                                {workflow.result.documentUrl && (
+                                  <Button size="sm" variant="outline" onClick={() => window.open(workflow.result.documentUrl, '_blank')}>
+                                    <Download className="w-4 h-4 mr-1" />
+                                    Download
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
             </div>
           </TabsContent>
 

@@ -173,25 +173,17 @@ const OnboardIQ: React.FC = () => {
     
     setLoading(true);
     try {
-      // Simulate API call to backend
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { vonageApi } = await import('../services/vonageApi');
+      const response = await vonageApi.startVerification({
+        phone_number: vonageApi.formatPhoneNumber(phoneNumber),
+        brand: 'OnboardIQ'
+      });
       
-      // Mock response
-      const mockResponse = {
-        status: 'verification_sent',
-        requestId: 'req_' + Math.random().toString(36).substr(2, 9),
-        message: 'Verification PIN sent successfully'
-      };
-      
-      if (mockResponse.status === 'verification_sent') {
-        setRequestId(mockResponse.requestId);
-        setCurrentStep(2);
-        setCountdown(60); // 60 second countdown for resend
-      } else {
-        setError('Failed to send verification. Try again.');
-      }
-    } catch (e) {
-      setError('Network error. Try again.');
+      setRequestId(response.requestId);
+      setCurrentStep(2);
+      setCountdown(60); // 60 second countdown for resend
+    } catch (error: any) {
+      setError(error.message || 'Failed to send verification. Please try again.');
     }
     setLoading(false);
   };
@@ -206,32 +198,33 @@ const OnboardIQ: React.FC = () => {
     
     setLoading(true);
     try {
-      // Simulate API call to backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { vonageApi } = await import('../services/vonageApi');
+      const response = await vonageApi.checkVerification({
+        request_id: requestId,
+        code: pinCode
+      });
       
-      // Mock response - simulate verification
-      const mockResponse = {
-        verified: pinCode === '123456', // Mock PIN for demo
-        videoSessionId: 'session_' + Math.random().toString(36).substr(2, 9),
-        welcomeMessage: 'Welcome to OnboardIQ! Let\'s get you set up with a personalized video tour.',
-        userProfile: {
+      if (response.verified) {
+        // Create video session after successful verification
+        const videoResponse = await vonageApi.createVideoSession({
+          user_id: `user_${Date.now()}`,
+          session_type: 'onboarding'
+        });
+        
+        setVideoSessionId(videoResponse.sessionId);
+        setWelcomeMessage('Welcome to OnboardIQ! Let\'s get you set up with a personalized video tour.');
+        setUserProfile({
           name: 'John Doe',
           email: 'john.doe@example.com',
           company: 'TechCorp Inc.',
           plan: 'premium'
-        }
-      };
-      
-      if (mockResponse.verified) {
-        setVideoSessionId(mockResponse.videoSessionId);
-        setWelcomeMessage(mockResponse.welcomeMessage);
-        setUserProfile(mockResponse.userProfile);
+        });
         setCurrentStep(3);
       } else {
-        setError('Incorrect PIN code. Please try again.');
+        setError(response.message || 'Incorrect PIN code. Please try again.');
       }
-    } catch (e) {
-      setError('Network error. Please try again.');
+    } catch (error: any) {
+      setError(error.message || 'Verification failed. Please try again.');
     }
     setLoading(false);
   };
@@ -240,58 +233,84 @@ const OnboardIQ: React.FC = () => {
   const startVideoSession = async () => {
     setLoading(true);
     try {
-      // Simulate video session creation
-      await new Promise(resolve => setTimeout(resolve, 2000));
       setVideoStarted(true);
       setCurrentStep(4);
       
-      // Simulate document generation
-      simulateDocumentGeneration();
+      // Generate documents using real Foxit API
+      await generateDocuments();
     } catch (e) {
       setError('Failed to start video session.');
     }
     setLoading(false);
   };
 
-  // Simulate document generation process
-  const simulateDocumentGeneration = () => {
-    const interval = setInterval(() => {
-      setDocuments(prev => {
-        const updated = prev.map(doc => {
-          if (doc.status === 'generating') {
-            const newProgress = Math.min(doc.progress + Math.random() * 20, 100);
-            const newStatus: DocumentStatus['status'] = newProgress >= 100 ? 'completed' : 'generating';
-            return {
-              ...doc,
-              progress: newProgress,
-              status: newStatus,
-              downloadUrl: newStatus === 'completed' ? `/download/${doc.id}` : undefined
-            };
-          }
-          return doc;
-        });
-        
-        // Check if all documents are completed
-        const allCompleted = updated.every(doc => doc.status === 'completed');
-        if (allCompleted) {
-          clearInterval(interval);
-          setTimeout(() => setCurrentStep(5), 1000);
+  // Generate documents using Foxit API
+  const generateDocuments = async () => {
+    try {
+      const { foxitApiService } = await import('../services/foxitApiService');
+      
+      for (const doc of documents) {
+        if (doc.status === 'generating') {
+          setDocuments(prev => prev.map(d => 
+            d.id === doc.id ? { ...d, progress: 25 } : d
+          ));
+          
+          const response = await foxitApiService.generateDocument({
+            templateId: doc.type,
+            data: {
+              user_name: userProfile?.name || 'User',
+              company: userProfile?.company || 'Company',
+              email: userProfile?.email || 'email@example.com'
+            },
+            options: {
+              includeWatermark: true,
+              compression: true
+            }
+          });
+          
+          setDocuments(prev => prev.map(d => 
+            d.id === doc.id ? {
+              ...d,
+              status: response.success ? 'completed' : 'generating',
+              progress: response.success ? 100 : 50,
+              downloadUrl: response.document_url
+            } : d
+          ));
         }
-        
-        return updated;
-      });
-    }, 1000);
+      }
+      
+      // Check if all documents are completed
+      setTimeout(() => {
+        setDocuments(prev => {
+          const allCompleted = prev.every(doc => doc.status === 'completed');
+          if (allCompleted) {
+            setTimeout(() => setCurrentStep(5), 1000);
+          }
+          return prev;
+        });
+      }, 2000);
+    } catch (error) {
+      console.error('Document generation error:', error);
+      setDocuments(prev => prev.map(doc => 
+        doc.status === 'generating' ? { ...doc, status: 'generating', progress: 100 } : doc
+      ));
+      setTimeout(() => setCurrentStep(5), 1000);
+    }
   };
 
   // Resend verification PIN
   const resendPin = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { vonageApi } = await import('../services/vonageApi');
+      await vonageApi.startVerification({
+        phone_number: vonageApi.formatPhoneNumber(phoneNumber),
+        brand: 'OnboardIQ'
+      });
       setCountdown(60);
       setError(null);
-    } catch (e) {
-      setError('Failed to resend PIN.');
+    } catch (error: any) {
+      setError(error.message || 'Failed to resend PIN.');
     }
     setLoading(false);
   };

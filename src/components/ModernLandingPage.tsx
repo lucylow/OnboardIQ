@@ -184,13 +184,21 @@ const ModernLandingPage: React.FC = () => {
             </Badge>
 
             {/* Main Heading */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 leading-tight">
               Transform Your
               <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Customer Onboarding
               </span>
               with AI
             </h1>
+
+            {/* Vision Statement */}
+            <div className="mb-6 max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 italic leading-relaxed">
+                "Redefining Customer Onboarding: transforming how businesses welcome and secure their users - 
+                <span className="text-blue-600"> instant, personalized, and trusted</span>"
+              </h2>
+            </div>
 
             {/* Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed">

@@ -579,10 +579,10 @@ const CustomerSuccess: React.FC = () => {
                     <span>At Risk (60-79%)</span>
                     <span className="font-medium text-yellow-600">25%</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span>Critical (<60%)</span>
-                    <span className="font-medium text-red-600">10%</span>
-                  </div>
+                                      <div className="flex items-center justify-between">
+                      <span>Critical (&lt;60%)</span>
+                      <span className="font-medium text-red-600">10%</span>
+                    </div>
                 </div>
               </CardContent>
             </Card>

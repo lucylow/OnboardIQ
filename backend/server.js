@@ -237,11 +237,11 @@ app.get('/health', (req, res) => {
     version: process.env.npm_package_version || '1.0.0',
     environment: process.env.NODE_ENV || 'development',
     services: {
-      userProfiling: userProfilingEngine.isReady(),
-      conversational: conversationalAI.isReady(),
-      security: securityAI.isReady(),
-      document: documentAI.isReady(),
-      churnPredictor: churnPredictor.isReady()
+      userProfiling: userProfilingEngine.isReady,
+      conversational: conversationalAI.isReady,
+      security: securityAI.isReady,
+      document: documentAI.isReady,
+      churnPredictor: churnPredictor.isReady
     }
   };
   

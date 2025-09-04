@@ -58,6 +58,7 @@ import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import BackendHealthCheck from './BackendHealthCheck';
 import BusinessMetrics from './BusinessMetrics';
+import ActivityChart from './ActivityChart';
 
 export const Dashboard: React.FC = () => {
   const [authState, setAuthState] = useState(authService.getAuthState());
@@ -598,32 +599,7 @@ export const Dashboard: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="activity" className="space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="w-5 h-5" />
-                    Activity Timeline
-                  </CardTitle>
-                  <CardDescription>Detailed activity breakdown</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {/* Activity Chart Placeholder */}
-                    <div className="h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center">
-                      <div className="text-center">
-                        <BarChart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">Activity chart will be displayed here</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
+            <ActivityChart />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">

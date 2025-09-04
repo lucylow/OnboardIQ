@@ -43,6 +43,7 @@ import BillingAndPricing from "./components/BillingAndPricing";
 import CustomerSuccess from "./components/CustomerSuccess";
 import SalesPipeline from "./components/SalesPipeline";
 import EnterpriseFeatures from "./components/EnterpriseFeatures";
+import ActivityChart from "./components/ActivityChart";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -104,6 +105,7 @@ const AppContent = () => {
           <Route path="/customer-success" element={<CustomerSuccess />} />
           <Route path="/sales-pipeline" element={<SalesPipeline />} />
           <Route path="/enterprise" element={<EnterpriseFeatures />} />
+          <Route path="/activity-chart" element={<ActivityChart />} />
           
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />

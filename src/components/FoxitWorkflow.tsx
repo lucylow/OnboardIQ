@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { foxitApiService, ESignatureRequest, PDFOperationRequest, EmbedTokenRequest, AdvancedPDFOperationRequest, DocumentAnalytics, AnalyticsReport, WorkflowTemplate, WorkflowExecution } from '@/services/foxitApiService';
+import { foxitApiService, ESignatureRequest, PDFOperationRequest, EmbedTokenRequest, DocumentAnalytics, AnalyticsReport, WorkflowTemplate, WorkflowExecution } from '@/services/foxitApiService';
 import { 
   FileText, 
   FileSignature, 
@@ -315,7 +315,7 @@ const FoxitWorkflow: React.FC = () => {
   const performAdvancedPDFOperation = async (operation: string, documentId: string, options?: any) => {
     setLoading(true);
     try {
-      const request: AdvancedPDFOperationRequest = {
+      const request: PDFOperationRequest = {
         operation: operation as any,
         documents: [documentId],
         options: {

@@ -167,7 +167,7 @@ export interface ESignatureRequest {
 
 // PDF Operations Interfaces
 export interface PDFOperationRequest {
-  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize';
+  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize' | 'rotate' | 'extract' | 'ocr' | 'redact' | 'flatten' | 'optimize' | 'repair' | 'validate';
   documents: string[]; // document IDs or URLs
   options?: {
     compressionLevel?: 'low' | 'medium' | 'high';
@@ -176,6 +176,15 @@ export interface PDFOperationRequest {
     password?: string;
     encryptionLevel?: '128' | '256';
     outputFormat?: 'pdf' | 'pdfa';
+    rotation?: '90' | '180' | '270';
+    pageRange?: string; // e.g., "1-5,7,10-15"
+    extractText?: boolean;
+    ocrLanguage?: 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
+    redactPatterns?: string[]; // regex patterns to redact
+    flattenLayers?: boolean;
+    optimizeImages?: boolean;
+    repairCorruption?: boolean;
+    validateStructure?: boolean;
   };
 }
 
@@ -237,28 +246,6 @@ export interface WebhookRegistration {
   status: 'active' | 'inactive';
   created_at: string;
   last_triggered?: string;
-}
-
-// Additional PDF Operations Interfaces
-export interface AdvancedPDFOperationRequest extends PDFOperationRequest {
-  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize' | 'rotate' | 'extract' | 'ocr' | 'redact' | 'flatten' | 'optimize' | 'repair' | 'validate';
-  options?: {
-    compressionLevel?: 'low' | 'medium' | 'high';
-    watermarkText?: string;
-    watermarkPosition?: 'top' | 'center' | 'bottom';
-    password?: string;
-    encryptionLevel?: '128' | '256';
-    outputFormat?: 'pdf' | 'pdfa';
-    rotation?: '90' | '180' | '270';
-    pageRange?: string; // e.g., "1-5,7,10-15"
-    extractText?: boolean;
-    ocrLanguage?: 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
-    redactPatterns?: string[]; // regex patterns to redact
-    flattenLayers?: boolean;
-    optimizeImages?: boolean;
-    repairCorruption?: boolean;
-    validateStructure?: boolean;
-  };
 }
 
 // Advanced Analytics Interfaces
@@ -1058,7 +1045,7 @@ class FoxitApiService {
 
   // ===== ADVANCED PDF OPERATIONS =====
 
-  async performAdvancedPDFOperation(request: AdvancedPDFOperationRequest): Promise<PDFOperationResponse> {
+  async performAdvancedPDFOperation(request: PDFOperationRequest): Promise<PDFOperationResponse> {
     try {
       const response = await this.makeRequest<PDFOperationResponse>('/pdf/advanced-operation', {
         method: 'POST',

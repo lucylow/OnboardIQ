@@ -308,30 +308,288 @@ const ModernLandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Integrations Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Enhanced Integrations Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Powered by Industry Leaders
-            </h3>
-            <p className="text-gray-600">
-              Seamlessly integrate with your existing tools and workflows
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700">
+              <Award className="h-3 w-3 mr-1" />
+              Hackathon Prize Technology Stack
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Powered by
+              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Industry Leaders
+              </span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Our platform integrates cutting-edge enterprise technologies, competing for multiple hackathon prizes 
+              with Vonage, Foxit, and MuleSoft's most advanced APIs.
             </p>
           </div>
-          
-          <div className="flex flex-wrap justify-center items-center gap-8">
-            {integrations.map((integration) => (
-              <div 
-                key={integration.name}
-                className="flex items-center gap-3 px-6 py-3 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
-              >
-                <div className={integration.color}>
-                  {integration.icon}
-                </div>
-                <span className="font-medium text-gray-700">{integration.name}</span>
+
+          {/* Enhanced Integration Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            {/* Vonage Card - Hackathon Prize */}
+            <Card className="group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-blue-50 to-blue-100">
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 font-semibold">
+                  <Award className="h-3 w-3 mr-1" />
+                  Hackathon Prize
+                </Badge>
               </div>
-            ))}
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <MessageSquare className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">Vonage APIs</CardTitle>
+                    <p className="text-blue-600 font-medium">Multi-Channel Communication</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-gray-700 mb-6 text-base leading-relaxed">
+                  Revolutionary communication platform enabling seamless customer engagement across SMS, voice, 
+                  video calls, WhatsApp Business, and advanced 2FA verification systems.
+                </CardDescription>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Global SMS & Voice API with 99.9% uptime</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">WhatsApp Business API integration</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Advanced 2FA & OTP verification</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Real-time video onboarding calls</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs font-medium border-blue-200 text-blue-700">
+                    Active Integration
+                  </Badge>
+                  <ArrowRight className="h-4 w-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Foxit Card - Hackathon Prize */}
+            <Card className="group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-orange-50 to-orange-100">
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 font-semibold">
+                  <Award className="h-3 w-3 mr-1" />
+                  Hackathon Prize
+                </Badge>
+              </div>
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-600 to-orange-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <FileText className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">Foxit PDF SDK</CardTitle>
+                    <p className="text-orange-600 font-medium">Document Intelligence</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-gray-700 mb-6 text-base leading-relaxed">
+                  Enterprise-grade PDF processing engine with AI-powered document generation, digital signatures, 
+                  form automation, and compliance-ready workflows for seamless onboarding.
+                </CardDescription>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">AI-powered PDF generation & customization</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Digital signature & e-signature workflows</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Form field auto-population & validation</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-orange-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Compliance-ready document archival</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs font-medium border-orange-200 text-orange-700">
+                    Active Integration
+                  </Badge>
+                  <ArrowRight className="h-4 w-4 text-orange-600 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* MuleSoft Card - Hackathon Prize */}
+            <Card className="group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-purple-50 to-purple-100">
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-yellow-900 font-semibold">
+                  <Award className="h-3 w-3 mr-1" />
+                  Hackathon Prize
+                </Badge>
+              </div>
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Zap className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">MuleSoft Anypoint</CardTitle>
+                    <p className="text-purple-600 font-medium">API Orchestration</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-gray-700 mb-6 text-base leading-relaxed">
+                  Enterprise integration platform connecting legacy systems, cloud applications, and APIs into 
+                  unified onboarding workflows with real-time data synchronization.
+                </CardDescription>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">API-led connectivity architecture</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Real-time data transformation & sync</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Legacy system modernization</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Enterprise security & governance</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs font-medium border-purple-200 text-purple-700">
+                    Active Integration
+                  </Badge>
+                  <ArrowRight className="h-4 w-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* OpenAI Card - Supporting Technology */}
+            <Card className="group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-gradient-to-br from-green-50 to-green-100">
+              <div className="absolute top-4 right-4">
+                <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 font-semibold">
+                  <Brain className="h-3 w-3 mr-1" />
+                  AI Engine
+                </Badge>
+              </div>
+              <CardHeader className="pb-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <Brain className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-gray-900">OpenAI GPT-4</CardTitle>
+                    <p className="text-green-600 font-medium">Intelligent Automation</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-gray-700 mb-6 text-base leading-relaxed">
+                  Advanced AI engine powering personalized onboarding experiences, intelligent chatbots, 
+                  predictive analytics, and automated decision-making across all customer touchpoints.
+                </CardDescription>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">GPT-4 powered conversational AI</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Predictive user behavior analysis</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Intelligent content personalization</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    <span className="text-sm text-gray-700">Automated workflow optimization</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="text-xs font-medium border-green-200 text-green-700">
+                    Active Integration
+                  </Badge>
+                  <ArrowRight className="h-4 w-4 text-green-600 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Integration Flow Diagram */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-16">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Seamless Technology Integration Flow
+              </h3>
+              <p className="text-gray-600">
+                How our hackathon prize technologies work together to deliver exceptional onboarding
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <MessageSquare className="h-8 w-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">1. Customer Contact</h4>
+                <p className="text-sm text-gray-600">Vonage multi-channel communication initiates onboarding</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <Brain className="h-8 w-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">2. AI Processing</h4>
+                <p className="text-sm text-gray-600">OpenAI analyzes customer data for personalization</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">3. Document Generation</h4>
+                <p className="text-sm text-gray-600">Foxit creates personalized compliance documents</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">4. System Integration</h4>
+                <p className="text-sm text-gray-600">MuleSoft orchestrates all enterprise systems</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Hackathon Recognition */}
+          <div className="text-center">
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-yellow-200">
+              <Award className="h-5 w-5 text-yellow-600" />
+              <span className="text-yellow-800 font-semibold">
+                Competing for multiple hackathon prizes with cutting-edge integrations
+              </span>
+              <Sparkles className="h-5 w-5 text-yellow-600" />
+            </div>
           </div>
         </div>
       </section>

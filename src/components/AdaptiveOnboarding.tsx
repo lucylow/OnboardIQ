@@ -123,6 +123,16 @@ const AdaptiveOnboarding: React.FC = () => {
       const behavior = await aiService.analyzeUserBehavior([], {});
       const recs = await aiService.generateRecommendations({}, behavior);
       
+      // Transform AI recommendations to match our interface
+      const transformedRecs = recs.map((rec: any) => ({
+        ...rec,
+        category: rec.category || 'General',
+        impact: (rec.impact || 'medium') as 'high' | 'medium' | 'low',
+        difficulty: (rec.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
+        tags: rec.tags || [],
+        type: rec.type as 'video' | 'document' | 'interaction' | 'learning'
+      }));
+      
       setUserBehavior({
         featureVisits: {
           'dashboard': 15,
@@ -148,7 +158,7 @@ const AdaptiveOnboarding: React.FC = () => {
           { type: 'video_watch', timestamp: new Date(), duration: 180 }
         ],
         preferences: {
-          learningStyle: behavior.learningStyle,
+          learningStyle: behavior.learningStyle as 'visual' | 'auditory' | 'kinesthetic',
           pace: behavior.pace,
           complexity: behavior.complexity
         },
@@ -160,7 +170,7 @@ const AdaptiveOnboarding: React.FC = () => {
         }
       });
       
-      setRecommendations(recs);
+      setRecommendations(transformedRecs);
     } catch (error) {
       console.error('Error loading adaptive data:', error);
       // Fallback to enhanced mock data

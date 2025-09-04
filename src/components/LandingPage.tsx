@@ -6,255 +6,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowRight, 
-  CheckCircle, 
-  Shield, 
-  Zap, 
-  Users, 
-  BarChart3, 
-  Smartphone, 
-  Video, 
-  FileText,
-  Star,
-  TrendingUp,
-  Clock,
+import {
   Play,
   Pause,
   RotateCcw,
+  ArrowRight,
+  CheckCircle,
+  Star,
+  Users,
+  Clock,
+  Shield,
+  TrendingUp,
   MessageSquare,
+  FileText,
+  Video,
   Mail,
   Phone,
   Globe,
-  Lock,
-  Eye,
-  Brain,
+  Zap,
   Target,
   Award,
-  Rocket,
-  Sparkles,
-  ChevronRight,
   ChevronLeft,
-  ExternalLink,
-  Download,
-  Upload,
-  Settings,
-  Bell,
-  Search,
-  Filter,
-  Calendar,
-  MapPin,
-  CreditCard,
-  Key,
-  Database,
-  Cloud,
-  Cpu,
-  Wifi,
-  Signal,
-  Battery,
-  Volume2,
-  Mic,
-  Camera,
-  Heart,
-  ThumbsUp,
-  Share2,
-  Bookmark,
-  Flag,
-  AlertTriangle,
-  Info,
-  HelpCircle,
+  ChevronRight,
+  Menu,
   X,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Copy,
-  Link,
-  Unlink,
-  RefreshCw,
-  Save,
-  Send,
-  Inbox,
-  Archive,
-  Tag,
-  Folder,
-  Image,
-  Music,
-  Film,
-  Monitor,
-  Tablet,
-  Watch,
-  Headphones,
-  Speaker,
-  Printer,
-  Scanner,
-  Projector,
-  Keyboard,
-  Mouse,
+  Settings,
   Gamepad2,
-  Controller,
-  Joystick,
-  Dice,
+  Dice1,
   Puzzle,
-  Chess,
-  Cards,
-  Trophy,
-  Medal,
-  Crown,
+  Layers,
+  Building,
+  Book,
   Gem,
-  Diamond,
-  Ruby,
-  Emerald,
-  Sapphire,
-  Pearl,
-  Gold,
-  Silver,
-  Bronze,
-  Platinum,
-  Iron,
-  Steel,
-  Copper,
-  Aluminum,
-  Titanium,
-  Carbon,
-  Silicon,
-  Neon,
-  Helium,
-  Argon,
-  Krypton,
-  Xenon,
-  Radon,
-  Hydrogen,
-  Oxygen,
-  Nitrogen,
-  Chlorine,
-  Fluorine,
-  Bromine,
-  Iodine,
-  Sulfur,
-  Phosphorus,
-  Calcium,
-  Magnesium,
-  Sodium,
-  Potassium,
-  Lithium,
-  Beryllium,
-  Boron,
-  Carbon as CarbonIcon,
-  Nitrogen as NitrogenIcon,
-  Oxygen as OxygenIcon,
-  Fluorine as FluorineIcon,
-  Neon as NeonIcon,
-  Sodium as SodiumIcon,
-  Magnesium as MagnesiumIcon,
-  Aluminum as AluminumIcon,
-  Silicon as SiliconIcon,
-  Phosphorus as PhosphorusIcon,
-  Sulfur as SulfurIcon,
-  Chlorine as ChlorineIcon,
-  Argon as ArgonIcon,
-  Potassium as PotassiumIcon,
-  Calcium as CalciumIcon,
-  Scandium,
-  Titanium as TitaniumIcon,
-  Vanadium,
-  Chromium,
-  Manganese,
-  Iron as IronIcon,
-  Cobalt,
-  Nickel,
-  Copper as CopperIcon,
-  Zinc,
-  Gallium,
-  Germanium,
-  Arsenic,
-  Selenium,
-  Bromine as BromineIcon,
-  Krypton as KryptonIcon,
-  Rubidium,
-  Strontium,
-  Yttrium,
-  Zirconium,
-  Niobium,
-  Molybdenum,
-  Technetium,
-  Ruthenium,
-  Rhodium,
-  Palladium,
-  Silver as SilverIcon,
-  Cadmium,
-  Indium,
-  Tin,
-  Antimony,
-  Tellurium,
-  Iodine as IodineIcon,
-  Xenon as XenonIcon,
-  Cesium,
-  Barium,
-  Lanthanum,
-  Cerium,
-  Praseodymium,
-  Neodymium,
-  Promethium,
-  Samarium,
-  Europium,
-  Gadolinium,
-  Terbium,
-  Dysprosium,
-  Holmium,
-  Erbium,
-  Thulium,
-  Ytterbium,
-  Lutetium,
-  Hafnium,
-  Tantalum,
-  Tungsten,
-  Rhenium,
-  Osmium,
-  Iridium,
-  Platinum as PlatinumIcon,
-  Gold as GoldIcon,
-  Mercury,
-  Thallium,
-  Lead,
-  Bismuth,
-  Polonium,
-  Astatine,
-  Radon as RadonIcon,
-  Francium,
-  Radium,
-  Actinium,
-  Thorium,
-  Protactinium,
-  Uranium,
-  Neptunium,
-  Plutonium,
-  Americium,
-  Curium,
-  Berkelium,
-  Californium,
-  Einsteinium,
-  Fermium,
-  Mendelevium,
-  Nobelium,
-  Lawrencium,
-  Rutherfordium,
-  Dubnium,
-  Seaborgium,
-  Bohrium,
-  Hassium,
-  Meitnerium,
-  Darmstadtium,
-  Roentgenium,
-  Copernicium,
-  Nihonium,
-  Flerovium,
-  Moscovium,
-  Livermorium,
-  Tennessine,
-  Oganesson,
-  User
-} from 'lucide-react';
+  Brain,
+  Network,
+  Bot,
+  User,
+  Smartphone,
+  BarChart3,
+  Sparkles,
+  Signal,
+  Wifi,
+  Battery
+} from "lucide-react";
 
 const LandingPage: React.FC = () => {
   const [currentDemoStep, setCurrentDemoStep] = useState(0);
@@ -467,15 +261,49 @@ const LandingPage: React.FC = () => {
     }
   ];
 
-  const integrations = [
-    { name: "Vonage", logo: "V", color: "bg-blue-500" },
-    { name: "Foxit", logo: "F", color: "bg-green-500" },
-    { name: "MuleSoft", logo: "M", color: "bg-purple-500" },
-    { name: "Slack", logo: "S", color: "bg-purple-600" },
-    { name: "Salesforce", logo: "SF", color: "bg-blue-600" },
-    { name: "HubSpot", logo: "H", color: "bg-orange-500" },
-    { name: "Zapier", logo: "Z", color: "bg-red-500" },
-    { name: "Stripe", logo: "S", color: "bg-blue-700" }
+  // Technology partners data
+  const technologyPartners = [
+    { 
+      name: "Vonage", 
+      logo: "V", 
+      color: "from-blue-500 to-purple-600",
+      title: "Multi-Channel Engagement",
+      description: "Seamlessly connect with users through SMS, video, voice, and secure verification APIs, ensuring global reach and instant communication.",
+      icon: MessageSquare
+    },
+    { 
+      name: "Foxit", 
+      logo: "F", 
+      color: "from-red-500 to-orange-600",
+      title: "Intelligent Document Automation",
+      description: "Generate, validate, and deliver compliant onboarding documents in seconds with AI-enhanced PDF workflows.",
+      icon: FileText
+    },
+    { 
+      name: "MuleSoft", 
+      logo: "M", 
+      color: "from-green-500 to-blue-600",
+      title: "API Orchestration at Scale",
+      description: "Integrate legacy and modern systems into one onboarding flow with enterprise-grade connectors and orchestration.",
+      icon: Network
+    },
+    { 
+      name: "OpenAI", 
+      logo: "AI", 
+      color: "from-purple-500 to-pink-600",
+      title: "Adaptive Intelligence",
+      description: "Leverage cutting-edge AI to personalize onboarding journeys, predict drop-off risks, and automate engagement at scale.",
+      icon: Brain
+    }
+  ];
+
+  // Additional integration partners
+  const integrationPartners = [
+    { name: "Slack", logo: "S", color: "from-purple-500 to-pink-600" },
+    { name: "Salesforce", logo: "SF", color: "from-blue-600 to-indigo-600" },
+    { name: "HubSpot", logo: "H", color: "from-orange-500 to-red-600" },
+    { name: "Zapier", logo: "Z", color: "from-yellow-500 to-orange-600" },
+    { name: "Stripe", logo: "St", color: "from-indigo-500 to-purple-600" }
   ];
 
   const handleDemoControl = (action: 'play' | 'pause' | 'reset') => {
@@ -1020,8 +848,8 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Integrations Section */}
-      <section className="py-20 bg-white">
+      {/* Technology Partners */}
+      <section className="py-20 bg-gradient-to-r from-primary/5 to-secondary/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div 
             className="text-center mb-16"
@@ -1031,33 +859,75 @@ const LandingPage: React.FC = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Seamless Integrations
+              Powered by Industry-Leading Technology
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Connect with your favorite tools and platforms. More integrations coming soon.
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Trusted integrations that scale with your business
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-6">
-            {integrations.map((integration, index) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            {technologyPartners.map((partner, index) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
+                key={partner.name}
+                className="group"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ y: -5 }}
               >
-                <Card className="border-0 shadow-md hover:shadow-lg transition-all duration-300">
-                  <CardContent className="p-4 text-center">
-                    <div className={`w-12 h-12 ${integration.color} rounded-lg flex items-center justify-center text-white font-bold mx-auto`}>
-                      {integration.logo}
+                <Card className="p-8 h-full hover:shadow-xl transition-all duration-300 bg-background/80 backdrop-blur-sm border-0 shadow-lg group-hover:border-primary/20">
+                  <div className="flex flex-col space-y-6">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${partner.color} flex items-center justify-center text-white font-bold text-xl group-hover:scale-110 transition-transform duration-300`}>
+                        {partner.logo}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900">{partner.title}</h3>
+                        <p className="text-sm text-gray-600">{partner.name}</p>
+                      </div>
+                      <partner.icon className="w-8 h-8 text-gray-500 group-hover:text-primary transition-colors duration-300" />
                     </div>
-                    <div className="text-sm font-medium mt-2">{integration.name}</div>
-                  </CardContent>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {partner.description}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="self-start group-hover:border-primary group-hover:text-primary transition-colors duration-300"
+                    >
+                      Learn More
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </Card>
               </motion.div>
             ))}
+          </div>
+
+          {/* Additional Integrations */}
+          <div className="text-center">
+            <p className="text-lg font-medium mb-6 text-gray-600">Plus seamless integration with</p>
+            <div className="flex flex-wrap justify-center gap-6">
+              {integrationPartners.map((partner, index) => (
+                <motion.div
+                  key={partner.name}
+                  className="group"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <div className="text-center">
+                    <div className={`w-14 h-14 rounded-lg bg-gradient-to-r ${partner.color} flex items-center justify-center text-white font-bold text-sm group-hover:shadow-lg transition-all duration-300 mx-auto`}>
+                      {partner.logo}
+                    </div>
+                    <p className="text-xs mt-2 text-gray-600">{partner.name}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

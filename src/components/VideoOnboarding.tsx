@@ -381,7 +381,7 @@ const VideoOnboarding: React.FC = () => {
                 <HelpCircle className="h-4 w-4 mr-2" />
                 Help
               </Button>
-              <Button>
+              <Button onClick={() => setIsDialogOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Session
               </Button>
@@ -505,7 +505,7 @@ const VideoOnboarding: React.FC = () => {
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-2">Schedule New Session</h3>
                   <p className="text-sm text-gray-600 mb-4">Create a personalized video onboarding session</p>
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => setIsDialogOpen(true)}>
                     Get Started
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -557,11 +557,16 @@ const VideoOnboarding: React.FC = () => {
                     </CardDescription>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast({
+                        title: "Refreshing Sessions",
+                        description: "Loading latest session data...",
+                      });
+                    }}>
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Refresh
                     </Button>
-                    <Button size="sm">
+                    <Button size="sm" onClick={() => setIsDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
                       New Session
                     </Button>
@@ -871,34 +876,62 @@ const VideoOnboarding: React.FC = () => {
 
       {/* Session Creation Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Create New Session</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              Schedule New Session
+            </DialogTitle>
             <DialogDescription>
-              {selectedTemplate && `Using template: ${selectedTemplate.name}`}
+              {selectedTemplate 
+                ? `Create a session using: ${selectedTemplate.name}` 
+                : "Create a new video onboarding session"}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="participantName">Participant Name *</Label>
-              <Input
-                id="participantName"
-                value={newSessionData.participantName}
-                onChange={(e) => setNewSessionData(prev => ({ ...prev, participantName: e.target.value }))}
-                placeholder="Enter participant name"
-              />
-            </div>
+            {!selectedTemplate && (
+              <div className="space-y-2">
+                <Label htmlFor="template">Select Template</Label>
+                <select
+                  id="template"
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                  onChange={(e) => {
+                    const template = templates.find(t => t.id === e.target.value);
+                    setSelectedTemplate(template || null);
+                  }}
+                >
+                  <option value="">Choose a template...</option>
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name} ({template.duration} min)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             
-            <div className="space-y-2">
-              <Label htmlFor="participantEmail">Participant Email</Label>
-              <Input
-                id="participantEmail"
-                type="email"
-                value={newSessionData.participantEmail}
-                onChange={(e) => setNewSessionData(prev => ({ ...prev, participantEmail: e.target.value }))}
-                placeholder="Enter participant email"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="participantName">Participant Name *</Label>
+                <Input
+                  id="participantName"
+                  value={newSessionData.participantName}
+                  onChange={(e) => setNewSessionData(prev => ({ ...prev, participantName: e.target.value }))}
+                  placeholder="Enter participant name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="participantEmail">Email</Label>
+                <Input
+                  id="participantEmail"
+                  type="email"
+                  value={newSessionData.participantEmail}
+                  onChange={(e) => setNewSessionData(prev => ({ ...prev, participantEmail: e.target.value }))}
+                  placeholder="Enter participant email"
+                />
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -934,20 +967,66 @@ const VideoOnboarding: React.FC = () => {
               />
             </div>
             
+            {/* Quick Fill Mock Data Button */}
+            <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Quick Demo Setup</p>
+                  <p className="text-xs text-blue-700">Auto-fill with sample data for testing</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    const mockNames = ["John Smith", "Emily Davis", "Michael Brown", "Sarah Wilson", "David Lee"];
+                    const mockEmails = ["john.smith@company.com", "emily.davis@startup.com", "michael.brown@tech.co", "sarah.wilson@business.net", "david.lee@innovation.org"];
+                    const randomIndex = Math.floor(Math.random() * mockNames.length);
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    
+                    setNewSessionData({
+                      participantName: mockNames[randomIndex],
+                      participantEmail: mockEmails[randomIndex],
+                      scheduledDate: tomorrow.toISOString().split('T')[0],
+                      scheduledTime: "14:00",
+                      notes: "Auto-generated demo session for testing purposes"
+                    });
+                    
+                    if (!selectedTemplate) {
+                      setSelectedTemplate(templates[0]);
+                    }
+                  }}
+                >
+                  <Zap className="h-3 w-3 mr-1" />
+                  Fill Demo Data
+                </Button>
+              </div>
+            </div>
+            
             {selectedTemplate && (
               <div className="p-3 bg-gray-50 rounded-lg">
                 <h4 className="font-medium text-sm mb-2">Template Details:</h4>
                 <div className="text-xs text-gray-600 space-y-1">
                   <p>Duration: {selectedTemplate.duration} minutes</p>
                   <p>Difficulty: {selectedTemplate.difficulty}</p>
-                  <p>Features: {selectedTemplate.features.join(', ')}</p>
+                  <p>Features: {selectedTemplate.features.join(", ")}</p>
                 </div>
               </div>
             )}
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsDialogOpen(false);
+              setSelectedTemplate(null);
+              setNewSessionData({
+                participantName: '',
+                participantEmail: '',
+                scheduledDate: '',
+                scheduledTime: '',
+                notes: ''
+              });
+            }}>
               Cancel
             </Button>
             <Button onClick={handleCreateSession} disabled={isLoading}>

@@ -167,7 +167,7 @@ export interface ESignatureRequest {
 
 // PDF Operations Interfaces
 export interface PDFOperationRequest {
-  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize';
+  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize' | 'rotate' | 'extract' | 'ocr' | 'redact' | 'flatten' | 'optimize' | 'repair' | 'validate';
   documents: string[]; // document IDs or URLs
   options?: {
     compressionLevel?: 'low' | 'medium' | 'high';
@@ -176,6 +176,15 @@ export interface PDFOperationRequest {
     password?: string;
     encryptionLevel?: '128' | '256';
     outputFormat?: 'pdf' | 'pdfa';
+    rotation?: '90' | '180' | '270';
+    pageRange?: string; // e.g., "1-5,7,10-15"
+    extractText?: boolean;
+    ocrLanguage?: 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
+    redactPatterns?: string[]; // regex patterns to redact
+    flattenLayers?: boolean;
+    optimizeImages?: boolean;
+    repairCorruption?: boolean;
+    validateStructure?: boolean;
   };
 }
 
@@ -239,27 +248,7 @@ export interface WebhookRegistration {
   last_triggered?: string;
 }
 
-// Additional PDF Operations Interfaces
-export interface AdvancedPDFOperationRequest extends PDFOperationRequest {
-  operation: 'merge' | 'split' | 'compress' | 'watermark' | 'encrypt' | 'linearize' | 'rotate' | 'extract' | 'ocr' | 'redact' | 'flatten' | 'optimize' | 'repair' | 'validate';
-  options?: {
-    compressionLevel?: 'low' | 'medium' | 'high';
-    watermarkText?: string;
-    watermarkPosition?: 'top' | 'center' | 'bottom';
-    password?: string;
-    encryptionLevel?: '128' | '256';
-    outputFormat?: 'pdf' | 'pdfa';
-    rotation?: '90' | '180' | '270';
-    pageRange?: string; // e.g., "1-5,7,10-15"
-    extractText?: boolean;
-    ocrLanguage?: 'en' | 'es' | 'fr' | 'de' | 'ja' | 'zh';
-    redactPatterns?: string[]; // regex patterns to redact
-    flattenLayers?: boolean;
-    optimizeImages?: boolean;
-    repairCorruption?: boolean;
-    validateStructure?: boolean;
-  };
-}
+// Additional PDF Operations Interfaces - now merged into PDFOperationRequest
 
 // Advanced Analytics Interfaces
 export interface DocumentAnalytics {
@@ -379,7 +368,7 @@ export interface WorkflowExecution {
   metadata: Record<string, any>;
 }
 
-// Enhanced Foxit API Service with caching, retry logic, and progress tracking
+// Enhanced Foxit API Service with comprehensive error handling, validation, and advanced features
 class FoxitApiService {
   private baseUrl: string;
   private apiKey: string;
@@ -387,6 +376,15 @@ class FoxitApiService {
   private cache: Map<string, { data: any; timestamp: number; ttl: number }>;
   private retryAttempts: number;
   private retryDelay: number;
+  private requestTimeout: number;
+  private requestQueue: Map<string, Promise<any>>;
+  private circuitBreaker: {
+    failures: number;
+    lastFailure: number;
+    state: 'closed' | 'open' | 'half-open';
+    threshold: number;
+    timeout: number;
+  };
 
   constructor() {
     // Use Supabase edge function instead of localhost
@@ -396,9 +394,18 @@ class FoxitApiService {
     this.cache = new Map();
     this.retryAttempts = 3;
     this.retryDelay = 1000; // 1 second
+    this.requestTimeout = 30000; // 30 seconds
+    this.requestQueue = new Map();
+    this.circuitBreaker = {
+      failures: 0,
+      lastFailure: 0,
+      state: 'closed',
+      threshold: 5,
+      timeout: 60000 // 1 minute
+    };
   }
 
-  // Enhanced request method with retry logic and caching
+  // Enhanced request method with circuit breaker, timeout, and queue management
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -407,7 +414,18 @@ class FoxitApiService {
     cacheTTL: number = 5 * 60 * 1000 // 5 minutes
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    const requestId = this.generateRequestId();
     
+    // Check circuit breaker state
+    if (this.circuitBreaker.state === 'open') {
+      const timeSinceLastFailure = Date.now() - this.circuitBreaker.lastFailure;
+      if (timeSinceLastFailure < this.circuitBreaker.timeout) {
+        throw new Error('Circuit breaker is open - service temporarily unavailable');
+      } else {
+        this.circuitBreaker.state = 'half-open';
+      }
+    }
+
     // Check cache for GET requests
     if (useCache && cacheKey && options.method === 'GET') {
       const cached = this.cache.get(cacheKey);
@@ -416,11 +434,19 @@ class FoxitApiService {
       }
     }
 
+    // Check if request is already in progress
+    const queueKey = `${options.method || 'GET'}_${endpoint}`;
+    if (this.requestQueue.has(queueKey)) {
+      return this.requestQueue.get(queueKey) as Promise<T>;
+    }
+
     const defaultHeaders = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBudnJ0ZnJ0d2J6bmRnbGFreHZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3NjQ0MjcsImV4cCI6MjA3MjM0MDQyN30.Z1ZzaXFgU_tr9bXjkFYhyTkrnTpnTVR1aCFhKspaf3Y`,
       'X-API-Version': 'v2',
-      'X-Request-ID': this.generateRequestId(),
+      'X-Request-ID': requestId,
+      'X-Client-Version': '1.0.0',
+      'X-Client-Platform': 'web',
     };
 
     const config: RequestInit = {
@@ -431,21 +457,56 @@ class FoxitApiService {
       },
     };
 
+    // Create request promise
+    const requestPromise = this.executeRequestWithRetry<T>(url, config, useCache, cacheKey, cacheTTL);
+    this.requestQueue.set(queueKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      this.requestQueue.delete(queueKey);
+    }
+  }
+
+  private async executeRequestWithRetry<T>(
+    url: string,
+    config: RequestInit,
+    useCache: boolean,
+    cacheKey?: string,
+    cacheTTL: number = 5 * 60 * 1000
+  ): Promise<T> {
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
-        const response = await fetch(url, config);
+        // Add timeout to the request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+        
+        const response = await fetch(url, {
+          ...config,
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+          const errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
         
+        // Reset circuit breaker on success
+        if (this.circuitBreaker.state === 'half-open') {
+          this.circuitBreaker.state = 'closed';
+          this.circuitBreaker.failures = 0;
+        }
+        
         // Cache successful GET responses
-        if (useCache && cacheKey && options.method === 'GET') {
+        if (useCache && cacheKey && config.method === 'GET') {
           this.cache.set(cacheKey, {
             data,
             timestamp: Date.now(),
@@ -457,20 +518,47 @@ class FoxitApiService {
       } catch (error) {
         lastError = error as Error;
         
+        // Update circuit breaker
+        this.circuitBreaker.failures++;
+        this.circuitBreaker.lastFailure = Date.now();
+        
+        if (this.circuitBreaker.failures >= this.circuitBreaker.threshold) {
+          this.circuitBreaker.state = 'open';
+        }
+        
+        // Don't retry on certain errors
+        if (error instanceof Error) {
+          if (error.name === 'AbortError' || error.message.includes('timeout')) {
+            throw new Error('Request timeout - please try again');
+          }
+          if (error.message.includes('401') || error.message.includes('403')) {
+            throw new Error('Authentication failed - please check your credentials');
+          }
+          if (error.message.includes('404')) {
+            throw new Error('Resource not found');
+          }
+          if (error.message.includes('429')) {
+            throw new Error('Rate limit exceeded - please try again later');
+          }
+        }
+        
+        // Wait before retry (exponential backoff)
         if (attempt < this.retryAttempts) {
-          console.warn(`Foxit API request failed (attempt ${attempt}/${this.retryAttempts}):`, error);
-          await this.delay(this.retryDelay * attempt); // Exponential backoff
+          const delay = this.retryDelay * Math.pow(2, attempt - 1);
+          await this.delay(delay);
         }
       }
     }
 
-    console.error(`Foxit API request failed after ${this.retryAttempts} attempts:`, lastError);
-    
-    if (this.isMockMode) {
-      return this.getMockResponse<T>(endpoint, options);
+    throw lastError || new Error('Request failed after all retry attempts');
+  }
+
+  // Request validation helper
+  private validateRequest(data: any, requiredFields: string[]): void {
+    const missingFields = requiredFields.filter(field => !data[field]);
+    if (missingFields.length > 0) {
+      throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
     }
-    
-    throw lastError;
   }
 
   // Generate unique request ID
@@ -501,44 +589,56 @@ class FoxitApiService {
     return this.makeRequest<FoxitTemplatesResponse>('/templates', { method: 'GET' }, true, 'templates', 10 * 60 * 1000); // 10 minutes cache
   }
 
-  // Generate document with progress tracking
+  // Enhanced document generation with validation
   async generateDocument(request: DocumentGenerationRequest): Promise<DocumentGenerationResponse> {
-    const payload = {
-      templateId: request.templateId,
-      data: request.data,
-      output_format: request.options?.format || 'pdf',
-      options: {
-        include_metadata: request.options?.include_metadata ?? true,
-        includeWatermark: request.options?.includeWatermark || false,
-        compression_level: request.options?.compression ? 'high' : 'none',
-        security: request.options?.security || 'standard'
+    try {
+      // Validate required fields
+      this.validateRequest(request, ['templateId', 'data']);
+      
+      if (!request.templateId || request.templateId.trim() === '') {
+        throw new Error('Template ID is required');
       }
-    };
 
-    return this.makeRequest<DocumentGenerationResponse>('/generate-document', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+      if (!request.data || typeof request.data !== 'object') {
+        throw new Error('Data must be a valid object');
+      }
+
+      const response = await this.makeRequest<DocumentGenerationResponse>('/generate-document', {
+        method: 'POST',
+        body: JSON.stringify(request)
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error generating document:', error);
+      return this.getFallbackDocumentGeneration(request);
+    }
   }
 
-  // Process PDF workflow with enhanced options
+  // Enhanced PDF workflow with validation
   async processPdfWorkflow(request: PDFWorkflowRequest): Promise<PDFWorkflowResponse> {
-    const payload = {
-      workflowId: request.workflowId,
-      documentIds: request.documentIds,
-      operations: request.operations,
-      options: {
-        watermark_text: request.options?.watermark_text,
-        password_protection: request.options?.password_protection || false,
-        compression_level: request.options?.compression_level || 'medium',
-        encryption_level: request.options?.encryption_level || '128'
+    try {
+      // Validate required fields
+      this.validateRequest(request, ['workflowId', 'documentIds', 'operations']);
+      
+      if (!Array.isArray(request.documentIds) || request.documentIds.length === 0) {
+        throw new Error('At least one document ID is required');
       }
-    };
 
-    return this.makeRequest<PDFWorkflowResponse>('/process-workflow', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+      if (!Array.isArray(request.operations) || request.operations.length === 0) {
+        throw new Error('At least one operation is required');
+      }
+
+      const response = await this.makeRequest<PDFWorkflowResponse>('/process-pdf-workflow', {
+        method: 'POST',
+        body: JSON.stringify(request)
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error processing PDF workflow:', error);
+      return this.getFallbackPdfWorkflow(request);
+    }
   }
 
   // Get document metadata with caching
@@ -816,6 +916,24 @@ class FoxitApiService {
   // 1. E-Signature Workflow Management
   async initiateESignature(request: ESignatureRequest): Promise<ESignatureEnvelope> {
     try {
+      // Validate required fields
+      this.validateRequest(request, ['envelopeName', 'recipients', 'documents']);
+      
+      if (!Array.isArray(request.recipients) || request.recipients.length === 0) {
+        throw new Error('At least one recipient is required');
+      }
+
+      if (!Array.isArray(request.documents) || request.documents.length === 0) {
+        throw new Error('At least one document is required');
+      }
+
+      // Validate recipient data
+      request.recipients.forEach((recipient, index) => {
+        if (!recipient.emailId || !recipient.firstName || !recipient.lastName) {
+          throw new Error(`Recipient ${index + 1} is missing required fields (emailId, firstName, lastName)`);
+        }
+      });
+
       const response = await this.makeRequest<ESignatureEnvelope>('/esign/initiate', {
         method: 'POST',
         body: JSON.stringify(request)
@@ -823,12 +941,16 @@ class FoxitApiService {
       return response;
     } catch (error) {
       console.error('Error initiating e-signature:', error);
-      // Fallback mock response
+      // Enhanced fallback with better error handling
       return {
         id: `envelope_${Date.now()}`,
         name: request.envelopeName,
         status: 'sent',
-        recipients: request.recipients,
+        recipients: request.recipients.map((recipient, index) => ({
+          ...recipient,
+          id: `recipient_${index}`,
+          status: 'pending'
+        })),
         documents: request.documents.map((doc, index) => ({
           id: `doc_${index}`,
           name: doc.name,
@@ -868,6 +990,18 @@ class FoxitApiService {
   // 2. Advanced PDF Operations
   async performPDFOperation(request: PDFOperationRequest): Promise<PDFOperationResponse> {
     try {
+      // Validate required fields
+      this.validateRequest(request, ['operation', 'documents']);
+      
+      const validOperations = ['merge', 'split', 'compress', 'watermark', 'encrypt', 'linearize'];
+      if (!validOperations.includes(request.operation)) {
+        throw new Error(`Invalid operation. Must be one of: ${validOperations.join(', ')}`);
+      }
+
+      if (!Array.isArray(request.documents) || request.documents.length === 0) {
+        throw new Error('At least one document is required');
+      }
+
       const response = await this.makeRequest<PDFOperationResponse>('/pdf/operation', {
         method: 'POST',
         body: JSON.stringify(request)
@@ -875,7 +1009,6 @@ class FoxitApiService {
       return response;
     } catch (error) {
       console.error('Error performing PDF operation:', error);
-      // Fallback mock response
       return {
         success: true,
         taskId: `task_${Date.now()}`,
@@ -1058,7 +1191,7 @@ class FoxitApiService {
 
   // ===== ADVANCED PDF OPERATIONS =====
 
-  async performAdvancedPDFOperation(request: AdvancedPDFOperationRequest): Promise<PDFOperationResponse> {
+  async performAdvancedPDFOperation(request: PDFOperationRequest): Promise<PDFOperationResponse> {
     try {
       const response = await this.makeRequest<PDFOperationResponse>('/pdf/advanced-operation', {
         method: 'POST',
@@ -1143,9 +1276,17 @@ class FoxitApiService {
 
   async getDocumentAnalytics(documentId: string): Promise<DocumentAnalytics> {
     try {
-      const response = await this.makeRequest<DocumentAnalytics>(`/analytics/document/${documentId}`, {
-        method: 'GET'
-      });
+      if (!documentId || documentId.trim() === '') {
+        throw new Error('Document ID is required');
+      }
+
+      const response = await this.makeRequest<DocumentAnalytics>(
+        `/analytics/document/${documentId}`,
+        { method: 'GET' },
+        true, // Use cache
+        `doc_analytics_${documentId}`,
+        5 * 60 * 1000 // 5 minutes cache
+      );
       return response;
     } catch (error) {
       console.error('Error getting document analytics:', error);
@@ -1155,9 +1296,18 @@ class FoxitApiService {
 
   async getAnalyticsReport(period: string = 'last_30_days'): Promise<AnalyticsReport> {
     try {
-      const response = await this.makeRequest<AnalyticsReport>(`/analytics/report?period=${period}`, {
-        method: 'GET'
-      });
+      const validPeriods = ['last_7_days', 'last_30_days', 'last_90_days', 'last_year'];
+      if (!validPeriods.includes(period)) {
+        throw new Error(`Invalid period. Must be one of: ${validPeriods.join(', ')}`);
+      }
+
+      const response = await this.makeRequest<AnalyticsReport>(
+        `/analytics/report?period=${period}`,
+        { method: 'GET' },
+        true, // Use cache
+        `analytics_${period}`,
+        10 * 60 * 1000 // 10 minutes cache
+      );
       return response;
     } catch (error) {
       console.error('Error getting analytics report:', error);
@@ -1165,14 +1315,57 @@ class FoxitApiService {
     }
   }
 
+  // Enhanced event tracking with batching
+  private eventQueue: Array<{ documentId: string; event: string; metadata?: any; timestamp: string }> = [];
+  private eventQueueTimer: NodeJS.Timeout | null = null;
+
   async trackDocumentEvent(documentId: string, event: 'view' | 'download' | 'print' | 'share', metadata?: any): Promise<void> {
     try {
-      await this.makeRequest('/analytics/track', {
-        method: 'POST',
-        body: JSON.stringify({ documentId, event, metadata, timestamp: new Date().toISOString() })
-      });
+      if (!documentId || documentId.trim() === '') {
+        throw new Error('Document ID is required');
+      }
+
+      const eventData = {
+        documentId,
+        event,
+        metadata,
+        timestamp: new Date().toISOString()
+      };
+
+      // Add to queue for batching
+      this.eventQueue.push(eventData);
+
+      // Flush queue if it gets too large or after a delay
+      if (this.eventQueue.length >= 10) {
+        await this.flushEventQueue();
+      } else if (!this.eventQueueTimer) {
+        this.eventQueueTimer = setTimeout(() => this.flushEventQueue(), 5000); // Flush after 5 seconds
+      }
     } catch (error) {
       console.error('Error tracking document event:', error);
+    }
+  }
+
+  private async flushEventQueue(): Promise<void> {
+    if (this.eventQueue.length === 0) return;
+
+    try {
+      const events = [...this.eventQueue];
+      this.eventQueue = [];
+
+      if (this.eventQueueTimer) {
+        clearTimeout(this.eventQueueTimer);
+        this.eventQueueTimer = null;
+      }
+
+      await this.makeRequest('/analytics/track-batch', {
+        method: 'POST',
+        body: JSON.stringify({ events })
+      });
+    } catch (error) {
+      console.error('Error flushing event queue:', error);
+      // Re-add events to queue for retry
+      this.eventQueue.unshift(...this.eventQueue);
     }
   }
 
@@ -1205,6 +1398,14 @@ class FoxitApiService {
 
   async executeWorkflowTemplate(templateId: string, data: any): Promise<WorkflowExecution> {
     try {
+      if (!templateId || templateId.trim() === '') {
+        throw new Error('Template ID is required');
+      }
+
+      if (!data || typeof data !== 'object') {
+        throw new Error('Data must be a valid object');
+      }
+
       const response = await this.makeRequest<WorkflowExecution>('/workflows/execute', {
         method: 'POST',
         body: JSON.stringify({ templateId, data })
@@ -1212,23 +1413,81 @@ class FoxitApiService {
       return response;
     } catch (error) {
       console.error('Error executing workflow template:', error);
-      throw new Error(`Failed to execute workflow template ${templateId}`);
+      throw new Error(`Failed to execute workflow template ${templateId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   async getWorkflowExecutionStatus(executionId: string): Promise<WorkflowExecution> {
     try {
-      const response = await this.makeRequest<WorkflowExecution>(`/workflows/execution/${executionId}`, {
-        method: 'GET'
-      });
+      if (!executionId || executionId.trim() === '') {
+        throw new Error('Execution ID is required');
+      }
+
+      const response = await this.makeRequest<WorkflowExecution>(
+        `/workflows/execution/${executionId}`,
+        { method: 'GET' },
+        false, // Don't cache status
+        undefined,
+        0
+      );
       return response;
     } catch (error) {
       console.error('Error getting workflow execution status:', error);
-      throw new Error(`Failed to get workflow execution status ${executionId}`);
+      throw new Error(`Failed to get workflow execution status ${executionId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
+  // Poll workflow status until completion
+  async pollWorkflowStatus(executionId: string, onProgress?: (execution: WorkflowExecution) => void): Promise<WorkflowExecution> {
+    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      try {
+        const execution = await this.getWorkflowExecutionStatus(executionId);
+        
+        if (onProgress) {
+          onProgress(execution);
+        }
+
+        if (execution.status === 'completed' || execution.status === 'failed') {
+          return execution;
+        }
+
+        await this.delay(5000); // Wait 5 seconds before next poll
+        attempts++;
+      } catch (error) {
+        console.error(`Error polling workflow status (attempt ${attempts + 1}):`, error);
+        attempts++;
+        
+        if (attempts >= maxAttempts) {
+          throw new Error('Workflow polling timeout');
+        }
+        
+        await this.delay(5000);
+      }
+    }
+
+    throw new Error('Workflow polling timeout');
+  }
+
   // ===== FALLBACK METHODS =====
+
+  private getFallbackDocumentGeneration(request: DocumentGenerationRequest): DocumentGenerationResponse {
+    return {
+      success: false,
+      error: 'Failed to generate document. Mocking response.',
+      details: 'Mocked document generation failed.'
+    };
+  }
+
+  private getFallbackPdfWorkflow(request: PDFWorkflowRequest): PDFWorkflowResponse {
+    return {
+      success: false,
+      error: 'Failed to process PDF workflow. Mocking response.',
+      details: 'Mocked PDF workflow processing failed.'
+    };
+  }
 
   private getFallbackDocumentAnalytics(documentId: string): DocumentAnalytics {
     return {
@@ -1491,6 +1750,18 @@ class FoxitApiService {
   // Utility method for delays
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Circuit breaker status
+  getCircuitBreakerStatus(): typeof this.circuitBreaker {
+    return { ...this.circuitBreaker };
+  }
+
+  // Reset circuit breaker
+  resetCircuitBreaker(): void {
+    this.circuitBreaker.state = 'closed';
+    this.circuitBreaker.failures = 0;
+    this.circuitBreaker.lastFailure = 0;
   }
 }
 

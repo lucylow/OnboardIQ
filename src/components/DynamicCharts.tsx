@@ -566,3 +566,4 @@ const DynamicCharts: React.FC = () => {
 };
 
 export default DynamicCharts;
+

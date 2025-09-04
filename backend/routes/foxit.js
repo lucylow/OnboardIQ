@@ -17,6 +17,51 @@ const foxitLimiter = rateLimit({
 // Apply rate limiting to all Foxit routes
 router.use(foxitLimiter);
 
+// Enhanced validation middleware
+const validateRequest = (schema) => {
+  return (req, res, next) => {
+    const { error } = schema.validate(req.body);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.details.map(detail => detail.message)
+      });
+    }
+    next();
+  };
+};
+
+// Rate limiting with exponential backoff
+const createRateLimiter = (windowMs, max, keyGenerator = (req) => req.ip) => {
+  const requests = new Map();
+  
+  return (req, res, next) => {
+    const key = keyGenerator(req);
+    const now = Date.now();
+    const windowStart = now - windowMs;
+    
+    if (!requests.has(key)) {
+      requests.set(key, []);
+    }
+    
+    const userRequests = requests.get(key);
+    const recentRequests = userRequests.filter(time => time > windowStart);
+    
+    if (recentRequests.length >= max) {
+      return res.status(429).json({
+        success: false,
+        error: 'Rate limit exceeded',
+        retryAfter: Math.ceil(windowMs / 1000)
+      });
+    }
+    
+    recentRequests.push(now);
+    requests.set(key, recentRequests);
+    next();
+  };
+};
+
 // Enhanced mock Foxit API responses for development
 const mockFoxitResponses = {
   generateDocument: (templateId, data, options = {}) => {
@@ -604,6 +649,45 @@ router.post('/esign/initiate', async (req, res) => {
     
     console.log(`📝 Foxit E-Signature Initiated: ${envelopeName}`);
     
+    // Enhanced validation
+    if (!envelopeName || typeof envelopeName !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid envelope name',
+        message: 'Envelope name must be a valid string'
+      });
+    }
+    
+    if (!Array.isArray(recipients) || recipients.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid recipients',
+        message: 'At least one recipient is required'
+      });
+    }
+    
+    if (!Array.isArray(documents) || documents.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid documents',
+        message: 'At least one document is required'
+      });
+    }
+    
+    // Validate recipient data
+    const invalidRecipients = recipients.filter((recipient, index) => {
+      return !recipient.emailId || !recipient.firstName || !recipient.lastName;
+    });
+    
+    if (invalidRecipients.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid recipient data',
+        message: 'All recipients must have emailId, firstName, and lastName',
+        invalid_recipients: invalidRecipients.map((_, index) => `Recipient ${index + 1}`)
+      });
+    }
+    
     const envelopeId = `envelope_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     const response = {
@@ -638,7 +722,8 @@ router.post('/esign/initiate', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to initiate e-signature',
-      message: error.message
+      message: error.message,
+      retryable: true
     });
   }
 });
@@ -1217,6 +1302,24 @@ router.post('/analytics/track', async (req, res) => {
     
     console.log(`📈 Foxit Analytics Track: ${event} for ${documentId}`);
     
+    // Validate input
+    if (!documentId || typeof documentId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid document ID',
+        message: 'Document ID must be a valid string'
+      });
+    }
+    
+    const validEvents = ['view', 'download', 'print', 'share'];
+    if (!validEvents.includes(event)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid event type',
+        message: `Event must be one of: ${validEvents.join(', ')}`
+      });
+    }
+    
     // In a real implementation, this would store the event in a database
     const response = {
       success: true,
@@ -1236,6 +1339,73 @@ router.post('/analytics/track', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to track analytics event',
+      message: error.message
+    });
+  }
+});
+
+// Batch analytics tracking
+router.post('/analytics/track-batch', async (req, res) => {
+  try {
+    const { events } = req.body;
+    
+    console.log(`📈 Foxit Batch Analytics Track: ${events.length} events`);
+    
+    // Validate input
+    if (!Array.isArray(events) || events.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid events array',
+        message: 'Events must be a non-empty array'
+      });
+    }
+    
+    if (events.length > 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Too many events',
+        message: 'Maximum 100 events per batch'
+      });
+    }
+    
+    // Validate each event
+    const validEvents = ['view', 'download', 'print', 'share'];
+    const invalidEvents = events.filter(event => 
+      !event.documentId || 
+      !validEvents.includes(event.event)
+    );
+    
+    if (invalidEvents.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid events in batch',
+        message: 'All events must have valid documentId and event type',
+        invalid_count: invalidEvents.length
+      });
+    }
+    
+    // Process events
+    const processedEvents = events.map(event => ({
+      eventId: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      documentId: event.documentId,
+      event: event.event,
+      timestamp: event.timestamp || new Date().toISOString(),
+      metadata: event.metadata || {}
+    }));
+    
+    console.log(`✅ Foxit Batch Analytics Processed: ${processedEvents.length} events`);
+    
+    res.json({
+      success: true,
+      processedEvents,
+      totalProcessed: processedEvents.length,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Batch Analytics Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process batch analytics',
       message: error.message
     });
   }

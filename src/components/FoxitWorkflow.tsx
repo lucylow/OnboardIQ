@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { foxitApiService, ESignatureRequest, PDFOperationRequest, EmbedTokenRequest, AdvancedPDFOperationRequest, DocumentAnalytics, AnalyticsReport, WorkflowTemplate, WorkflowExecution } from '@/services/foxitApiService';
+import { foxitApiService, ESignatureRequest, PDFOperationRequest, EmbedTokenRequest, DocumentAnalytics, AnalyticsReport, WorkflowTemplate, WorkflowExecution } from '@/services/foxitApiService';
 import { 
   FileText, 
   FileSignature, 
@@ -78,6 +78,9 @@ const FoxitWorkflow: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsReport | null>(null);
   const [documentAnalytics, setDocumentAnalytics] = useState<DocumentAnalytics | null>(null);
   const [selectedWorkflowTemplate, setSelectedWorkflowTemplate] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const [healthStatus, setHealthStatus] = useState<{ connected: boolean; response_time?: number } | null>(null);
+  const [circuitBreakerStatus, setCircuitBreakerStatus] = useState<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -85,10 +88,23 @@ const FoxitWorkflow: React.FC = () => {
     loadWorkflows();
     loadWorkflowTemplates();
     loadAnalytics();
+    checkHealthStatus();
   }, []);
+
+  const checkHealthStatus = async () => {
+    try {
+      const health = await foxitApiService.healthCheck();
+      setHealthStatus(health);
+      setCircuitBreakerStatus(foxitApiService.getCircuitBreakerStatus());
+    } catch (error) {
+      console.error('Error checking health status:', error);
+      setError('Failed to check service health');
+    }
+  };
 
   const loadTemplates = async () => {
     try {
+      setError(null);
       const response = await foxitApiService.getTemplates();
       if (response.success && response.templates) {
         setTemplates(response.templates.map(template => ({
@@ -102,6 +118,12 @@ const FoxitWorkflow: React.FC = () => {
       }
     } catch (error) {
       console.error('Error loading templates:', error);
+      setError('Failed to load templates');
+      toast({
+        title: "Error",
+        description: "Failed to load document templates. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -315,7 +337,7 @@ const FoxitWorkflow: React.FC = () => {
   const performAdvancedPDFOperation = async (operation: string, documentId: string, options?: any) => {
     setLoading(true);
     try {
-      const request: AdvancedPDFOperationRequest = {
+      const request: PDFOperationRequest = {
         operation: operation as any,
         documents: [documentId],
         options: {
@@ -503,13 +525,57 @@ const FoxitWorkflow: React.FC = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.5, type: "spring" }}
+          className="flex items-center gap-3"
         >
+          {healthStatus && (
+            <Badge 
+              variant={healthStatus.connected ? "default" : "destructive"} 
+              className="flex items-center gap-2"
+            >
+              <div className={`w-2 h-2 rounded-full ${healthStatus.connected ? 'bg-green-500' : 'bg-red-500'}`} />
+              {healthStatus.connected ? 'Connected' : 'Disconnected'}
+              {healthStatus.response_time && (
+                <span className="text-xs">({healthStatus.response_time}ms)</span>
+              )}
+            </Badge>
+          )}
           <Badge variant="secondary" className="flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 border-blue-200">
             <Zap className="w-4 h-4" />
             Enterprise Ready
           </Badge>
         </motion.div>
       </motion.div>
+
+      {/* Error Display */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4"
+        >
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error}</span>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  setError(null);
+                  checkHealthStatus();
+                  loadTemplates();
+                  loadWorkflows();
+                  loadWorkflowTemplates();
+                  loadAnalytics();
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-1" />
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
 
       {/* Feature Overview */}
       <motion.div
@@ -611,8 +677,28 @@ const FoxitWorkflow: React.FC = () => {
 
           {/* Workflows Tab */}
           <TabsContent value="workflows" className="space-y-4">
-            <div className="grid gap-4">
-              {workflows.map((workflow, index) => (
+            {loading && workflows.length === 0 ? (
+              <div className="grid gap-4">
+                {[1, 2, 3].map((i) => (
+                  <Card key={i}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
+                          <div className="space-y-2">
+                            <div className="w-32 h-4 bg-gray-200 rounded animate-pulse" />
+                            <div className="w-20 h-3 bg-gray-200 rounded animate-pulse" />
+                          </div>
+                        </div>
+                        <div className="w-24 h-2 bg-gray-200 rounded animate-pulse" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {workflows.map((workflow, index) => (
                 <motion.div
                   key={workflow.id}
                   initial={{ opacity: 0, x: -20 }}

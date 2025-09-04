@@ -754,7 +754,8 @@ const FoxitWorkflow: React.FC = () => {
                     </Card>
                   </motion.div>
                 ))}
-            </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* Templates Tab */}

@@ -942,59 +942,133 @@ const VideoOnboarding: React.FC = () => {
 
           <TabsContent value="analytics" className="space-y-6">
             {/* Analytics Content */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Session Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analytics & Insights
+                </CardTitle>
+                <CardDescription>
+                  Track session performance, user engagement, and business metrics
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Revenue Metrics */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Completion Rate</span>
-                      <span className="font-semibold">94.2%</span>
-                    </div>
-                    <Progress value={94.2} className="h-2" />
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Avg Session Duration</span>
-                      <span className="font-semibold">45 min</span>
-                    </div>
-                    <Progress value={75} className="h-2" />
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Satisfaction Score</span>
-                      <span className="font-semibold">4.8/5</span>
-                    </div>
-                    <Progress value={96} className="h-2" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Popular Templates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {templates.map((template) => (
-                      <div key={template.id} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">{template.name}</span>
-                        <div className="flex items-center space-x-2">
-                          <Progress value={template.popularity} className="w-20 h-2" />
-                          <span className="text-xs font-medium">{template.popularity}%</span>
+                    <h4 className="font-medium text-gray-900">Revenue Metrics</h4>
+                    <div className="space-y-3">
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-green-900">Monthly Revenue</span>
+                          <Badge className="bg-green-500 hover:bg-green-600">+15%</Badge>
                         </div>
+                        <p className="text-2xl font-bold text-green-900">$12,450</p>
+                        <p className="text-sm text-green-700">From 120 sessions</p>
                       </div>
-                    ))}
+                      
+                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-blue-900">Avg Session Value</span>
+                          <Badge className="bg-blue-500 hover:bg-blue-600">+8%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-blue-900">$104.17</p>
+                        <p className="text-sm text-blue-700">Per session</p>
+                      </div>
+                      
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-purple-900">Conversion Rate</span>
+                          <Badge className="bg-purple-500 hover:bg-purple-600">+12%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-purple-900">9.2%</p>
+                        <p className="text-sm text-purple-700">Lead to customer</p>
+                      </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+
+                  {/* Session Metrics */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Session Performance</h4>
+                    <div className="space-y-3">
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-orange-900">Completion Rate</span>
+                          <Badge className="bg-orange-500 hover:bg-orange-600">94%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-orange-900">94.2%</p>
+                        <p className="text-sm text-orange-700">Sessions completed</p>
+                      </div>
+                      
+                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-yellow-900">Avg Duration</span>
+                          <Badge className="bg-yellow-500 hover:bg-yellow-600">+5%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-yellow-900">45 min</p>
+                        <p className="text-sm text-yellow-700">Per session</p>
+                      </div>
+                      
+                      <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-red-900">Cancellation Rate</span>
+                          <Badge className="bg-red-500 hover:bg-red-600">-3%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-red-900">5.8%</p>
+                        <p className="text-sm text-red-700">Sessions cancelled</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Business Metrics */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Business Metrics</h4>
+                    <div className="space-y-3">
+                      <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-indigo-900">Customer Satisfaction</span>
+                          <Badge className="bg-indigo-500 hover:bg-indigo-600">4.8/5</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-indigo-900">4.8</p>
+                        <p className="text-sm text-indigo-700">Out of 5 stars</p>
+                      </div>
+                      
+                      <div className="p-4 bg-teal-50 rounded-lg border border-teal-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-teal-900">Customer Retention</span>
+                          <Badge className="bg-teal-500 hover:bg-teal-600">+18%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-teal-900">87%</p>
+                        <p className="text-sm text-teal-700">Repeat customers</p>
+                      </div>
+                      
+                      <div className="p-4 bg-pink-50 rounded-lg border border-pink-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-pink-900">ROI</span>
+                          <Badge className="bg-pink-500 hover:bg-pink-600">+25%</Badge>
+                        </div>
+                        <p className="text-2xl font-bold text-pink-900">325%</p>
+                        <p className="text-sm text-pink-700">Return on investment</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Upgrade CTA */}
+                <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Unlock Advanced Analytics</h3>
+                      <p className="text-gray-600">Get detailed insights, custom reports, and predictive analytics with our Pro plan.</p>
+                    </div>
+                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                      <TrendingUp className="h-4 w-4 mr-2" />
+                      Upgrade to Pro
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">

@@ -35,6 +35,7 @@ import DocumentGeneration from "./components/DocumentGeneration";
 import ChurnPrediction from "./components/ChurnPrediction";
 import UserProfiling from "./components/UserProfiling";
 import VideoOnboarding from "./components/VideoOnboarding";
+import DocumentationPage from "./components/DocumentationPage";
 import NotFound from "./pages/NotFound";
 import HelpPage from "./components/HelpPage";
 
@@ -119,7 +120,7 @@ const AppContent = () => {
           <Route path="/demo" element={<DemoPage />} />
           
           {/* Resource routes */}
-          <Route path="/docs" element={<NotFound />} />
+          <Route path="/docs" element={<DocumentationPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/tutorials" element={<NotFound />} />
           <Route path="/api" element={<NotFound />} />

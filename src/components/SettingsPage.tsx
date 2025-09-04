@@ -121,19 +121,20 @@ interface UserSettings {
 const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>({
     profile: {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@company.com',
-      company: 'Acme Corporation',
-      role: 'Administrator',
-      timezone: 'America/New_York',
-      language: 'en-US'
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      email: 'sarah.johnson@onboardiq.com',
+      company: 'OnboardIQ Solutions',
+      role: 'Product Manager',
+      timezone: 'America/Los_Angeles',
+      language: 'en-US',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face'
     },
     preferences: {
       theme: 'auto',
       notifications: {
         email: true,
-        sms: false,
+        sms: true,
         push: true,
         security: true,
         updates: true,
@@ -148,27 +149,27 @@ const SettingsPage: React.FC = () => {
     integrations: {
       vonage: {
         enabled: true,
-        apiKey: '••••••••••••••••',
-        apiSecret: '••••••••••••••••',
-        phoneNumber: '+1 (555) 123-4567'
+        apiKey: 'vng_1234567890abcdef',
+        apiSecret: 'secret_abcdef1234567890',
+        phoneNumber: '+1 (415) 555-0123'
       },
       foxit: {
         enabled: true,
-        apiKey: '••••••••••••••••',
-        endpoint: 'https://api.foxit.com/v1'
+        apiKey: 'fox_9876543210fedcba',
+        endpoint: 'https://api.foxit.com/v2'
       },
       mulesoft: {
-        enabled: false,
-        clientId: '',
-        clientSecret: '',
-        environment: 'sandbox'
+        enabled: true,
+        clientId: 'mule_client_12345',
+        clientSecret: 'mule_secret_67890',
+        environment: 'production'
       }
     },
     security: {
       twoFactorEnabled: true,
-      sessionTimeout: 30,
+      sessionTimeout: 60,
       passwordPolicy: {
-        minLength: 8,
+        minLength: 12,
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
@@ -177,9 +178,79 @@ const SettingsPage: React.FC = () => {
     },
     system: {
       autoBackup: true,
-      backupFrequency: 'weekly',
-      dataRetention: 90,
-      performanceMode: 'balanced'
+      backupFrequency: 'daily',
+      dataRetention: 365,
+      performanceMode: 'performance'
+    }
+  });
+
+  // Additional mock data for enhanced features
+  const [mockUsageStats] = useState({
+    lastLogin: '2024-01-15T10:30:00Z',
+    totalSessions: 247,
+    averageSessionTime: '45 minutes',
+    documentsProcessed: 1234,
+    integrationsUsed: ['vonage', 'foxit', 'mulesoft'],
+    storageUsed: '2.3 GB',
+    storageLimit: '10 GB'
+  });
+
+  const [mockRecentActivity] = useState([
+    {
+      id: 1,
+      type: 'login',
+      description: 'Logged in from San Francisco, CA',
+      timestamp: '2024-01-15T10:30:00Z',
+      icon: '🔐'
+    },
+    {
+      id: 2,
+      type: 'integration',
+      description: 'Vonage SMS integration tested successfully',
+      timestamp: '2024-01-15T09:15:00Z',
+      icon: '📱'
+    },
+    {
+      id: 3,
+      type: 'document',
+      description: 'Generated 5 PDF documents via Foxit',
+      timestamp: '2024-01-14T16:45:00Z',
+      icon: '📄'
+    },
+    {
+      id: 4,
+      type: 'settings',
+      description: 'Updated notification preferences',
+      timestamp: '2024-01-14T14:20:00Z',
+      icon: '⚙️'
+    },
+    {
+      id: 5,
+      type: 'security',
+      description: 'Two-factor authentication enabled',
+      timestamp: '2024-01-13T11:10:00Z',
+      icon: '🛡️'
+    }
+  ]);
+
+  const [mockIntegrationMetrics] = useState({
+    vonage: {
+      callsMade: 156,
+      smsSent: 89,
+      successRate: 98.5,
+      lastUsed: '2024-01-15T08:30:00Z'
+    },
+    foxit: {
+      documentsGenerated: 234,
+      templatesUsed: 12,
+      successRate: 99.2,
+      lastUsed: '2024-01-15T09:45:00Z'
+    },
+    mulesoft: {
+      apiCalls: 567,
+      integrationsActive: 8,
+      successRate: 97.8,
+      lastUsed: '2024-01-15T07:15:00Z'
     }
   });
 
@@ -292,16 +363,40 @@ const SettingsPage: React.FC = () => {
   const testIntegration = async (integration: keyof UserSettings['integrations']) => {
     try {
       setLoading(true);
-      // Simulate API test
-      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast({
-        title: "Integration Test Successful",
-        description: `${integration} integration is working properly.`,
-      });
+      // Simulate different test scenarios based on integration
+      const testScenarios = {
+        vonage: {
+          success: true,
+          message: "SMS and Voice services are operational",
+          details: "Test message sent successfully to +1 (415) 555-0123"
+        },
+        foxit: {
+          success: true,
+          message: "PDF generation service is working",
+          details: "Test document generated successfully"
+        },
+        mulesoft: {
+          success: true,
+          message: "API connections are stable",
+          details: "All 8 active integrations responding"
+        }
+      };
+
+      const scenario = testScenarios[integration];
+      await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
+      
+      if (scenario.success) {
+        toast({
+          title: `${integration.charAt(0).toUpperCase() + integration.slice(1)} Test Successful`,
+          description: scenario.message,
+        });
+      } else {
+        throw new Error("Test failed");
+      }
     } catch (error) {
       toast({
-        title: "Integration Test Failed",
+        title: `${integration.charAt(0).toUpperCase() + integration.slice(1)} Test Failed`,
         description: `Unable to connect to ${integration}. Please check your credentials.`,
         variant: "destructive",
       });
@@ -337,7 +432,7 @@ const SettingsPage: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadSettings}>
+          <Button variant="outline" onClick={loadSettings} disabled={loading}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
@@ -348,14 +443,74 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => document.getElementById('profile')?.click()}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <User className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Profile</h3>
+                <p className="text-sm text-gray-600">Update personal info</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => document.getElementById('integrations')?.click()}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Zap className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Integrations</h3>
+                <p className="text-sm text-gray-600">Manage connections</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => document.getElementById('security')?.click()}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <Shield className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Security</h3>
+                <p className="text-sm text-gray-600">Account protection</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => document.getElementById('analytics')?.click()}>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Activity className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Analytics</h3>
+                <p className="text-sm text-gray-600">Usage insights</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
-          <TabsTrigger value="ai">AI Settings</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="profile" id="profile">Profile</TabsTrigger>
+          <TabsTrigger value="preferences" id="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="integrations" id="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="ai" id="ai">AI Settings</TabsTrigger>
+          <TabsTrigger value="analytics" id="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="security" id="security">Security</TabsTrigger>
+          <TabsTrigger value="system" id="system">System</TabsTrigger>
         </TabsList>
 
         {/* Profile Settings */}
@@ -370,7 +525,32 @@ const SettingsPage: React.FC = () => {
                 Update your personal information and account details
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              {/* Avatar Section */}
+              <div className="flex items-center gap-6">
+                <div className="relative">
+                  <img 
+                    src={settings.profile.avatar} 
+                    alt="Profile" 
+                    className="w-20 h-20 rounded-full object-cover border-4 border-gray-100"
+                  />
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">{settings.profile.firstName} {settings.profile.lastName}</h3>
+                  <p className="text-gray-600">{settings.profile.role} at {settings.profile.company}</p>
+                  <p className="text-sm text-gray-500">Member since January 2024</p>
+                </div>
+              </div>
+
+              <Separator />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
@@ -985,9 +1165,189 @@ const SettingsPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+                 </TabsContent>
 
-        {/* Security Settings */}
+         {/* Analytics Settings */}
+         <TabsContent value="analytics" className="space-y-6">
+           {/* Usage Statistics */}
+           <Card>
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2">
+                 <Activity className="w-5 h-5" />
+                 Usage Statistics
+               </CardTitle>
+               <CardDescription>
+                 Overview of your account usage and activity
+               </CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="text-center">
+                   <div className="text-3xl font-bold text-blue-600">{mockUsageStats.totalSessions}</div>
+                   <div className="text-sm text-gray-600">Total Sessions</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-3xl font-bold text-green-600">{mockUsageStats.documentsProcessed}</div>
+                   <div className="text-sm text-gray-600">Documents Processed</div>
+                 </div>
+                 <div className="text-center">
+                   <div className="text-3xl font-bold text-purple-600">{mockUsageStats.storageUsed}</div>
+                   <div className="text-sm text-gray-600">Storage Used</div>
+                 </div>
+               </div>
+               <div className="mt-6">
+                 <div className="flex justify-between text-sm mb-2">
+                   <span>Storage Usage</span>
+                   <span>{mockUsageStats.storageUsed} / {mockUsageStats.storageLimit}</span>
+                 </div>
+                 <div className="w-full bg-gray-200 rounded-full h-2">
+                   <div 
+                     className="bg-blue-600 h-2 rounded-full" 
+                     style={{ width: `${(parseFloat(mockUsageStats.storageUsed) / parseFloat(mockUsageStats.storageLimit)) * 100}%` }}
+                   ></div>
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* Integration Metrics */}
+           <Card>
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2">
+                 <Zap className="w-5 h-5" />
+                 Integration Performance
+               </CardTitle>
+               <CardDescription>
+                 Performance metrics for your connected integrations
+               </CardDescription>
+             </CardHeader>
+             <CardContent className="space-y-6">
+               {/* Vonage Metrics */}
+               <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 bg-blue-100 rounded-lg">
+                     <Phone className="w-5 h-5 text-blue-600" />
+                   </div>
+                   <div className="flex-1">
+                     <h3 className="font-semibold">Vonage Communication</h3>
+                     <p className="text-sm text-gray-600">Last used: {new Date(mockIntegrationMetrics.vonage.lastUsed).toLocaleString()}</p>
+                   </div>
+                   <Badge className="bg-green-100 text-green-800">
+                     {mockIntegrationMetrics.vonage.successRate}% Success
+                   </Badge>
+                 </div>
+                 <div className="grid grid-cols-3 gap-4 text-center">
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.vonage.callsMade}</div>
+                     <div className="text-sm text-gray-600">Calls Made</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.vonage.smsSent}</div>
+                     <div className="text-sm text-gray-600">SMS Sent</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.vonage.successRate}%</div>
+                     <div className="text-sm text-gray-600">Success Rate</div>
+                   </div>
+                 </div>
+               </div>
+
+               <Separator />
+
+               {/* Foxit Metrics */}
+               <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 bg-green-100 rounded-lg">
+                     <FileText className="w-5 h-5 text-green-600" />
+                   </div>
+                   <div className="flex-1">
+                     <h3 className="font-semibold">Foxit PDF</h3>
+                     <p className="text-sm text-gray-600">Last used: {new Date(mockIntegrationMetrics.foxit.lastUsed).toLocaleString()}</p>
+                   </div>
+                   <Badge className="bg-green-100 text-green-800">
+                     {mockIntegrationMetrics.foxit.successRate}% Success
+                   </Badge>
+                 </div>
+                 <div className="grid grid-cols-3 gap-4 text-center">
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.foxit.documentsGenerated}</div>
+                     <div className="text-sm text-gray-600">Documents Generated</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.foxit.templatesUsed}</div>
+                     <div className="text-sm text-gray-600">Templates Used</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.foxit.successRate}%</div>
+                     <div className="text-sm text-gray-600">Success Rate</div>
+                   </div>
+                 </div>
+               </div>
+
+               <Separator />
+
+               {/* MuleSoft Metrics */}
+               <div className="space-y-4">
+                 <div className="flex items-center gap-3">
+                   <div className="p-2 bg-purple-100 rounded-lg">
+                     <Network className="w-5 h-5 text-purple-600" />
+                   </div>
+                   <div className="flex-1">
+                     <h3 className="font-semibold">MuleSoft Anypoint</h3>
+                     <p className="text-sm text-gray-600">Last used: {new Date(mockIntegrationMetrics.mulesoft.lastUsed).toLocaleString()}</p>
+                   </div>
+                   <Badge className="bg-green-100 text-green-800">
+                     {mockIntegrationMetrics.mulesoft.successRate}% Success
+                   </Badge>
+                 </div>
+                 <div className="grid grid-cols-3 gap-4 text-center">
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.mulesoft.apiCalls}</div>
+                     <div className="text-sm text-gray-600">API Calls</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.mulesoft.integrationsActive}</div>
+                     <div className="text-sm text-gray-600">Active Integrations</div>
+                   </div>
+                   <div>
+                     <div className="text-lg font-semibold">{mockIntegrationMetrics.mulesoft.successRate}%</div>
+                     <div className="text-sm text-gray-600">Success Rate</div>
+                   </div>
+                 </div>
+               </div>
+             </CardContent>
+           </Card>
+
+           {/* Recent Activity */}
+           <Card>
+             <CardHeader>
+               <CardTitle className="flex items-center gap-2">
+                 <Clock className="w-5 h-5" />
+                 Recent Activity
+               </CardTitle>
+               <CardDescription>
+                 Your recent account activity and actions
+               </CardDescription>
+             </CardHeader>
+             <CardContent>
+               <div className="space-y-4">
+                 {mockRecentActivity.map((activity) => (
+                   <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                     <div className="text-2xl">{activity.icon}</div>
+                     <div className="flex-1">
+                       <p className="font-medium">{activity.description}</p>
+                       <p className="text-sm text-gray-600">
+                         {new Date(activity.timestamp).toLocaleString()}
+                       </p>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </CardContent>
+           </Card>
+         </TabsContent>
+
+         {/* Security Settings */}
         <TabsContent value="security" className="space-y-6">
           <Card>
             <CardHeader>

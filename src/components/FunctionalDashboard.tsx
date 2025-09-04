@@ -414,7 +414,8 @@ const FunctionalDashboard: React.FC = () => {
                     id="firstName"
                     value={signupForm.firstName}
                     onChange={(e) => setSignupForm({...signupForm, firstName: e.target.value})}
-                    placeholder="John"
+                    placeholder="Enter your first name"
+                    className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
@@ -423,7 +424,8 @@ const FunctionalDashboard: React.FC = () => {
                     id="lastName"
                     value={signupForm.lastName}
                     onChange={(e) => setSignupForm({...signupForm, lastName: e.target.value})}
-                    placeholder="Doe"
+                    placeholder="Enter your last name"
+                    className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -435,7 +437,9 @@ const FunctionalDashboard: React.FC = () => {
                   type="email"
                   value={signupForm.email}
                   onChange={(e) => setSignupForm({...signupForm, email: e.target.value})}
-                  placeholder="john@company.com"
+                  placeholder="Enter your email address"
+                  className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
                 />
               </div>
 
@@ -443,9 +447,11 @@ const FunctionalDashboard: React.FC = () => {
                 <Label htmlFor="phoneNumber">Phone Number</Label>
                 <Input
                   id="phoneNumber"
+                  type="tel"
                   value={signupForm.phoneNumber}
                   onChange={(e) => setSignupForm({...signupForm, phoneNumber: e.target.value})}
-                  placeholder="+1234567890"
+                  placeholder="Enter your phone number (+1234567890)"
+                  className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
@@ -455,7 +461,8 @@ const FunctionalDashboard: React.FC = () => {
                   id="companyName"
                   value={signupForm.companyName}
                   onChange={(e) => setSignupForm({...signupForm, companyName: e.target.value})}
-                  placeholder="Acme Corp"
+                  placeholder="Enter your company name"
+                  className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 

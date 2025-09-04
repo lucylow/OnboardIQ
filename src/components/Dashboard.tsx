@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Input } from './ui/input';
 import { 
   BarChart3, 
   Users, 
@@ -32,7 +33,8 @@ import {
   Lock,
   Unlock,
   Calendar,
-  Filter
+  Filter,
+  Search
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
@@ -239,11 +241,19 @@ export const Dashboard: React.FC = () => {
             </div>
             <div className="flex items-center space-x-3">
               <BackendHealthCheck />
+              <div className="relative">
+                <Input
+                  type="search"
+                  placeholder="Search dashboard..."
+                  className="w-64 pl-10"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              </div>
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
-              <Button size="sm">
+              <Button size="sm" onClick={() => navigate('/settings')}>
                 <Settings className="h-4 w-4 mr-2" />
                 Settings
               </Button>

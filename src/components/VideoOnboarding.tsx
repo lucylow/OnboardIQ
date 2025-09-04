@@ -5,6 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Video, 
   Play, 
@@ -108,8 +113,17 @@ const VideoOnboarding: React.FC = () => {
   const [currentSession, setCurrentSession] = useState<VideoSession | null>(null);
   const [sessions, setSessions] = useState<VideoSession[]>([]);
   const [templates, setTemplates] = useState<VideoTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newSessionData, setNewSessionData] = useState({
+    participantName: '',
+    participantEmail: '',
+    scheduledDate: '',
+    scheduledTime: '',
+    notes: ''
+  });
+  const { toast } = useToast();
 
   // Mock data
   useEffect(() => {
@@ -236,6 +250,75 @@ const VideoOnboarding: React.FC = () => {
         return <Badge className="bg-gray-500 hover:bg-gray-600">Low</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
+    }
+  };
+
+  const handleUseTemplate = (template: VideoTemplate) => {
+    setSelectedTemplate(template);
+    setIsDialogOpen(true);
+    toast({
+      title: "Template Selected",
+      description: `Using template: ${template.name}`,
+    });
+  };
+
+  const handleCreateSession = async () => {
+    if (!selectedTemplate || !newSessionData.participantName || !newSessionData.scheduledDate || !newSessionData.scheduledTime) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Create new session with template
+      const scheduledDateTime = new Date(`${newSessionData.scheduledDate}T${newSessionData.scheduledTime}`);
+      
+      const newSession: VideoSession = {
+        id: (sessions.length + 1).toString(),
+        title: `${selectedTemplate.name} - ${newSessionData.participantName}`,
+        type: selectedTemplate.category.toLowerCase() as VideoSession['type'],
+        status: 'scheduled',
+        participant: newSessionData.participantName,
+        host: 'Current User',
+        scheduledAt: scheduledDateTime,
+        tags: [selectedTemplate.category.toLowerCase(), selectedTemplate.difficulty],
+        priority: 'medium'
+      };
+
+      setSessions(prev => [...prev, newSession]);
+      
+      toast({
+        title: "Session Created Successfully!",
+        description: `Video session scheduled for ${newSession.participant} on ${scheduledDateTime.toLocaleDateString()}`,
+      });
+
+      // Reset form and close dialog
+      setNewSessionData({
+        participantName: '',
+        participantEmail: '',
+        scheduledDate: '',
+        scheduledTime: '',
+        notes: ''
+      });
+      setIsDialogOpen(false);
+      setSelectedTemplate(null);
+      
+      // Switch to sessions tab to show the new session
+      setActiveTab('sessions');
+      
+    } catch (error) {
+      toast({
+        title: "Error Creating Session",
+        description: "Failed to create the video session. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -590,7 +673,10 @@ const VideoOnboarding: React.FC = () => {
                       </div>
                     </div>
 
-                    <Button className="w-full">
+                    <Button 
+                      className="w-full" 
+                      onClick={() => handleUseTemplate(template)}
+                    >
                       Use Template
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
@@ -719,6 +805,104 @@ const VideoOnboarding: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Session Creation Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Session</DialogTitle>
+            <DialogDescription>
+              {selectedTemplate && `Using template: ${selectedTemplate.name}`}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="participantName">Participant Name *</Label>
+              <Input
+                id="participantName"
+                value={newSessionData.participantName}
+                onChange={(e) => setNewSessionData(prev => ({ ...prev, participantName: e.target.value }))}
+                placeholder="Enter participant name"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="participantEmail">Participant Email</Label>
+              <Input
+                id="participantEmail"
+                type="email"
+                value={newSessionData.participantEmail}
+                onChange={(e) => setNewSessionData(prev => ({ ...prev, participantEmail: e.target.value }))}
+                placeholder="Enter participant email"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="scheduledDate">Date *</Label>
+                <Input
+                  id="scheduledDate"
+                  type="date"
+                  value={newSessionData.scheduledDate}
+                  onChange={(e) => setNewSessionData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="scheduledTime">Time *</Label>
+                <Input
+                  id="scheduledTime"
+                  type="time"
+                  value={newSessionData.scheduledTime}
+                  onChange={(e) => setNewSessionData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Textarea
+                id="notes"
+                value={newSessionData.notes}
+                onChange={(e) => setNewSessionData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Additional notes or requirements"
+                rows={3}
+              />
+            </div>
+            
+            {selectedTemplate && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <h4 className="font-medium text-sm mb-2">Template Details:</h4>
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p>Duration: {selectedTemplate.duration} minutes</p>
+                  <p>Difficulty: {selectedTemplate.difficulty}</p>
+                  <p>Features: {selectedTemplate.features.join(', ')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateSession} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule Session
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Video Controls Overlay - Only show when in session */}
       {currentSession && (

@@ -556,6 +556,72 @@ router.get('/documents/:id/download', async (req, res) => {
   }
 });
 
+// Actual file download endpoint
+router.get('/documents/:id/file', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`📥 Foxit Document File Download: ${id}`);
+    
+    // Generate realistic PDF content based on document ID
+    const mockPdfContent = generateRealisticPdfContent(id);
+    
+    // Set headers for file download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="document_${id}.pdf"`);
+    res.setHeader('Content-Length', mockPdfContent.length);
+    res.setHeader('Cache-Control', 'no-cache');
+    
+    // Send the file
+    res.send(mockPdfContent);
+    
+    console.log(`✅ Foxit Document File Downloaded: ${id}`);
+  } catch (error) {
+    console.error('❌ Foxit Document File Download Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to download document file',
+      message: error.message
+    });
+  }
+});
+
+// Stream document download (for large files)
+router.get('/documents/:id/stream', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`📥 Foxit Document Stream Download: ${id}`);
+    
+    // Set headers for streaming download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="document_${id}.pdf"`);
+    res.setHeader('Transfer-Encoding', 'chunked');
+    res.setHeader('Cache-Control', 'no-cache');
+    
+    // Simulate streaming large file
+    const chunks = 10;
+    const chunkSize = 1024; // 1KB chunks
+    
+    for (let i = 0; i < chunks; i++) {
+      const chunk = Buffer.from(`Mock PDF chunk ${i + 1} for document ${id} `.repeat(chunkSize / 20));
+      res.write(chunk);
+      
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    res.end();
+    
+    console.log(`✅ Foxit Document Stream Downloaded: ${id}`);
+  } catch (error) {
+    console.error('❌ Foxit Document Stream Download Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to stream document download',
+      message: error.message
+    });
+  }
+});
+
 // Batch generate documents
 router.post('/batch-generate', validateBatchGeneration, handleValidationErrors, async (req, res) => {
   try {

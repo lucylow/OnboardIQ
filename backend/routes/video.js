@@ -12,4 +12,9 @@ router.post('/session', videoController.createSession);
 // @access  Public
 router.get('/session/:userId', videoController.getSession);
 
+// @route   POST /api/video/invite
+// @desc    Invite user to video session
+// @access  Public
+router.post('/invite', videoController.inviteToSession);
+
 module.exports = router;

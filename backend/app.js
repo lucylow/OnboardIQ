@@ -13,6 +13,7 @@ const documentRoutes = require('./routes/documents');
 const analyticsRoutes = require('./routes/analytics');
 const aiRoutes = require('./routes/ai');
 const mcpRoutes = require('./routes/mcp');
+const vonageRoutes = require('./routes/vonage');
 
 // Initialize Express app
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/mcp', mcpRoutes);
+app.use('/api/vonage', vonageRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

@@ -278,6 +278,72 @@ startxref
     }
   };
 
+  const handleUseTemplate = (templateId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      templateId: templateId
+    }));
+    
+    // Auto-fill some sample data based on template
+    const sampleData = getSampleDataForTemplate(templateId);
+    setFormData(prev => ({
+      ...prev,
+      ...sampleData
+    }));
+  };
+
+  const getSampleDataForTemplate = (templateId: string) => {
+    const sampleData = {
+      customerName: '',
+      companyName: '',
+      email: '',
+      phoneNumber: '',
+      welcomeMessage: '',
+      startDate: new Date().toISOString().split('T')[0]
+    };
+
+    switch (templateId) {
+      case 'welcome_packet':
+        return {
+          ...sampleData,
+          customerName: 'Sarah Chen',
+          companyName: 'TechCorp Solutions',
+          email: 'sarah.chen@techcorp.com',
+          phoneNumber: '+1 (555) 123-4567',
+          welcomeMessage: 'Welcome to TechCorp Solutions! We\'re excited to have you on board and look forward to helping you streamline your onboarding process.'
+        };
+      case 'contract':
+        return {
+          ...sampleData,
+          customerName: 'Michael Johnson',
+          companyName: 'Global Finance Corp',
+          email: 'michael.johnson@globalfinance.com',
+          phoneNumber: '+1 (555) 987-6543',
+          welcomeMessage: 'Thank you for choosing Global Finance Corp. This service agreement outlines our commitment to providing exceptional financial services.'
+        };
+      case 'invoice':
+        return {
+          ...sampleData,
+          customerName: 'Emily Rodriguez',
+          companyName: 'Healthcare Plus',
+          email: 'emily.rodriguez@healthcareplus.com',
+          phoneNumber: '+1 (555) 456-7890',
+          welcomeMessage: 'Professional consulting services invoice for the month of ' + new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        };
+      case 'onboarding_guide':
+        return {
+          ...sampleData,
+          customerName: 'David Kim',
+          companyName: 'Innovation Labs',
+          email: 'david.kim@innovationlabs.com',
+          phoneNumber: '+1 (555) 321-0987',
+          welcomeMessage: 'Welcome to Innovation Labs! This comprehensive onboarding guide will help you get started with our platform and maximize your productivity.'
+        };
+      default:
+        return sampleData;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-4xl mx-auto">
@@ -530,7 +596,7 @@ startxref
                       ? 'border-blue-500 bg-blue-50 shadow-md' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
-                  onClick={() => handleInputChange('templateId', template.id)}
+                  onClick={() => handleUseTemplate(template.id)}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="font-semibold text-lg">{template.name}</h4>

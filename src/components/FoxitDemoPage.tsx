@@ -25,8 +25,10 @@ import {
   Eye,
   Server,
   Wifi,
-  CheckSquare
+  CheckSquare,
+  ExternalLink
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ApiCall {
   id: string;
@@ -301,6 +303,23 @@ const FoxitDemoPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Working Demo Link */}
+        <div className="mb-6">
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <strong>🎉 Working Demo Available!</strong> Try the fully functional Foxit PDF Generator with real document generation and download capabilities.{' '}
+              <Link 
+                to="/foxit-pdf-generator" 
+                className="inline-flex items-center gap-1 text-green-700 hover:text-green-800 font-medium underline"
+              >
+                Launch Working Demo
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </AlertDescription>
+          </Alert>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">

@@ -40,6 +40,7 @@ const DocumentAIEngine = require('./ai/documentAIEngine');
 const ChurnPredictor = require('./ai/churnPredictor');
 const MultiAgentOrchestrator = require('./ai/multiAgentOrchestrator');
 const mcpRoutes = require('./routes/mcp');
+const vonageRoutes = require('./routes/vonage');
 
 // Import API integrations
 const VonageIntegration = require('./integrations/vonageIntegration');
@@ -258,6 +259,7 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/foxit', foxitRoutes);
 app.use('/api/ai-agents', aiAgentsRoutes);
 app.use('/api/mcp', mcpRoutes);
+app.use('/api/vonage', vonageRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

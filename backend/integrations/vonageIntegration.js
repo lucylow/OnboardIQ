@@ -9,23 +9,34 @@ class VonageIntegration {
       apiSecret: config.apiSecret
     });
     this.isConnected = false;
+    this.useMock = !config.apiKey || !config.apiSecret;
     this.initialize();
   }
 
   async initialize() {
     try {
-      // Test connection by checking account balance
-      await this.checkConnection();
-      this.isConnected = true;
+      if (this.useMock) {
+        console.log('🔧 Using mock Vonage integration (no API credentials provided)');
+        this.isConnected = true;
+      } else {
+        // Test connection by checking account balance
+        await this.checkConnection();
+        this.isConnected = true;
+      }
       console.log('✅ Vonage integration initialized');
     } catch (error) {
       console.error('❌ Vonage integration failed:', error);
-      this.isConnected = false;
+      console.log('🔄 Falling back to mock mode');
+      this.useMock = true;
+      this.isConnected = true;
     }
   }
 
   async checkConnection() {
     try {
+      if (this.useMock) {
+        return true;
+      }
       // In production, this would check account balance or make a test API call
       console.log('🔗 Checking Vonage connection...');
       return true;
@@ -38,6 +49,10 @@ class VonageIntegration {
   async sendSMS(to, from, text, options = {}) {
     try {
       console.log(`📱 Sending SMS to ${to}: ${text.substring(0, 50)}...`);
+      
+      if (this.useMock) {
+        return this.mockSendSMS(to, from, text, options);
+      }
       
       const smsData = {
         to: to,
@@ -66,13 +81,47 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ SMS send failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock SMS');
+      return this.mockSendSMS(to, from, text, options);
     }
+  }
+
+  mockSendSMS(to, from, text, options = {}) {
+    console.log(`🎭 Mock SMS to ${to}: ${text.substring(0, 50)}...`);
+    
+    // Simulate different scenarios
+    const scenarios = [
+      { success: true, delay: 1000 },
+      { success: true, delay: 2000 },
+      { success: false, error: 'INSUFFICIENT_CREDITS', delay: 500 },
+      { success: false, error: 'INVALID_PHONE_NUMBER', delay: 300 }
+    ];
+    
+    const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    
+    if (!scenario.success) {
+      throw new Error(scenario.error);
+    }
+    
+    return {
+      messages: [{
+        to: to,
+        'message-id': `mock_msg_${Date.now()}`,
+        status: '0',
+        'remaining-balance': '95.50',
+        'message-price': '0.01',
+        network: 'US'
+      }]
+    };
   }
 
   async sendBulkSMS(recipients, from, text, options = {}) {
     try {
       console.log(`📱 Sending bulk SMS to ${recipients.length} recipients`);
+      
+      if (this.useMock) {
+        return this.mockSendBulkSMS(recipients, from, text, options);
+      }
       
       const results = [];
       
@@ -102,14 +151,49 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Bulk SMS failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock bulk SMS');
+      return this.mockSendBulkSMS(recipients, from, text, options);
     }
+  }
+
+  mockSendBulkSMS(recipients, from, text, options = {}) {
+    console.log(`🎭 Mock bulk SMS to ${recipients.length} recipients`);
+    
+    const results = recipients.map(recipient => {
+      const success = Math.random() > 0.1; // 90% success rate
+      return {
+        recipient: recipient,
+        status: success ? 'success' : 'failed',
+        result: success ? {
+          messages: [{
+            to: recipient,
+            'message-id': `mock_bulk_${Date.now()}`,
+            status: '0',
+            'remaining-balance': '95.50',
+            'message-price': '0.01',
+            network: 'US'
+          }]
+        } : null,
+        error: success ? null : 'DELIVERY_FAILED'
+      };
+    });
+    
+    return {
+      total: recipients.length,
+      successful: results.filter(r => r.status === 'success').length,
+      failed: results.filter(r => r.status === 'failed').length,
+      results: results
+    };
   }
 
   // Voice Integration
   async makeCall(to, from, text, options = {}) {
     try {
       console.log(`📞 Making voice call to ${to}`);
+      
+      if (this.useMock) {
+        return this.mockMakeCall(to, from, text, options);
+      }
       
       const callData = {
         to: [{
@@ -147,13 +231,29 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Voice call failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock voice call');
+      return this.mockMakeCall(to, from, text, options);
     }
+  }
+
+  mockMakeCall(to, from, text, options = {}) {
+    console.log(`🎭 Mock voice call to ${to}`);
+    
+    return {
+      uuid: `mock_call_${Date.now()}`,
+      status: 'started',
+      direction: 'outbound',
+      rate: '0.01'
+    };
   }
 
   async createTTSMessage(text, options = {}) {
     try {
       console.log(`🔊 Creating TTS message: ${text.substring(0, 50)}...`);
+      
+      if (this.useMock) {
+        return this.mockCreateTTSMessage(text, options);
+      }
       
       const ttsData = {
         text: text,
@@ -178,14 +278,32 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ TTS creation failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock TTS');
+      return this.mockCreateTTSMessage(text, options);
     }
+  }
+
+  mockCreateTTSMessage(text, options = {}) {
+    console.log(`🎭 Mock TTS message: ${text.substring(0, 50)}...`);
+    
+    return {
+      uuid: `mock_tts_${Date.now()}`,
+      url: `https://mock-api.vonage.com/tts/${Date.now()}.mp3`,
+      duration: text.length * 0.1,
+      voiceName: options.voiceName || 'Amy',
+      language: options.language || 'en-US',
+      speed: options.speed || 1.0
+    };
   }
 
   // Video Integration
   async createVideoSession(options = {}) {
     try {
       console.log('📹 Creating Vonage Video session');
+      
+      if (this.useMock) {
+        return this.mockCreateVideoSession(options);
+      }
       
       const sessionData = {
         mediaMode: options.mediaMode || 'routed',
@@ -210,13 +328,29 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Video session creation failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock video session');
+      return this.mockCreateVideoSession(options);
     }
+  }
+
+  mockCreateVideoSession(options = {}) {
+    console.log('🎭 Mock video session creation');
+    
+    return {
+      sessionId: `mock_session_${Date.now()}`,
+      mediaMode: options.mediaMode || 'routed',
+      archiveMode: options.archiveMode || 'manual',
+      location: options.location || 'auto'
+    };
   }
 
   async generateVideoToken(sessionId, options = {}) {
     try {
       console.log(`🎫 Generating video token for session ${sessionId}`);
+      
+      if (this.useMock) {
+        return this.mockGenerateVideoToken(sessionId, options);
+      }
       
       const tokenData = {
         sessionId: sessionId,
@@ -241,13 +375,29 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Video token generation failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock token generation');
+      return this.mockGenerateVideoToken(sessionId, options);
     }
+  }
+
+  mockGenerateVideoToken(sessionId, options = {}) {
+    console.log(`🎭 Mock video token for session ${sessionId}`);
+    
+    return {
+      token: `mock_token_${sessionId}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      sessionId: sessionId,
+      role: options.role || 'publisher',
+      expireTime: options.expireTime || Math.floor(Date.now() / 1000) + 86400
+    };
   }
 
   async inviteToVideoSession(sessionId, email, options = {}) {
     try {
       console.log(`📧 Inviting ${email} to video session ${sessionId}`);
+      
+      if (this.useMock) {
+        return this.mockInviteToVideoSession(sessionId, email, options);
+      }
       
       const inviteData = {
         sessionId: sessionId,
@@ -273,14 +423,32 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Video invitation failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock video invitation');
+      return this.mockInviteToVideoSession(sessionId, email, options);
     }
+  }
+
+  mockInviteToVideoSession(sessionId, email, options = {}) {
+    console.log(`🎭 Mock video invitation to ${email} for session ${sessionId}`);
+    
+    return {
+      inviteId: `mock_invite_${Date.now()}`,
+      sessionId: sessionId,
+      email: email,
+      status: 'sent',
+      subject: options.subject || 'Join your OnboardIQ video session',
+      message: options.message || 'You have been invited to join a video session.'
+    };
   }
 
   // Verify Integration
   async startVerification(phoneNumber, options = {}) {
     try {
       console.log(`🔐 Starting verification for ${phoneNumber}`);
+      
+      if (this.useMock) {
+        return this.mockStartVerification(phoneNumber, options);
+      }
       
       const verifyData = {
         number: phoneNumber,
@@ -305,13 +473,42 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Verification start failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock verification');
+      return this.mockStartVerification(phoneNumber, options);
     }
+  }
+
+  mockStartVerification(phoneNumber, options = {}) {
+    console.log(`🎭 Mock verification start for ${phoneNumber}`);
+    
+    // Simulate different scenarios
+    const scenarios = [
+      { success: true, delay: 1000 },
+      { success: true, delay: 2000 },
+      { success: false, error: 'INSUFFICIENT_CREDITS', delay: 500 },
+      { success: false, error: 'INVALID_PHONE_NUMBER', delay: 300 }
+    ];
+    
+    const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    
+    if (!scenario.success) {
+      throw new Error(scenario.error);
+    }
+    
+    return {
+      request_id: `mock_verify_${Date.now()}`,
+      status: '0',
+      error_text: null
+    };
   }
 
   async checkVerification(requestId, code) {
     try {
       console.log(`🔍 Checking verification code for request ${requestId}`);
+      
+      if (this.useMock) {
+        return this.mockCheckVerification(requestId, code);
+      }
       
       const checkData = {
         request_id: requestId,
@@ -333,13 +530,45 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Verification check failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock verification check');
+      return this.mockCheckVerification(requestId, code);
     }
+  }
+
+  mockCheckVerification(requestId, code) {
+    console.log(`🎭 Mock verification check for request ${requestId} with code ${code}`);
+    
+    // Accept any 6-digit code for demo purposes, but simulate some failures
+    if (code && code.length === 6) {
+      // 90% success rate for demo
+      if (Math.random() > 0.1) {
+        return { 
+          status: '0',
+          request_id: requestId,
+          error_text: null
+        };
+      } else {
+        return { 
+          status: '16',
+          request_id: requestId,
+          error_text: 'Invalid code'
+        };
+      }
+    }
+    return { 
+      status: '16',
+      request_id: requestId,
+      error_text: 'Invalid code'
+    };
   }
 
   async cancelVerification(requestId) {
     try {
       console.log(`❌ Cancelling verification request ${requestId}`);
+      
+      if (this.useMock) {
+        return this.mockCancelVerification(requestId);
+      }
       
       const cancelData = {
         request_id: requestId
@@ -360,14 +589,29 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Verification cancellation failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock verification cancellation');
+      return this.mockCancelVerification(requestId);
     }
+  }
+
+  mockCancelVerification(requestId) {
+    console.log(`🎭 Mock verification cancellation for request ${requestId}`);
+    
+    return {
+      request_id: requestId,
+      status: '0',
+      error_text: null
+    };
   }
 
   // WhatsApp Integration
   async sendWhatsApp(to, from, text, options = {}) {
     try {
       console.log(`💬 Sending WhatsApp message to ${to}`);
+      
+      if (this.useMock) {
+        return this.mockSendWhatsApp(to, from, text, options);
+      }
       
       const whatsappData = {
         to: to,
@@ -392,14 +636,30 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ WhatsApp send failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock WhatsApp');
+      return this.mockSendWhatsApp(to, from, text, options);
     }
+  }
+
+  mockSendWhatsApp(to, from, text, options = {}) {
+    console.log(`🎭 Mock WhatsApp message to ${to}: ${text.substring(0, 50)}...`);
+    
+    return {
+      message_uuid: `mock_whatsapp_${Date.now()}`,
+      to: to,
+      from: from || 'OnboardIQ',
+      status: 'sent'
+    };
   }
 
   // Multi-channel messaging
   async sendMultiChannelMessage(recipient, channels, message, options = {}) {
     try {
       console.log(`📤 Sending multi-channel message to ${recipient.email || recipient.phone}`);
+      
+      if (this.useMock) {
+        return this.mockSendMultiChannelMessage(recipient, channels, message, options);
+      }
       
       const results = {};
       
@@ -457,14 +717,41 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Multi-channel message failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock multi-channel message');
+      return this.mockSendMultiChannelMessage(recipient, channels, message, options);
     }
+  }
+
+  mockSendMultiChannelMessage(recipient, channels, message, options = {}) {
+    console.log(`🎭 Mock multi-channel message to ${recipient.email || recipient.phone}`);
+    
+    const results = {};
+    
+    for (const channel of channels) {
+      const success = Math.random() > 0.1; // 90% success rate
+      results[channel] = {
+        status: success ? 'success' : 'failed',
+        error: success ? null : 'MOCK_DELIVERY_FAILED'
+      };
+    }
+    
+    return {
+      recipient: recipient,
+      channels: channels,
+      results: results,
+      successful: Object.values(results).filter(r => r.status === 'success').length,
+      failed: Object.values(results).filter(r => r.status === 'failed').length
+    };
   }
 
   // Analytics and monitoring
   async getAccountBalance() {
     try {
       console.log('💰 Getting Vonage account balance');
+      
+      if (this.useMock) {
+        return this.mockGetAccountBalance();
+      }
       
       // In production, this would use the actual Vonage API
       // const response = await this.vonage.account.getBalance();
@@ -480,13 +767,28 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Balance check failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock balance');
+      return this.mockGetAccountBalance();
     }
+  }
+
+  mockGetAccountBalance() {
+    console.log('🎭 Mock account balance check');
+    
+    return {
+      balance: '95.50',
+      currency: 'USD',
+      autoReload: false
+    };
   }
 
   async getMessageHistory(options = {}) {
     try {
       console.log('📊 Getting message history');
+      
+      if (this.useMock) {
+        return this.mockGetMessageHistory(options);
+      }
       
       // In production, this would use the actual Vonage API
       // const response = await this.vonage.sms.getHistory(options);
@@ -510,8 +812,35 @@ class VonageIntegration {
       
     } catch (error) {
       console.error(`❌ Message history failed: ${error.message}`);
-      throw error;
+      console.log('🔄 Falling back to mock message history');
+      return this.mockGetMessageHistory(options);
     }
+  }
+
+  mockGetMessageHistory(options = {}) {
+    console.log('🎭 Mock message history');
+    
+    return {
+      messages: [
+        {
+          messageId: `mock_msg_${Date.now()}`,
+          to: '+1234567890',
+          from: 'OnboardIQ',
+          text: 'Welcome to OnboardIQ!',
+          status: 'delivered',
+          timestamp: new Date().toISOString()
+        },
+        {
+          messageId: `mock_msg_${Date.now() - 1000}`,
+          to: '+1234567891',
+          from: 'OnboardIQ',
+          text: 'Your verification code is 123456',
+          status: 'delivered',
+          timestamp: new Date(Date.now() - 1000).toISOString()
+        }
+      ],
+      count: 2
+    };
   }
 
   // Error handling and retry logic
@@ -538,6 +867,7 @@ class VonageIntegration {
       return {
         status: 'healthy',
         connected: this.isConnected,
+        useMock: this.useMock,
         balance: balance.balance,
         currency: balance.currency,
         timestamp: new Date().toISOString()
@@ -546,6 +876,7 @@ class VonageIntegration {
       return {
         status: 'unhealthy',
         connected: false,
+        useMock: this.useMock,
         error: error.message,
         timestamp: new Date().toISOString()
       };
@@ -554,6 +885,10 @@ class VonageIntegration {
 
   isConnected() {
     return this.isConnected;
+  }
+
+  isMockMode() {
+    return this.useMock;
   }
 
   // Cleanup

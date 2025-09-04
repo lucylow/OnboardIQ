@@ -123,6 +123,9 @@ const VideoOnboarding: React.FC = () => {
     scheduledTime: '',
     notes: ''
   });
+  const [joinMeetingDialog, setJoinMeetingDialog] = useState<{ open: boolean; session: VideoSession | null }>({ open: false, session: null });
+  const [recordingDialog, setRecordingDialog] = useState<{ open: boolean; session: VideoSession | null }>({ open: false, session: null });
+  const [transcriptDialog, setTranscriptDialog] = useState<{ open: boolean; session: VideoSession | null }>({ open: false, session: null });
   const { toast } = useToast();
 
   // Mock data
@@ -323,27 +326,15 @@ const VideoOnboarding: React.FC = () => {
   };
 
   const handleJoinMeeting = (session: VideoSession) => {
-    toast({
-      title: "Join Meeting",
-      description: `Joining meeting for session: ${session.title}`,
-    });
-    // Implement navigation or modal for joining meeting
+    setJoinMeetingDialog({ open: true, session });
   };
 
   const handleDownloadRecording = (session: VideoSession) => {
-    toast({
-      title: "Download Recording",
-      description: `Downloading recording for session: ${session.title}`,
-    });
-    // Implement download logic
+    setRecordingDialog({ open: true, session });
   };
 
   const handleViewTranscript = (session: VideoSession) => {
-    toast({
-      title: "View Transcript",
-      description: `Viewing transcript for session: ${session.title}`,
-    });
-    // Implement transcript viewing logic
+    setTranscriptDialog({ open: true, session });
   };
 
   const handleEditSession = (session: VideoSession) => {
@@ -971,6 +962,226 @@ const VideoOnboarding: React.FC = () => {
                   Schedule Session
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Join Meeting Dialog */}
+      <Dialog open={joinMeetingDialog.open} onOpenChange={(open) => setJoinMeetingDialog({ open, session: null })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Video className="h-5 w-5 text-blue-600" />
+              Join Video Meeting
+            </DialogTitle>
+            <DialogDescription>
+              Ready to join the meeting for "{joinMeetingDialog.session?.title}"?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-medium text-blue-900">Meeting Details</span>
+                <Badge className="bg-blue-500 hover:bg-blue-600">Live</Badge>
+              </div>
+              <div className="space-y-2 text-sm text-blue-800">
+                <p><strong>Participant:</strong> {joinMeetingDialog.session?.participant}</p>
+                <p><strong>Host:</strong> {joinMeetingDialog.session?.host}</p>
+                <p><strong>Meeting ID:</strong> 123-456-789</p>
+                <p><strong>Password:</strong> onboard123</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <span className="text-sm text-green-800">Your camera and microphone are ready</span>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setJoinMeetingDialog({ open: false, session: null })}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                window.open(joinMeetingDialog.session?.meetingUrl || 'https://meet.google.com/abc-defg-hij', '_blank');
+                setJoinMeetingDialog({ open: false, session: null });
+                toast({ title: "Joining meeting...", description: "Opening meeting in new tab" });
+              }}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Join Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Download Recording Dialog */}
+      <Dialog open={recordingDialog.open} onOpenChange={(open) => setRecordingDialog({ open, session: null })}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-purple-600" />
+              Download Recording
+            </DialogTitle>
+            <DialogDescription>
+              Choose your preferred format for "{recordingDialog.session?.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-purple-900">Recording Info</span>
+                  <Badge variant="secondary">HD Quality</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm text-purple-800">
+                  <div>
+                    <p><strong>Duration:</strong> {recordingDialog.session?.duration || 45} min</p>
+                    <p><strong>Size:</strong> 892 MB</p>
+                  </div>
+                  <div>
+                    <p><strong>Quality:</strong> 1080p HD</p>
+                    <p><strong>Format:</strong> MP4</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h4 className="font-medium text-sm">Available Downloads:</h4>
+              <div className="space-y-2">
+                <Button variant="outline" className="w-full justify-between">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    <span>Full Recording (HD)</span>
+                  </div>
+                  <span className="text-xs text-gray-500">892 MB</span>
+                </Button>
+                <Button variant="outline" className="w-full justify-between">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    <span>Audio Only</span>
+                  </div>
+                  <span className="text-xs text-gray-500">45 MB</span>
+                </Button>
+                <Button variant="outline" className="w-full justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Transcript (TXT)</span>
+                  </div>
+                  <span className="text-xs text-gray-500">12 KB</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setRecordingDialog({ open: false, session: null })}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Mock download
+                const link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,Mock video recording file';
+                link.download = `${recordingDialog.session?.title?.replace(/\s+/g, '_')}_recording.mp4`;
+                link.click();
+                setRecordingDialog({ open: false, session: null });
+                toast({ title: "Download started", description: "Recording download has begun" });
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download HD
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Transcript Dialog */}
+      <Dialog open={transcriptDialog.open} onOpenChange={(open) => setTranscriptDialog({ open, session: null })}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-green-600" />
+              Session Transcript
+            </DialogTitle>
+            <DialogDescription>
+              Full transcript for "{transcriptDialog.session?.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-800">AI-Generated Transcript</span>
+              </div>
+              <Badge variant="secondary">95% Accuracy</Badge>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+              <div className="space-y-4 text-sm">
+                <div className="border-l-4 border-blue-500 pl-3">
+                  <p className="font-medium text-blue-600">Host ({transcriptDialog.session?.host}):</p>
+                  <p className="text-gray-700">Welcome to your onboarding session! I'm excited to help you get started with our platform. Could you please introduce yourself?</p>
+                  <span className="text-xs text-gray-500">00:05</span>
+                </div>
+                
+                <div className="border-l-4 border-purple-500 pl-3">
+                  <p className="font-medium text-purple-600">Participant ({transcriptDialog.session?.participant}):</p>
+                  <p className="text-gray-700">Hi! Thank you for having me. I'm really looking forward to learning about the platform and how it can help our team.</p>
+                  <span className="text-xs text-gray-500">00:15</span>
+                </div>
+                
+                <div className="border-l-4 border-blue-500 pl-3">
+                  <p className="font-medium text-blue-600">Host ({transcriptDialog.session?.host}):</p>
+                  <p className="text-gray-700">Perfect! Let's start with a quick overview of the dashboard. As you can see here, we have several key sections...</p>
+                  <span className="text-xs text-gray-500">00:25</span>
+                </div>
+                
+                <div className="border-l-4 border-purple-500 pl-3">
+                  <p className="font-medium text-purple-600">Participant ({transcriptDialog.session?.participant}):</p>
+                  <p className="text-gray-700">This looks really intuitive. I especially like the analytics section. How often is the data updated?</p>
+                  <span className="text-xs text-gray-500">01:45</span>
+                </div>
+                
+                <div className="border-l-4 border-blue-500 pl-3">
+                  <p className="font-medium text-blue-600">Host ({transcriptDialog.session?.host}):</p>
+                  <p className="text-gray-700">Great question! The analytics are updated in real-time, so you'll always have the most current information. Let me show you how to customize the reports...</p>
+                  <span className="text-xs text-gray-500">01:55</span>
+                </div>
+                
+                <div className="text-center py-4">
+                  <span className="text-xs text-gray-500 italic">... transcript continues for {transcriptDialog.session?.duration || 45} minutes ...</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <Clock className="h-3 w-3" />
+              <span>Generated on {new Date().toLocaleDateString()}</span>
+              <span>•</span>
+              <span>{transcriptDialog.session?.duration || 45} minutes</span>
+              <span>•</span>
+              <span>~2,450 words</span>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                // Mock download transcript
+                const transcriptText = `Session Transcript: ${transcriptDialog.session?.title}\nDate: ${new Date().toLocaleDateString()}\nParticipants: ${transcriptDialog.session?.host}, ${transcriptDialog.session?.participant}\n\nHost: Welcome to your onboarding session...\n[Full transcript content would be here]`;
+                const link = document.createElement('a');
+                link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(transcriptText);
+                link.download = `${transcriptDialog.session?.title?.replace(/\s+/g, '_')}_transcript.txt`;
+                link.click();
+                toast({ title: "Transcript downloaded", description: "Transcript saved as text file" });
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+            <Button onClick={() => setTranscriptDialog({ open: false, session: null })}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

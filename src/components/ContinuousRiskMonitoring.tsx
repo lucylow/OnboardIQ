@@ -17,7 +17,27 @@ import {
   Lock,
   Unlock,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Zap,
+  Users,
+  BarChart3,
+  RefreshCw,
+  Settings,
+  Bell,
+  Globe,
+  Target,
+  Heart,
+  Star,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  Plus,
+  Filter,
+  Search,
+  Download,
+  Share2,
+  MoreHorizontal
 } from 'lucide-react';
 
 interface SecurityEvent {
@@ -209,266 +229,390 @@ const ContinuousRiskMonitoring: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading security data...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Continuous Risk Monitoring</h1>
-          <p className="text-gray-600 mt-2">
-            Real-time security monitoring and threat detection powered by Vonage APIs
-          </p>
-        </div>
-        <Badge variant="secondary" className="flex items-center gap-2">
-          <Shield className="w-4 h-4" />
-          Live Monitoring
-        </Badge>
-      </div>
-
-      {/* Security Metrics Overview */}
-      {securityMetrics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Total Events</p>
-                  <p className="text-2xl font-bold">{securityMetrics.totalEvents}</p>
-                </div>
-                <Activity className="w-8 h-8 text-blue-600" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center">
+                <Shield className="h-6 w-6 text-white" />
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">High Risk Events</p>
-                  <p className="text-2xl font-bold text-red-600">{securityMetrics.highRiskEvents}</p>
-                </div>
-                <AlertTriangle className="w-8 h-8 text-red-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Resolved Events</p>
-                  <p className="text-2xl font-bold text-green-600">{securityMetrics.resolvedEvents}</p>
-                </div>
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Active Threats</p>
-                  <p className="text-2xl font-bold text-orange-600">{securityMetrics.activeThreats}</p>
-                </div>
-                <Lock className="w-8 h-8 text-orange-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Risk Assessment */}
-      {riskAssessment && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Current Risk Assessment
-            </CardTitle>
-            <CardDescription>
-              Last updated: {riskAssessment.lastUpdated.toLocaleString()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Overall Risk Score</span>
-                  <span>{Math.round(riskAssessment.overallRisk * 100)}%</span>
-                </div>
-                <Progress value={riskAssessment.overallRisk * 100} className="h-2" />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium mb-2">Risk Factors</h4>
-                  <div className="space-y-2">
-                    {riskAssessment.riskFactors.map((factor, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <span>{factor.description}</span>
-                        <Badge variant="outline">{Math.round(factor.score * 100)}%</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium mb-2">Recommendations</h4>
-                  <div className="space-y-2">
-                    {riskAssessment.recommendations.map((rec, index) => (
-                      <div key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
-                        <span>{rec}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <h1 className="text-3xl font-bold text-gray-900">Continuous Risk Monitoring</h1>
+                <p className="text-gray-600 mt-1">
+                  Real-time security monitoring and threat detection powered by AI
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Badge variant="secondary" className="flex items-center gap-2 bg-green-100 text-green-700 border-green-200">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Live Monitoring
+              </Badge>
+            </div>
+          </div>
+        </div>
 
-      {/* Security Events */}
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="events">Security Events</TabsTrigger>
-          <TabsTrigger value="threats">Active Threats</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Status</CardTitle>
-              <CardDescription>Current security posture and recommendations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <Alert>
-                  <Shield className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Security Status:</strong> {securityMetrics?.riskTrend === 'increasing' ? 
-                      'Elevated risk detected. Review recent events and consider additional security measures.' :
-                      'Normal security posture maintained. Continue monitoring for any changes.'
-                    }
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {securityMetrics?.resolvedEvents || 0}
-                    </div>
-                    <div className="text-sm text-gray-600">Issues Resolved</div>
+        {/* Security Metrics Overview */}
+        {securityMetrics && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Total Events</p>
+                    <p className="text-3xl font-bold text-blue-600">{securityMetrics.totalEvents}</p>
+                    <p className="text-xs text-green-600 mt-1">+12% from last week</p>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {securityMetrics?.totalEvents || 0}
-                    </div>
-                    <div className="text-sm text-gray-600">Total Monitored</div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Activity className="w-6 h-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">High Risk Events</p>
+                    <p className="text-3xl font-bold text-red-600">{securityMetrics.highRiskEvents}</p>
+                    <p className="text-xs text-red-600 mt-1">Requires attention</p>
+                  </div>
+                  <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Resolved Events</p>
+                    <p className="text-3xl font-bold text-green-600">{securityMetrics.resolvedEvents}</p>
+                    <p className="text-xs text-green-600 mt-1">80% resolution rate</p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Active Threats</p>
+                    <p className="text-3xl font-bold text-orange-600">{securityMetrics.activeThreats}</p>
+                    <p className="text-xs text-orange-600 mt-1">Under investigation</p>
+                  </div>
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Lock className="w-6 h-6 text-orange-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Risk Assessment */}
+        {riskAssessment && (
+          <Card className="mb-8 hover:shadow-lg transition-shadow duration-300">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Shield className="w-5 h-5" />
+                    Current Risk Assessment
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    Last updated: {riskAssessment.lastUpdated.toLocaleString()}
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-sm">
+                  Risk Score: {Math.round(riskAssessment.overallRisk * 100)}%
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <div className="flex justify-between text-sm mb-3">
+                  <span className="font-medium">Overall Risk Score</span>
+                  <span className="font-semibold">{Math.round(riskAssessment.overallRisk * 100)}%</span>
+                </div>
+                <Progress value={riskAssessment.overallRisk * 100} className="h-3" />
+                <p className="text-xs text-gray-500 mt-2">
+                  {riskAssessment.overallRisk > 0.7 ? 'High risk detected' : 
+                   riskAssessment.overallRisk > 0.4 ? 'Medium risk detected' : 'Low risk detected'}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <Target className="w-4 h-4" />
+                    Risk Factors
+                  </h4>
+                  <div className="space-y-3">
+                    {riskAssessment.riskFactors.map((factor, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm text-gray-700">{factor.description}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {Math.round(factor.score * 100)}%
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <Heart className="w-4 h-4" />
+                    Recommendations
+                  </h4>
+                  <div className="space-y-3">
+                    {riskAssessment.recommendations.map((rec, index) => (
+                      <div key={index} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                        <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-gray-700">{rec}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
 
-        <TabsContent value="events" className="space-y-4">
-          <div className="space-y-4">
-            {securityEvents.map((event) => (
-              <Card key={event.id} className={event.resolved ? 'opacity-60' : ''}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="flex items-center gap-2">
-                        {getEventIcon(event.type)}
-                        <Badge className={getSeverityColor(event.severity)}>
-                          {event.severity}
-                        </Badge>
+        {/* Security Events Tabs */}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 bg-white border border-gray-200">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="events" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
+              Security Events
+            </TabsTrigger>
+            <TabsTrigger value="threats" className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700">
+              Active Threats
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="hover:shadow-lg transition-shadow duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Security Status
+                  </CardTitle>
+                  <CardDescription>Current security posture and recommendations</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert className={securityMetrics?.riskTrend === 'increasing' ? 'border-red-200 bg-red-50' : 'border-green-200 bg-green-50'}>
+                    <Shield className="h-4 w-4" />
+                    <AlertDescription className={securityMetrics?.riskTrend === 'increasing' ? 'text-red-800' : 'text-green-800'}>
+                      <strong>Security Status:</strong> {securityMetrics?.riskTrend === 'increasing' ? 
+                        'Elevated risk detected. Review recent events and consider additional security measures.' :
+                        'Normal security posture maintained. Continue monitoring for any changes.'
+                      }
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600 mb-1">
+                        {securityMetrics?.resolvedEvents || 0}
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{event.description}</h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {event.timestamp.toLocaleString()}
-                        </p>
-                        {event.details && (
-                          <div className="mt-2 text-sm text-gray-500">
-                            {Object.entries(event.details).map(([key, value]) => (
-                              <div key={key}>
-                                <span className="font-medium">{key}:</span> {String(value)}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <div className="text-sm text-gray-600">Issues Resolved</div>
                     </div>
-                    {!event.resolved && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleResolveEvent(event.id)}
-                      >
-                        Resolve
-                      </Button>
-                    )}
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        {securityMetrics?.totalEvents || 0}
+                      </div>
+                      <div className="text-sm text-gray-600">Total Monitored</div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </TabsContent>
 
-        <TabsContent value="threats" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Active Threat Analysis</CardTitle>
-              <CardDescription>Real-time threat detection and response</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+              <Card className="hover:shadow-lg transition-shadow duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Risk Trends
+                  </CardTitle>
+                  <CardDescription>Security metrics over time</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Weekly Events</span>
+                      <div className="flex items-center gap-2">
+                        <ArrowUp className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-600">+15%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">Response Time</span>
+                      <div className="flex items-center gap-2">
+                        <ArrowDown className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-semibold text-blue-600">-8%</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm font-medium">False Positives</span>
+                      <div className="flex items-center gap-2">
+                        <ArrowDown className="w-4 h-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-600">-12%</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="events" className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Security Events</h3>
+              <div className="flex items-center space-x-2">
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {securityEvents.map((event) => (
+                <Card key={event.id} className={`hover:shadow-lg transition-all duration-300 ${event.resolved ? 'opacity-75' : 'border-l-4 border-l-red-500'}`}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          {getEventIcon(event.type)}
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <h4 className="font-semibold text-gray-900">{event.description}</h4>
+                            <Badge className={getSeverityColor(event.severity)}>
+                              {event.severity}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {event.timestamp.toLocaleString()}
+                          </p>
+                          {event.details && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                              {Object.entries(event.details).map(([key, value]) => (
+                                <div key={key} className="text-sm">
+                                  <span className="font-medium text-gray-700 capitalize">{key.replace('_', ' ')}:</span>{' '}
+                                  <span className="text-gray-600">{String(value)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        {!event.resolved && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleResolveEvent(event.id)}
+                            className="hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Resolve
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="threats" className="space-y-6">
+            <Card className="hover:shadow-lg transition-shadow duration-300">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Active Threat Analysis
+                </CardTitle>
+                <CardDescription>Real-time threat detection and response</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 {securityMetrics?.activeThreats ? (
-                  <Alert>
+                  <Alert className="border-red-200 bg-red-50">
                     <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
+                    <AlertDescription className="text-red-800">
                       <strong>Active Threats Detected:</strong> {securityMetrics.activeThreats} potential security threats 
                       require immediate attention. Review the security events tab for details.
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <Alert>
+                  <Alert className="border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>
+                    <AlertDescription className="text-green-800">
                       <strong>No Active Threats:</strong> All security systems are operating normally. 
                       Continue monitoring for any suspicious activity.
                     </AlertDescription>
                   </Alert>
                 )}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-                    <div className="text-sm font-medium">Threat Detection</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-200">
+                    <TrendingUp className="w-8 h-8 mx-auto mb-3 text-blue-600" />
+                    <div className="text-sm font-medium text-gray-700 mb-1">Threat Detection</div>
                     <div className="text-2xl font-bold text-blue-600">Active</div>
+                    <p className="text-xs text-gray-500 mt-2">Real-time monitoring</p>
                   </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <Shield className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                    <div className="text-sm font-medium">Response Time</div>
+                  <div className="text-center p-6 bg-green-50 rounded-xl border border-green-200">
+                    <Shield className="w-8 h-8 mx-auto mb-3 text-green-600" />
+                    <div className="text-sm font-medium text-gray-700 mb-1">Response Time</div>
                     <div className="text-2xl font-bold text-green-600">&lt;30s</div>
+                    <p className="text-xs text-gray-500 mt-2">Average response</p>
+                  </div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-200">
+                    <Target className="w-8 h-8 mx-auto mb-3 text-purple-600" />
+                    <div className="text-sm font-medium text-gray-700 mb-1">Accuracy</div>
+                    <div className="text-2xl font-bold text-purple-600">98.5%</div>
+                    <p className="text-xs text-gray-500 mt-2">False positive rate</p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

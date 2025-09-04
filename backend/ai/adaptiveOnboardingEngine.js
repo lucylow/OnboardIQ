@@ -1,5 +1,6 @@
 const axios = require('axios');
 const crypto = require('crypto');
+const OpenAIService = require('../services/openaiService');
 
 class AdaptiveOnboardingEngine {
   constructor() {
@@ -7,33 +8,22 @@ class AdaptiveOnboardingEngine {
     this.muleSoftToken = process.env.MULESOFT_ACCESS_TOKEN;
     this.userBehaviorCache = new Map();
     this.recommendationCache = new Map();
+    this.openaiService = new OpenAIService();
+    this.initialize();
   }
 
-  // Analyze user behavior patterns using MuleSoft AI
+  async initialize() {
+    await this.openaiService.initialize();
+  }
+
+  // Analyze user behavior patterns using OpenAI AI
   async analyzeUserBehavior(userId, userData) {
     try {
-      const behaviorData = {
-        userId,
-        interactions: userData.interactions || [],
-        featureUsage: userData.featureUsage || {},
-        timeSpent: userData.timeSpent || {},
-        preferences: userData.preferences || {},
-        timestamp: new Date().toISOString()
-      };
-
-      // Call MuleSoft AI API for behavior analysis
-      const response = await axios.post(
-        `${this.muleSoftBaseUrl}/ai/behavior-analysis`,
-        behaviorData,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.muleSoftToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      // Use OpenAI for behavior analysis
+      const analysis = await this.openaiService.analyzeUserBehavior(
+        userData.interactions || [],
+        userData.featureUsage || {}
       );
-
-      const analysis = response.data;
       
       // Cache the analysis
       this.userBehaviorCache.set(userId, {
@@ -50,39 +40,20 @@ class AdaptiveOnboardingEngine {
     }
   }
 
-  // Generate personalized recommendations
+  // Generate personalized recommendations using OpenAI
   async generateRecommendations(userId, behaviorAnalysis) {
     try {
-      const recommendationData = {
-        userId,
-        behaviorAnalysis,
-        context: {
-          userType: behaviorAnalysis.userType || 'new',
-          learningStyle: behaviorAnalysis.learningStyle || 'visual',
-          pace: behaviorAnalysis.pace || 'moderate',
-          complexity: behaviorAnalysis.complexity || 'intermediate'
-        }
-      };
-
-      // Call MuleSoft AI for recommendations
-      const response = await axios.post(
-        `${this.muleSoftBaseUrl}/ai/recommendations`,
-        recommendationData,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.muleSoftToken}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      // Use OpenAI for recommendations
+      const recommendations = await this.openaiService.generateOnboardingRecommendations(
+        { userId, ...behaviorAnalysis },
+        behaviorAnalysis
       );
-
-      const recommendations = response.data.recommendations || [];
       
       // Cache recommendations
       this.recommendationCache.set(userId, {
         recommendations,
         generatedAt: new Date(),
-        confidence: response.data.confidence || 0.78
+        confidence: 0.85
       });
 
       return recommendations;

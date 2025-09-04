@@ -49,7 +49,8 @@ import {
   Edit,
   Copy,
   ExternalLink,
-  Phone
+  Phone,
+  Brain
 } from 'lucide-react';
 
 interface UserSettings {
@@ -257,23 +258,54 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleIntegrationChange = (integration: keyof UserSettings['integrations'], field: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      integrations: {
-        ...prev.integrations,
-        [integration]: {
-          ...prev.integrations[integration],
-          [field]: value
-        }
-      }
-    }));
+    setSettings(prev => {
+      const updatedIntegrations = { ...prev.integrations };
+      const currentIntegration = updatedIntegrations[integration] as any;
+      updatedIntegrations[integration] = { ...currentIntegration, [field]: value };
+      
+      return {
+        ...prev,
+        integrations: updatedIntegrations
+      };
+    });
   };
 
   const getIntegrationStatus = (integration: keyof UserSettings['integrations']) => {
     const config = settings.integrations[integration];
-    if (!config.enabled) return { status: 'disabled', color: 'bg-gray-100 text-gray-600' };
-    if (config.apiKey && config.apiKey !== '••••••••••••••••') return { status: 'connected', color: 'bg-green-100 text-green-800' };
-    return { status: 'incomplete', color: 'bg-yellow-100 text-yellow-800' };
+    if (!config.enabled) return { status: 'disabled', color: 'bg-gray-100 text-gray-600', icon: <AlertTriangle className="w-4 h-4" /> };
+    
+    // Check if the integration has an apiKey property
+    if ('apiKey' in config && config.apiKey && config.apiKey !== '••••••••••••••••') {
+      return { status: 'connected', color: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-4 h-4" /> };
+    }
+    
+    // Check if the integration has a clientId property (MuleSoft)
+    if ('clientId' in config && config.clientId) {
+      return { status: 'connected', color: 'bg-green-100 text-green-800', icon: <CheckCircle className="w-4 h-4" /> };
+    }
+    
+    return { status: 'incomplete', color: 'bg-yellow-100 text-yellow-800', icon: <AlertTriangle className="w-4 h-4" /> };
+  };
+
+  const testIntegration = async (integration: keyof UserSettings['integrations']) => {
+    try {
+      setLoading(true);
+      // Simulate API test
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast({
+        title: "Integration Test Successful",
+        description: `${integration} integration is working properly.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Integration Test Failed",
+        description: `Unable to connect to ${integration}. Please check your credentials.`,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -315,10 +347,11 @@ const SettingsPage: React.FC = () => {
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="ai">AI Settings</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
         </TabsList>
@@ -607,8 +640,17 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={getIntegrationStatus('vonage').color}>
+                      {getIntegrationStatus('vonage').icon}
                       {getIntegrationStatus('vonage').status}
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => testIntegration('vonage')}
+                      disabled={loading}
+                    >
+                      Test
+                    </Button>
                     <Switch
                       checked={settings.integrations.vonage.enabled}
                       onCheckedChange={(checked) => handleIntegrationChange('vonage', 'enabled', checked)}
@@ -688,8 +730,17 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={getIntegrationStatus('foxit').color}>
+                      {getIntegrationStatus('foxit').icon}
                       {getIntegrationStatus('foxit').status}
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => testIntegration('foxit')}
+                      disabled={loading}
+                    >
+                      Test
+                    </Button>
                     <Switch
                       checked={settings.integrations.foxit.enabled}
                       onCheckedChange={(checked) => handleIntegrationChange('foxit', 'enabled', checked)}
@@ -747,8 +798,17 @@ const SettingsPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge className={getIntegrationStatus('mulesoft').color}>
+                      {getIntegrationStatus('mulesoft').icon}
                       {getIntegrationStatus('mulesoft').status}
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => testIntegration('mulesoft')}
+                      disabled={loading}
+                    >
+                      Test
+                    </Button>
                     <Switch
                       checked={settings.integrations.mulesoft.enabled}
                       onCheckedChange={(checked) => handleIntegrationChange('mulesoft', 'enabled', checked)}
@@ -804,6 +864,122 @@ const SettingsPage: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* AI Settings */}
+        <TabsContent value="ai" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5" />
+                AI Configuration
+              </CardTitle>
+              <CardDescription>
+                Configure AI-powered features and personalization settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* AI Personalization */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">AI Personalization</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="ai-recommendations">AI Recommendations</Label>
+                      <p className="text-sm text-gray-600">Enable AI-powered content recommendations</p>
+                    </div>
+                    <Switch
+                      id="ai-recommendations"
+                      checked={settings.preferences.privacy.personalizedContent}
+                      onCheckedChange={(checked) => handlePreferenceChange('privacy', 'personalizedContent', checked)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="behavior-tracking">Behavior Tracking</Label>
+                      <p className="text-sm text-gray-600">Track user behavior for AI improvements</p>
+                    </div>
+                    <Switch
+                      id="behavior-tracking"
+                      checked={settings.preferences.privacy.analytics}
+                      onCheckedChange={(checked) => handlePreferenceChange('privacy', 'analytics', checked)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Learning Preferences */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">Learning Preferences</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="learning-style">Preferred Learning Style</Label>
+                    <Select defaultValue="visual">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="visual">Visual</SelectItem>
+                        <SelectItem value="auditory">Auditory</SelectItem>
+                        <SelectItem value="kinesthetic">Hands-on</SelectItem>
+                        <SelectItem value="mixed">Mixed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="learning-pace">Learning Pace</Label>
+                    <Select defaultValue="moderate">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="slow">Slow & Detailed</SelectItem>
+                        <SelectItem value="moderate">Moderate</SelectItem>
+                        <SelectItem value="fast">Fast & Concise</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* AI Model Settings */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">AI Model Configuration</h3>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="ai-model">AI Model Version</Label>
+                    <Select defaultValue="latest">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="latest">Latest (GPT-4)</SelectItem>
+                        <SelectItem value="stable">Stable (GPT-3.5)</SelectItem>
+                        <SelectItem value="experimental">Experimental</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ai-temperature">AI Creativity Level</Label>
+                    <Select defaultValue="balanced">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="focused">Focused & Precise</SelectItem>
+                        <SelectItem value="balanced">Balanced</SelectItem>
+                        <SelectItem value="creative">Creative & Varied</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

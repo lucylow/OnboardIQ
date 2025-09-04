@@ -39,7 +39,7 @@ export const FailureTesting: React.FC<FailureTestingProps> = ({
     { id: 'sms', name: 'SMS Verification', icon: '📱' },
     { id: 'video', name: 'Video Onboarding', icon: '🎥' },
     { id: 'document', name: 'Document Generation', icon: '📄' },
-    { id: 'team', name: 'Team Management', icon: '👥' },
+
     { id: 'security', name: 'Security', icon: '🔒' },
     { id: 'analytics', name: 'Analytics', icon: '📊' },
     { id: 'documentation', name: 'Documentation', icon: '📚' }

@@ -34,9 +34,9 @@ import OnboardIQCore from "./components/OnboardIQCore";
 import DocumentGeneration from "./components/DocumentGeneration";
 import ChurnPrediction from "./components/ChurnPrediction";
 import UserProfiling from "./components/UserProfiling";
+import VideoOnboarding from "./components/VideoOnboarding";
 import NotFound from "./pages/NotFound";
 import HelpPage from "./components/HelpPage";
-import DocumentationPage from "./components/DocumentationPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +90,7 @@ const AppContent = () => {
           <Route path="/risk-monitoring" element={<ContinuousRiskMonitoring />} />
           <Route path="/documents" element={<DocumentGeneration userId="demo_user" />} />
           <Route path="/churn-prediction" element={<ChurnPrediction />} />
+          <Route path="/video-onboarding" element={<VideoOnboarding />} />
           
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />
@@ -118,7 +119,7 @@ const AppContent = () => {
           <Route path="/demo" element={<DemoPage />} />
           
           {/* Resource routes */}
-          <Route path="/docs" element={<DocumentationPage />} />
+          <Route path="/docs" element={<NotFound />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/tutorials" element={<NotFound />} />
           <Route path="/api" element={<NotFound />} />

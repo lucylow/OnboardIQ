@@ -692,42 +692,7 @@ const VonageDemoPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="h-5 w-5" />
-                  Challenge Highlights
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-yellow-500" />
-                    <span className="font-semibold">1st Place Prize: $750 Cash + $750 Vonage Credits</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award className="h-4 w-4 text-gray-500" />
-                    <span className="font-semibold">2nd Place Prize: Steam Deck 512GB OLED + $150 Credits</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-semibold">Key Features Implemented:</h4>
-                  <ul className="text-sm space-y-1">
-                    <li>• Vonage Verify API for multi-factor authentication</li>
-                    <li>• SIM Swap detection for enhanced security</li>
-                    <li>• Phone number insights and validation</li>
-                    <li>• Multi-channel messaging (SMS, WhatsApp, Voice, Video)</li>
-                    <li>• Unified customer service platform</li>
-                    <li>• Real-time analytics and monitoring</li>
-                  </ul>
-                </div>
 
-                <Button className="w-full">
-                  Submit Challenge Entry
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>

@@ -68,14 +68,7 @@ export const DemoPage: React.FC<DemoPageProps> = ({ userId = 'demo_user_123' }) 
       status: 'active',
       successRate: 97.8
     },
-    {
-      id: 'team',
-      name: 'Team Management',
-      description: 'Collaborative team management with role-based permissions',
-      icon: Users,
-      status: 'active',
-      successRate: 99.1
-    }
+
   ];
 
   const securityFeatures = [

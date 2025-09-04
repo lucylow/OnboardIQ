@@ -1,14 +1,14 @@
 // AI Routes - Direct AI engine interactions and AI-assisted development
 const express = require('express');
 const router = express.Router();
+const OpenAIService = require('../services/openaiService');
 const AdaptiveOnboardingEngine = require('../ai/adaptiveOnboardingEngine');
-const SecurityAIEngine = require('../ai/securityAIEngine');
-const DocumentAIEngine = require('../ai/documentAIEngine');
+const ConversationalAIEngine = require('../ai/conversationalAIEngine');
 
-// Initialize AI engines
+// Initialize AI services
+const openaiService = new OpenAIService();
 const adaptiveEngine = new AdaptiveOnboardingEngine();
-const securityEngine = new SecurityAIEngine();
-const documentEngine = new DocumentAIEngine();
+const conversationalEngine = new ConversationalAIEngine();
 
 // Middleware to authenticate JWT token
 function authenticateToken(req, res, next) {
@@ -36,634 +36,367 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// === Adaptive Onboarding Routes ===
-
-// Get user behavior insights
-router.get('/user-behavior/:userId', async (req, res) => {
+// Test OpenAI connection
+router.get('/test', async (req, res) => {
   try {
-    const { userId } = req.params;
-    const insights = await adaptiveEngine.getUserBehaviorInsights(userId);
+    const isConfigured = openaiService.isConfigured();
+    const connectionTest = await openaiService.testConnection();
     
     res.json({
       success: true,
-      insights
+      configured: isConfigured,
+      connection: connectionTest,
+      cacheStats: openaiService.getCacheStats()
     });
   } catch (error) {
-    console.error('Error fetching user behavior:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch user behavior insights'
+      error: error.message,
+      configured: openaiService.isConfigured()
     });
   }
 });
 
-// Get personalized recommendations
-router.get('/recommendations/:userId', async (req, res) => {
+// Generate personalized recommendations
+router.post('/recommendations', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId, userData, behaviorAnalysis } = req.body;
     
-    // Check cache first
-    let recommendations = adaptiveEngine.getCachedRecommendations(userId);
-    
-    if (!recommendations) {
-      // Get user behavior analysis
-      const behaviorAnalysis = await adaptiveEngine.getUserBehaviorInsights(userId);
-      
-      // Generate recommendations
-      recommendations = await adaptiveEngine.generateRecommendations(userId, behaviorAnalysis);
-    }
+    const recommendations = await openaiService.generateOnboardingRecommendations(
+      userData || {},
+      behaviorAnalysis || {}
+    );
     
     res.json({
       success: true,
-      recommendations
+      recommendations,
+      generatedAt: new Date().toISOString()
     });
   } catch (error) {
     console.error('Error generating recommendations:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to generate recommendations'
+      error: error.message,
+      recommendations: openaiService.getFallbackRecommendations({})
     });
   }
 });
 
-// Track user action for learning
-router.post('/track-action', async (req, res) => {
+// Analyze user behavior
+router.post('/behavior-analysis', async (req, res) => {
   try {
-    const { userId, action } = req.body;
+    const { userId, interactions, featureUsage } = req.body;
     
-    if (!userId || !action) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing userId or action data'
-      });
-    }
-    
-    const result = await adaptiveEngine.trackUserAction(userId, action);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error tracking user action:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to track user action'
-    });
-  }
-});
-
-// Update recommendation status
-router.patch('/recommendations/:recommendationId', async (req, res) => {
-  try {
-    const { recommendationId } = req.params;
-    const { userId, completed } = req.body;
-    
-    const result = await adaptiveEngine.updateRecommendationStatus(userId, recommendationId, completed);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error updating recommendation status:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to update recommendation status'
-    });
-  }
-});
-
-// === Security AI Routes ===
-
-// Analyze login risk
-router.post('/security/analyze-risk', async (req, res) => {
-  try {
-    const { userId, loginData } = req.body;
-    
-    if (!userId || !loginData) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing userId or login data'
-      });
-    }
-    
-    const riskAnalysis = await securityEngine.analyzeLoginRisk(userId, loginData);
-    
-    res.json({
-      success: true,
-      riskAnalysis
-    });
-  } catch (error) {
-    console.error('Error analyzing login risk:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to analyze login risk'
-    });
-  }
-});
-
-// Trigger step-up authentication
-router.post('/security/step-up-auth', async (req, res) => {
-  try {
-    const { userId, phoneNumber, reason } = req.body;
-    
-    if (!userId || !phoneNumber) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing userId or phone number'
-      });
-    }
-    
-    const result = await securityEngine.triggerStepUpAuth(userId, phoneNumber, reason);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error triggering step-up auth:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to trigger step-up authentication'
-    });
-  }
-});
-
-// Verify step-up code
-router.post('/security/verify-step-up', async (req, res) => {
-  try {
-    const { userId, code } = req.body;
-    
-    if (!userId || !code) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing userId or verification code'
-      });
-    }
-    
-    const result = await securityEngine.verifyStepUpCode(userId, code);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error verifying step-up code:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to verify step-up code'
-    });
-  }
-});
-
-// Get security dashboard data
-router.get('/security/dashboard', async (req, res) => {
-  try {
-    const dashboardData = await securityEngine.getSecurityDashboard();
-    
-    res.json({
-      success: true,
-      dashboard: dashboardData
-    });
-  } catch (error) {
-    console.error('Error fetching security dashboard:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch security dashboard'
-    });
-  }
-});
-
-// Detect SIM swap
-router.post('/security/detect-sim-swap', async (req, res) => {
-  try {
-    const { userId, phoneNumber } = req.body;
-    
-    if (!userId || !phoneNumber) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing userId or phone number'
-      });
-    }
-    
-    const simSwapResult = await securityEngine.detectSimSwap(userId, phoneNumber);
-    
-    res.json({
-      success: true,
-      simSwapResult
-    });
-  } catch (error) {
-    console.error('Error detecting SIM swap:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to detect SIM swap'
-    });
-  }
-});
-
-// === Document AI Routes ===
-
-// Generate compliance document
-router.post('/documents/generate', async (req, res) => {
-  try {
-    const { userData, documentType, locale } = req.body;
-    
-    if (!userData || !documentType) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing user data or document type'
-      });
-    }
-    
-    const result = await documentEngine.generateComplianceDocument(
-      userData,
-      documentType,
-      locale || 'en-US'
+    const analysis = await openaiService.analyzeUserBehavior(
+      interactions || [],
+      featureUsage || {}
     );
     
     res.json({
       success: true,
-      result
+      analysis,
+      analyzedAt: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error generating document:', error);
+    console.error('Error analyzing behavior:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to generate document'
+      error: error.message,
+      analysis: openaiService.getFallbackBehaviorAnalysis([], {})
     });
   }
 });
 
-// Create localized templates
-router.post('/documents/templates/localize', async (req, res) => {
+// Generate conversational response
+router.post('/chat', async (req, res) => {
   try {
-    const { templateType, locales } = req.body;
+    const { message, userId, context, userProfile } = req.body;
     
-    if (!templateType) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing template type'
-      });
-    }
-    
-    const result = await documentEngine.createLocalizedTemplate(
-      templateType,
-      locales || ['en-US', 'es-ES', 'fr-FR', 'de-DE']
+    const response = await openaiService.generateConversationalResponse(
+      message,
+      context || {},
+      userProfile || {}
     );
     
     res.json({
       success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error creating localized templates:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create localized templates'
-    });
-  }
-});
-
-// Generate contract workflow
-router.post('/documents/contract-workflow', async (req, res) => {
-  try {
-    const { userData, contractType } = req.body;
-    
-    if (!userData || !contractType) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing user data or contract type'
-      });
-    }
-    
-    const result = await documentEngine.generateContractWorkflow(userData, contractType);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error generating contract workflow:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to generate contract workflow'
-    });
-  }
-});
-
-// Setup e-signature workflow
-router.post('/documents/esignature/setup', async (req, res) => {
-  try {
-    const { documentIds, userData } = req.body;
-    
-    if (!documentIds || !userData) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing document IDs or user data'
-      });
-    }
-    
-    const result = await documentEngine.setupESignatureWorkflow(documentIds, userData);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error setting up e-signature workflow:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to setup e-signature workflow'
-    });
-  }
-});
-
-// Monitor signing status
-router.get('/documents/esignature/status/:workflowId', async (req, res) => {
-  try {
-    const { workflowId } = req.params;
-    
-    const result = await documentEngine.monitorSigningStatus(workflowId);
-    
-    res.json({
-      success: true,
-      result
-    });
-  } catch (error) {
-    console.error('Error monitoring signing status:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to monitor signing status'
-    });
-  }
-});
-
-// List user documents
-router.get('/documents/user/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    const documents = await documentEngine.listUserDocuments(userId);
-    
-    res.json({
-      success: true,
-      documents
-    });
-  } catch (error) {
-    console.error('Error listing user documents:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to list user documents'
-    });
-  }
-});
-
-// Get document metadata
-router.get('/documents/metadata/:documentId', async (req, res) => {
-  try {
-    const { documentId } = req.params;
-    
-    const metadata = await documentEngine.getDocumentMetadata(documentId);
-    
-    if (!metadata) {
-      return res.status(404).json({
-        success: false,
-        error: 'Document not found'
-      });
-    }
-    
-    res.json({
-      success: true,
-      metadata
-    });
-  } catch (error) {
-    console.error('Error fetching document metadata:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch document metadata'
-    });
-  }
-});
-
-// === Multi-Agent Orchestration Routes ===
-
-// Orchestrate multiple AI agents for complex workflows
-router.post('/orchestrate/workflow', async (req, res) => {
-  try {
-    const { userId, workflowType, userData } = req.body;
-    
-    if (!userId || !workflowType || !userData) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required workflow parameters'
-      });
-    }
-    
-    // Orchestrate multiple AI agents based on workflow type
-    const orchestrationResult = await orchestrateWorkflow(userId, workflowType, userData);
-    
-    res.json({
-      success: true,
-      result: orchestrationResult
-    });
-  } catch (error) {
-    console.error('Error orchestrating workflow:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to orchestrate workflow'
-    });
-  }
-});
-
-// Helper function to orchestrate complex workflows
-async function orchestrateWorkflow(userId, workflowType, userData) {
-  const result = {
-    workflowId: crypto.randomUUID(),
-    userId,
-    workflowType,
-    status: 'initiated',
-    steps: [],
-    agents: [],
-    createdAt: new Date()
-  };
-
-  try {
-    switch (workflowType) {
-      case 'complete_onboarding':
-        // Step 1: Analyze user behavior
-        const behaviorAnalysis = await adaptiveEngine.analyzeUserBehavior(userId, userData);
-        result.steps.push({
-          step: 1,
-          agent: 'adaptive_engine',
-          action: 'behavior_analysis',
-          completed: true,
-          data: behaviorAnalysis
-        });
-
-        // Step 2: Generate personalized recommendations
-        const recommendations = await adaptiveEngine.generateRecommendations(userId, behaviorAnalysis);
-        result.steps.push({
-          step: 2,
-          agent: 'adaptive_engine',
-          action: 'generate_recommendations',
-          completed: true,
-          data: recommendations
-        });
-
-        // Step 3: Security assessment
-        const securityAssessment = await securityEngine.analyzeLoginRisk(userId, {
-          location: userData.location,
-          deviceFingerprint: userData.deviceFingerprint,
-          timestamp: new Date(),
-          userTimezone: userData.timezone
-        });
-        result.steps.push({
-          step: 3,
-          agent: 'security_engine',
-          action: 'security_assessment',
-          completed: true,
-          data: securityAssessment
-        });
-
-        // Step 4: Generate compliance documents
-        const documents = await documentEngine.generateContractWorkflow(userData, 'service_agreement');
-        result.steps.push({
-          step: 4,
-          agent: 'document_engine',
-          action: 'generate_documents',
-          completed: true,
-          data: documents
-        });
-
-        result.status = 'completed';
-        break;
-
-      case 'security_audit':
-        // Security-focused workflow
-        const simSwapCheck = await securityEngine.detectSimSwap(userId, userData.phoneNumber);
-        result.steps.push({
-          step: 1,
-          agent: 'security_engine',
-          action: 'sim_swap_detection',
-          completed: true,
-          data: simSwapCheck
-        });
-
-        const securityDashboard = await securityEngine.getSecurityDashboard();
-        result.steps.push({
-          step: 2,
-          agent: 'security_engine',
-          action: 'security_dashboard',
-          completed: true,
-          data: securityDashboard
-        });
-
-        result.status = 'completed';
-        break;
-
-      case 'document_workflow':
-        // Document-focused workflow
-        const localizedTemplates = await documentEngine.createLocalizedTemplate(
-          'service_agreement',
-          userData.preferredLocales || ['en-US', 'es-ES']
-        );
-        result.steps.push({
-          step: 1,
-          agent: 'document_engine',
-          action: 'create_localized_templates',
-          completed: true,
-          data: localizedTemplates
-        });
-
-        const contractWorkflow = await documentEngine.generateContractWorkflow(userData, 'service_agreement');
-        result.steps.push({
-          step: 2,
-          agent: 'document_engine',
-          action: 'generate_contract_workflow',
-          completed: true,
-          data: contractWorkflow
-        });
-
-        result.status = 'completed';
-        break;
-
-      default:
-        throw new Error(`Unknown workflow type: ${workflowType}`);
-    }
-
-    return result;
-  } catch (error) {
-    result.status = 'failed';
-    result.error = error.message;
-    throw error;
-  }
-}
-
-// AI Engine Health Check
-router.get('/health', authenticateToken, async (req, res) => {
-  try {
-    const healthStatus = {
-      adaptiveOnboarding: adaptiveEngine.isReady(),
-      security: securityEngine.isReady(),
-      document: documentEngine.isReady(),
-      vonage: req.integrations.vonage.isConnected(),
-      foxit: req.integrations.foxit.isConnected(),
-      muleSoft: req.integrations.muleSoft.isConnected()
-    };
-
-    const allReady = Object.values(healthStatus).every(status => status === true);
-
-    return res.status(200).json({
-      status: allReady ? 'healthy' : 'degraded',
-      engines: healthStatus,
+      response,
       timestamp: new Date().toISOString()
     });
-
   } catch (error) {
-    console.error('AI health check error:', error);
+    console.error('Error generating chat response:', error);
     res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
+      success: false,
+      error: error.message,
+      response: openaiService.getFallbackResponse('', {})
     });
   }
 });
 
-// AI Model Performance Metrics
-router.get('/performance', authenticateToken, async (req, res) => {
+// Analyze sentiment and intent
+router.post('/sentiment', async (req, res) => {
   try {
-    const performance = {
-      adaptiveOnboarding: {
-        accuracy: 0.85,
-        precision: 0.82,
-        recall: 0.88,
-        f1Score: 0.85
-      },
-      security: {
-        accuracy: 0.92,
-        precision: 0.90,
-        recall: 0.94,
-        f1Score: 0.92
-      },
-      documentGeneration: {
-        accuracy: 0.95,
-        precision: 0.93,
-        recall: 0.97,
-        f1Score: 0.95
-      }
-    };
-
-    return res.status(200).json({
-      performance: performance,
-      averageAccuracy: Object.values(performance).reduce((acc, model) => acc + model.accuracy, 0) / Object.keys(performance).length,
-      lastUpdated: new Date().toISOString()
+    const { text, context } = req.body;
+    
+    const analysis = await openaiService.analyzeSentimentAndIntent(
+      text,
+      context || {}
+    );
+    
+    res.json({
+      success: true,
+      analysis,
+      analyzedAt: new Date().toISOString()
     });
-
   } catch (error) {
-    console.error('Performance metrics error:', error);
+    console.error('Error analyzing sentiment:', error);
     res.status(500).json({
-      error: 'Internal server error',
-      message: error.message
+      success: false,
+      error: error.message,
+      analysis: openaiService.getFallbackSentimentAnalysis('')
+    });
+  }
+});
+
+// Generate document content
+router.post('/document', async (req, res) => {
+  try {
+    const { documentType, userData, requirements } = req.body;
+    
+    const content = await openaiService.generateDocumentContent(
+      documentType,
+      userData || {},
+      requirements || ''
+    );
+    
+    res.json({
+      success: true,
+      content,
+      documentType,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error generating document content:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      content: openaiService.getFallbackDocumentContent(documentType, {})
+    });
+  }
+});
+
+// Generate learning path
+router.post('/learning-path', async (req, res) => {
+  try {
+    const { userProfile, goals, currentProgress } = req.body;
+    
+    const learningPath = await openaiService.generateLearningPath(
+      userProfile || {},
+      goals || [],
+      currentProgress || {}
+    );
+    
+    res.json({
+      success: true,
+      learningPath,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error generating learning path:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      learningPath: openaiService.getFallbackLearningPath({}, [])
+    });
+  }
+});
+
+// Generate security recommendations
+router.post('/security-recommendations', async (req, res) => {
+  try {
+    const { userData, riskAssessment } = req.body;
+    
+    const recommendations = await openaiService.generateSecurityRecommendations(
+      userData || {},
+      riskAssessment || {}
+    );
+    
+    res.json({
+      success: true,
+      recommendations,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error generating security recommendations:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      recommendations: openaiService.getFallbackSecurityRecommendations({})
+    });
+  }
+});
+
+// Adaptive onboarding endpoints
+router.post('/adaptive/behavior', async (req, res) => {
+  try {
+    const { userId, userData } = req.body;
+    
+    const analysis = await adaptiveEngine.analyzeUserBehavior(userId, userData);
+    
+    res.json({
+      success: true,
+      analysis,
+      analyzedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error in adaptive behavior analysis:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.post('/adaptive/recommendations', async (req, res) => {
+  try {
+    const { userId, behaviorAnalysis } = req.body;
+    
+    const recommendations = await adaptiveEngine.generateRecommendations(userId, behaviorAnalysis);
+    
+    res.json({
+      success: true,
+      recommendations,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error in adaptive recommendations:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Conversational AI endpoints
+router.post('/conversational/process', async (req, res) => {
+  try {
+    const { message, userId, channel } = req.body;
+    
+    const response = await conversationalEngine.processMessage(message, userId, channel);
+    
+    res.json({
+      success: true,
+      response,
+      processedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error in conversational processing:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Multi-channel message handling
+router.post('/conversational/multi-channel', async (req, res) => {
+  try {
+    const { channel, message, sender } = req.body;
+    
+    const response = await conversationalEngine.handleMultiChannelMessage(channel, message, sender);
+    
+    res.json({
+      success: true,
+      response,
+      channel,
+      processedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error in multi-channel processing:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Get conversation analytics
+router.get('/conversational/analytics', async (req, res) => {
+  try {
+    const analytics = conversationalEngine.getConversationAnalytics();
+    
+    res.json({
+      success: true,
+      analytics,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting conversation analytics:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Cache management
+router.delete('/cache', async (req, res) => {
+  try {
+    openaiService.clearCache();
+    
+    res.json({
+      success: true,
+      message: 'Cache cleared successfully',
+      clearedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+router.get('/cache/stats', async (req, res) => {
+  try {
+    const stats = openaiService.getCacheStats();
+    
+    res.json({
+      success: true,
+      stats,
+      retrievedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error getting cache stats:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Health check
+router.get('/health', async (req, res) => {
+  try {
+    const health = {
+      openai: openaiService.isConfigured(),
+      adaptive: adaptiveEngine.isReady !== undefined,
+      conversational: conversationalEngine.isReady(),
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      health,
+      status: 'operational'
+    });
+  } catch (error) {
+    console.error('Error in health check:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      status: 'degraded'
     });
   }
 });

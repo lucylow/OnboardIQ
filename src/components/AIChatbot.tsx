@@ -21,6 +21,7 @@ import {
   Video,
   Smartphone
 } from 'lucide-react';
+import { aiService } from '@/services/aiService';
 
 interface Message {
   id: string;
@@ -109,55 +110,59 @@ const AIChatbot: React.FC = () => {
   }, [messages]);
 
   const simulateAIResponse = async (userMessage: string): Promise<Message> => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    try {
+      // Use the new AI service for conversational responses
+      const aiResponse = await aiService.generateChatResponse(
+        userMessage,
+        { messages: messages.slice(-5) }, // Context from last 5 messages
+        { firstName: 'User', companyName: 'Demo Company', planTier: 'free' }
+      );
 
-    const responses = {
-      'onboarding': {
-        content: "I'd be happy to help with your onboarding! Let me guide you through the process. What specific step are you having trouble with?",
-        quickReplies: ["Registration", "Phone verification", "Document setup", "Video session"]
-      },
-      'document': {
-        content: "I can help you generate documents! What type of document do you need? I can create welcome packets, contracts, or onboarding guides.",
-        quickReplies: ["Welcome packet", "Contract", "Onboarding guide", "Invoice"]
-      },
-      'video': {
-        content: "Great! I can help you schedule a video session. Our team will provide personalized guidance. When would you prefer to have the session?",
-        quickReplies: ["Today", "Tomorrow", "This week", "Next week"]
-      },
-      'security': {
-        content: "Security is our top priority! I can help you with verification, explain our security measures, or address any concerns.",
-        quickReplies: ["Phone verification", "Security features", "Privacy policy", "Report issue"]
-      },
-      'default': {
-        content: "I understand you're asking about that. Let me provide you with the most relevant information and assistance.",
-        quickReplies: ["More details", "Contact human", "Related topics", "Close"]
-      }
-    };
+      // Generate quick replies based on the response
+      const quickReplies = generateQuickReplies(userMessage, aiResponse);
 
+      return {
+        id: Date.now().toString(),
+        content: aiResponse,
+        sender: 'bot',
+        timestamp: new Date(),
+        type: 'text',
+        metadata: {
+          quickReplies
+        }
+      };
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      // Fallback response
+      return {
+        id: Date.now().toString(),
+        content: "I'm here to help you with OnboardIQ! How can I assist you today?",
+        sender: 'bot',
+        timestamp: new Date(),
+        type: 'text',
+        metadata: {
+          quickReplies: ["Onboarding help", "Document generation", "Video session", "Security questions"]
+        }
+      };
+    }
+  };
+
+  const generateQuickReplies = (userMessage: string, aiResponse: string): string[] => {
     const lowerMessage = userMessage.toLowerCase();
-    let response = responses.default;
+    const lowerResponse = aiResponse.toLowerCase();
 
     if (lowerMessage.includes('onboard') || lowerMessage.includes('signup') || lowerMessage.includes('register')) {
-      response = responses.onboarding;
+      return ["Registration", "Phone verification", "Document setup", "Video session"];
     } else if (lowerMessage.includes('document') || lowerMessage.includes('contract') || lowerMessage.includes('generate')) {
-      response = responses.document;
+      return ["Welcome packet", "Contract", "Onboarding guide", "Invoice"];
     } else if (lowerMessage.includes('video') || lowerMessage.includes('call') || lowerMessage.includes('session')) {
-      response = responses.video;
+      return ["Today", "Tomorrow", "This week", "Next week"];
     } else if (lowerMessage.includes('security') || lowerMessage.includes('verify') || lowerMessage.includes('fraud')) {
-      response = responses.security;
+      return ["Phone verification", "Security features", "Privacy policy", "Report issue"];
+    } else {
+      return ["More details", "Contact human", "Related topics", "Close"];
     }
-
-    return {
-      id: Date.now().toString(),
-      content: response.content,
-      sender: 'bot',
-      timestamp: new Date(),
-      type: 'text',
-      metadata: {
-        quickReplies: response.quickReplies
-      }
-    };
   };
 
   const handleSendMessage = async (content: string) => {

@@ -6,7 +6,7 @@ import { Phone, Video, FileText, Users, CheckCircle, Zap } from 'lucide-react';
 import SMSVerification from './SMSVerification';
 import VideoOnboarding from './VideoOnboarding';
 import DocumentGeneration from './DocumentGeneration';
-import TeamManagement from './TeamManagement';
+
 
 interface ProductFeaturesProps {
   userId: string;
@@ -64,22 +64,7 @@ export const ProductFeatures: React.FC<ProductFeaturesProps> = ({ userId }) => {
         'Download tracking'
       ]
     },
-    {
-      id: 'teams',
-      title: 'Team Management',
-      description: 'Collaborative team management with role-based permissions',
-      icon: Users,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      benefits: [
-        'Team creation & management',
-        'Role-based permissions',
-        'Member invitations',
-        'Activity tracking',
-        'Plan-based limits',
-        'Real-time collaboration'
-      ]
-    }
+
   ];
 
   const renderFeatureContent = (featureId: string) => {
@@ -123,21 +108,7 @@ export const ProductFeatures: React.FC<ProductFeaturesProps> = ({ userId }) => {
             }}
           />
         );
-      case 'teams':
-        return (
-          <TeamManagement
-            userId={userId}
-            onTeamCreated={(team) => {
-              console.log('Team created:', team);
-            }}
-            onMemberInvited={(invitation) => {
-              console.log('Member invited:', invitation);
-            }}
-            onMemberJoined={(member) => {
-              console.log('Member joined:', member);
-            }}
-          />
-        );
+
       default:
         return null;
     }
@@ -157,7 +128,7 @@ export const ProductFeatures: React.FC<ProductFeaturesProps> = ({ userId }) => {
       </div>
 
       {/* Feature Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {features.map((feature) => (
           <Card
             key={feature.id}
@@ -196,7 +167,7 @@ export const ProductFeatures: React.FC<ProductFeaturesProps> = ({ userId }) => {
 
       {/* Feature Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           {features.map((feature) => (
             <TabsTrigger key={feature.id} value={feature.id} className="flex items-center gap-2">
               <feature.icon className="h-4 w-4" />

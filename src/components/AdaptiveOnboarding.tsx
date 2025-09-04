@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { aiService } from '@/services/aiService';
 import { 
   Brain, 
   TrendingUp, 
@@ -62,15 +63,60 @@ const AdaptiveOnboarding: React.FC = () => {
     try {
       setLoading(true);
       
-      // Simulate API calls to MuleSoft AI integration
-      const behaviorResponse = await fetch('/api/ai/user-behavior');
-      const recommendationsResponse = await fetch('/api/ai/recommendations');
+      // Use the new AI service
+      const behaviorAnalysis = await aiService.analyzeUserBehavior(
+        [
+          { type: 'page_view', timestamp: new Date(), duration: 120 },
+          { type: 'button_click', timestamp: new Date(), duration: 5 },
+          { type: 'form_submit', timestamp: new Date(), duration: 30 }
+        ],
+        {
+          'dashboard': 15,
+          'analytics': 8,
+          'documents': 12,
+          'security': 5
+        }
+      );
       
-      const behavior = await behaviorResponse.json();
-      const recs = await recommendationsResponse.json();
+      const recommendations = await aiService.generateRecommendations(
+        {
+          companyName: 'Demo Company',
+          role: 'Manager',
+          industry: 'Technology',
+          teamSize: '10-50'
+        },
+        behaviorAnalysis
+      );
       
-      setUserBehavior(behavior);
-      setRecommendations(recs);
+      setUserBehavior({
+        featureVisits: {
+          'dashboard': 15,
+          'analytics': 8,
+          'documents': 12,
+          'security': 5
+        },
+        timeSpent: {
+          'dashboard': 45,
+          'analytics': 20,
+          'documents': 30,
+          'security': 15
+        },
+        interactions: [
+          { type: 'page_view', timestamp: new Date(), duration: 120 },
+          { type: 'button_click', timestamp: new Date(), duration: 5 },
+          { type: 'form_submit', timestamp: new Date(), duration: 30 }
+        ],
+        preferences: {
+          learningStyle: behaviorAnalysis.learningStyle === 'mixed' ? 'visual' : behaviorAnalysis.learningStyle,
+          pace: behaviorAnalysis.pace,
+          complexity: behaviorAnalysis.complexity
+        }
+      });
+      
+      setRecommendations(recommendations.map(rec => ({
+        ...rec,
+        type: rec.type as 'video' | 'document' | 'interaction' | 'learning'
+      })));
     } catch (error) {
       console.error('Error loading adaptive data:', error);
       // Fallback to mock data

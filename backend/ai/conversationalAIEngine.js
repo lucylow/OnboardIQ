@@ -1,5 +1,6 @@
 // Conversational AI Engine - Multi-channel chatbot with sentiment analysis and escalation
 const axios = require('axios');
+const OpenAIService = require('../services/openaiService');
 
 class ConversationalAIEngine {
   constructor() {
@@ -11,24 +12,20 @@ class ConversationalAIEngine {
       technicalIssues: 3, // number of technical questions
       timeInConversation: 300 // seconds
     };
+    this.openaiService = new OpenAIService();
     this.initialize();
   }
 
   async initialize() {
     try {
-      // Initialize OpenAI or other NLP service
-      await this.initializeNLPService();
+      // Initialize OpenAI service
+      await this.openaiService.initialize();
       this.isReady = true;
       console.log('✅ Conversational AI Engine initialized');
     } catch (error) {
       console.error('❌ Conversational AI Engine initialization failed:', error);
       this.isReady = false;
     }
-  }
-
-  async initializeNLPService() {
-    // In production, this would initialize OpenAI or other NLP service
-    console.log('🤖 Initializing NLP service...');
   }
 
   async processMessage(userMessage, userId, channel = 'chat') {
@@ -95,31 +92,9 @@ class ConversationalAIEngine {
 
   async analyzeSentiment(text) {
     try {
-      // In production, this would use OpenAI or a dedicated sentiment analysis service
-      const negativeWords = ['angry', 'frustrated', 'hate', 'terrible', 'awful', 'not working', 'problem', 'issue', 'help'];
-      const positiveWords = ['thanks', 'thank', 'great', 'good', 'awesome', 'love', 'excellent', 'perfect'];
-      
-      const textLower = text.toLowerCase();
-      let negativeScore = 0;
-      let positiveScore = 0;
-      
-      negativeWords.forEach(word => {
-        if (textLower.includes(word)) negativeScore += 1;
-      });
-      
-      positiveWords.forEach(word => {
-        if (textLower.includes(word)) positiveScore += 1;
-      });
-      
-      // Calculate sentiment score (-1 to 1)
-      const totalWords = negativeWords.length + positiveWords.length;
-      const sentimentScore = (positiveScore - negativeScore) / totalWords;
-      
-      // Classify sentiment
-      if (sentimentScore > 0.2) return 'positive';
-      else if (sentimentScore < -0.2) return 'negative';
-      else return 'neutral';
-      
+      // Use OpenAI for sentiment analysis
+      const analysis = await this.openaiService.analyzeSentimentAndIntent(text);
+      return analysis.sentiment;
     } catch (error) {
       console.error('Sentiment analysis error:', error);
       return 'neutral';
@@ -178,64 +153,14 @@ class ConversationalAIEngine {
     const userProfile = context.userProfile;
     const sentiment = context.history[context.history.length - 1]?.sentiment || 'neutral';
     
-    // Generate context-aware response
-    const response = await this.generateContextualResponse(state, message, userProfile, sentiment);
+    // Use OpenAI for response generation
+    const response = await this.openaiService.generateConversationalResponse(message, context, userProfile);
     
     return {
-      message: response.message,
-      suggestedActions: response.suggestedActions,
-      confidence: response.confidence
+      message: response,
+      suggestedActions: ['product_tour', 'setup_guide', 'contact_support'],
+      confidence: 0.85
     };
-  }
-
-  async generateContextualResponse(state, message, userProfile, sentiment) {
-    const name = userProfile?.firstName || userProfile?.name || 'there';
-    const company = userProfile?.companyName || '';
-    const planTier = userProfile?.planTier || 'free';
-    
-    switch (state) {
-      case 'greeting':
-        return {
-          message: `Hi ${name}! Welcome to OnboardIQ. How can I help you get started today?`,
-          suggestedActions: ['product_tour', 'setup_guide', 'contact_support'],
-          confidence: 0.9
-        };
-        
-      case 'onboarding_help':
-        return {
-          message: `I'd be happy to help you with your onboarding, ${name}! What specific area would you like assistance with?`,
-          suggestedActions: ['video_tutorial', 'step_by_step_guide', 'live_demo'],
-          confidence: 0.85
-        };
-        
-      case 'technical_support':
-        return {
-          message: `I understand you need technical assistance. Let me help you with that setup. What specific technical issue are you facing?`,
-          suggestedActions: ['technical_documentation', 'video_tutorial', 'schedule_call'],
-          confidence: 0.8
-        };
-        
-      case 'account_issues':
-        return {
-          message: `I can help you with your account. What specific account issue are you experiencing?`,
-          suggestedActions: ['password_reset', 'account_settings', 'contact_support'],
-          confidence: 0.85
-        };
-        
-      case 'feature_help':
-        return {
-          message: `Great! I'd love to show you how to use our features. Which feature would you like to learn about?`,
-          suggestedActions: ['feature_tour', 'documentation', 'video_demo'],
-          confidence: 0.9
-        };
-        
-      default:
-        return {
-          message: `I'm here to help, ${name}! How can I assist you today?`,
-          suggestedActions: ['general_help', 'contact_support'],
-          confidence: 0.7
-        };
-    }
   }
 
   needsHumanEscalation(context, sentiment) {

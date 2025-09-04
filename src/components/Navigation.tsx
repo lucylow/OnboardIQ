@@ -265,24 +265,7 @@ const Navigation: React.FC<NavigationProps> = ({
         }
       ]
     },
-    // Team & Management
-    {
-      section: 'Team & Management',
-      items: [
-        {
-          label: 'Team Management',
-          href: '/team',
-          icon: <Users className="h-4 w-4" />,
-          description: 'User administration'
-        },
-        {
-          label: 'Settings',
-          href: '/settings',
-          icon: <Settings className="h-4 w-4" />,
-          description: 'System configuration'
-        }
-      ]
-    },
+
     // Support & Resources
     {
       section: 'Support & Resources',

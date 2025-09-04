@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+      xmlns:email="http://www.mulesoft.org/schema/mule/email"
+      xmlns:file="http://www.mulesoft.org/schema/mule/file"
+      xmlns:db="http://www.mulesoft.org/schema/mule/db"
+      xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+      xmlns:vm="http://www.mulesoft.org/schema/mule/vm"
+      xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+      xmlns:servicenow="http://www.mulesoft.org/schema/mule/servicenow"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+                          http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+                          http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+                          http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+                          http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+                          http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+                          http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd
+                          http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+                          http://www.mulesoft.org/schema/mule/servicenow http://www.mulesoft.org/schema/mule/servicenow/current/mule-servicenow.xsd">
+
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+
+    <email:smtp-config name="Email_SMTP" doc:name="Email SMTP">
+        <email:smtp-connection host="smtp.gmail.com" port="587" user="${email.user}" password="${email.password}">
+            <email:properties>
+                <email:property key="mail.smtp.starttls.enable" value="true" />
+            </email:properties>
+        </email:smtp-connection>
+    </email:smtp-config>
+
+    <db:config name="Database_Config" doc:name="Database Config">
+        <db:generic-connection url="jdbc:postgresql://localhost:5432/onboardiq" driverClassName="org.postgresql.Driver" user="${db.user}" password="${db.password}" />
+    </db:config>
+
+    <salesforce:config name="Salesforce_Config" doc:name="Salesforce Config">
+        <salesforce:basic-connection username="${salesforce.username}" password="${salesforce.password}" securityToken="${salesforce.token}" />
+    </salesforce:config>
+
+    <servicenow:config name="ServiceNow_Config" doc:name="ServiceNow Config">
+        <servicenow:basic-connection username="${servicenow.username}" password="${servicenow.password}" url="${servicenow.url}" />
+    </servicenow:config>
+
+    <!-- Main OnboardIQ Flow -->
+    <flow name="onboardiq-main-flow" doc:id="main-flow">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/onboardiq/*" doc:name="HTTP Listener" />
+        
+        <choice doc:name="Route by Operation">
+            <when expression="#[payload.operation == 'user-registration']">
+                <flow-ref name="user-registration-flow" />
+            </when>
+            <when expression="#[payload.operation == 'document-generation']">
+                <flow-ref name="document-generation-flow" />
+            </when>
+            <when expression="#[payload.operation == 'verification']">
+                <flow-ref name="verification-flow" />
+            </when>
+            <when expression="#[payload.operation == 'onboarding-complete']">
+                <flow-ref name="onboarding-complete-flow" />
+            </when>
+            <otherwise>
+                <set-payload value='{"error": "Invalid operation"}' />
+            </otherwise>
+        </choice>
+    </flow>
+
+    <!-- User Registration Flow -->
+    <flow name="user-registration-flow" doc:id="user-registration">
+        <logger level="INFO" message="Processing user registration: #[payload]" />
+        
+        <!-- Validate input data -->
+        <validation:is-not-empty value="#[payload.email]" />
+        <validation:is-not-empty value="#[payload.phone]" />
+        
+        <!-- Store user in database -->
+        <db:insert config-ref="Database_Config" doc:name="Insert User">
+            <db:sql>INSERT INTO users (email, phone, status, created_at) VALUES (?, ?, 'pending', NOW())</db:sql>
+            <db:input-parameters>
+                <db:input-parameter key="1" value="#[payload.email]" />
+                <db:input-parameter key="2" value="#[payload.phone]" />
+            </db:input-parameters>
+        </db:insert>
+        
+        <!-- Send welcome email -->
+        <email:send config-ref="Email_SMTP" fromAddress="noreply@onboardiq.com" toAddresses="#[payload.email]" subject="Welcome to OnboardIQ!" doc:name="Send Welcome Email">
+            <email:body contentType="text/html">
+                <email:content>Welcome to OnboardIQ! Your account has been created successfully.</email:content>
+            </email:body>
+        </email:send>
+        
+        <!-- Create Salesforce lead -->
+        <salesforce:create config-ref="Salesforce_Config" type="Lead" doc:name="Create Salesforce Lead">
+            <salesforce:records>
+                <salesforce:record>
+                    <salesforce:field key="Email" value="#[payload.email]" />
+                    <salesforce:field key="Phone" value="#[payload.phone]" />
+                    <salesforce:field key="Company" value="OnboardIQ User" />
+                    <salesforce:field key="LeadSource" value="Website" />
+                </salesforce:record>
+            </salesforce:records>
+        </salesforce:create>
+        
+        <set-payload value='{"status": "success", "message": "User registered successfully", "userId": "#[payload.Id]"}' />
+    </flow>
+
+    <!-- Document Generation Flow -->
+    <flow name="document-generation-flow" doc:id="document-generation">
+        <logger level="INFO" message="Generating documents for user: #[payload.userId]" />
+        
+        <!-- Generate onboarding documents -->
+        <file:write config-ref="File_Config" path="/tmp/onboarding-docs/#[payload.userId]-welcome.pdf" doc:name="Generate Welcome PDF">
+            <file:content>Welcome to OnboardIQ! This is your personalized onboarding document.</file:content>
+        </file:write>
+        
+        <!-- Send documents via email -->
+        <email:send config-ref="Email_SMTP" fromAddress="docs@onboardiq.com" toAddresses="#[payload.email]" subject="Your OnboardIQ Documents" doc:name="Send Documents Email">
+            <email:body contentType="text/html">
+                <email:content>Please find your onboarding documents attached.</email:content>
+            </email:body>
+            <email:attachments>
+                <email:attachment path="/tmp/onboarding-docs/#[payload.userId]-welcome.pdf" />
+            </email:attachments>
+        </email:send>
+        
+        <set-payload value='{"status": "success", "message": "Documents generated and sent"}' />
+    </flow>
+
+    <!-- Verification Flow -->
+    <flow name="verification-flow" doc:id="verification">
+        <logger level="INFO" message="Processing verification for user: #[payload.userId]" />
+        
+        <!-- Update user status -->
+        <db:update config-ref="Database_Config" doc:name="Update User Status">
+            <db:sql>UPDATE users SET status = 'verified', verified_at = NOW() WHERE id = ?</db:sql>
+            <db:input-parameters>
+                <db:input-parameter key="1" value="#[payload.userId]" />
+            </db:input-parameters>
+        </db:update>
+        
+        <!-- Send verification confirmation -->
+        <email:send config-ref="Email_SMTP" fromAddress="verify@onboardiq.com" toAddresses="#[payload.email]" subject="Account Verified Successfully" doc:name="Send Verification Email">
+            <email:body contentType="text/html">
+                <email:content>Your OnboardIQ account has been verified successfully!</email:content>
+            </email:body>
+        </email:send>
+        
+        <set-payload value='{"status": "success", "message": "User verified successfully"}' />
+    </flow>
+
+    <!-- Onboarding Complete Flow -->
+    <flow name="onboarding-complete-flow" doc:id="onboarding-complete">
+        <logger level="INFO" message="Completing onboarding for user: #[payload.userId]" />
+        
+        <!-- Update user status to completed -->
+        <db:update config-ref="Database_Config" doc:name="Complete Onboarding">
+            <db:sql>UPDATE users SET status = 'completed', completed_at = NOW() WHERE id = ?</db:sql>
+            <db:input-parameters>
+                <db:input-parameter key="1" value="#[payload.userId]" />
+            </db:input-parameters>
+        </db:update>
+        
+        <!-- Create ServiceNow ticket for follow-up -->
+        <servicenow:create config-ref="ServiceNow_Config" table="incident" doc:name="Create Follow-up Ticket">
+            <servicenow:fields>
+                <servicenow:field key="short_description" value="OnboardIQ Onboarding Complete - #[payload.userId]" />
+                <servicenow:field key="description" value="User onboarding process completed successfully. Schedule follow-up call." />
+                <servicenow:field key="priority" value="3" />
+                <servicenow:field key="category" value="customer_onboarding" />
+            </servicenow:fields>
+        </servicenow:create>
+        
+        <!-- Send completion email -->
+        <email:send config-ref="Email_SMTP" fromAddress="success@onboardiq.com" toAddresses="#[payload.email]" subject="Welcome to OnboardIQ - You're All Set!" doc:name="Send Completion Email">
+            <email:body contentType="text/html">
+                <email:content>Congratulations! Your onboarding is complete. Welcome to OnboardIQ!</email:content>
+            </email:body>
+        </email:send>
+        
+        <set-payload value='{"status": "success", "message": "Onboarding completed successfully"}' />
+    </flow>
+
+    <!-- Error Handling -->
+    <error-handler name="Global_Error_Handler">
+        <on-error-continue type="ANY">
+            <logger level="ERROR" message="Error occurred: #[error.description]" />
+            <set-payload value='{"status": "error", "message": "An error occurred during processing"}' />
+        </on-error-continue>
+    </error-handler>
+
+</mule>

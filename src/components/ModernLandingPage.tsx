@@ -661,14 +661,14 @@ const ModernLandingPage: React.FC = () => {
             <Button
               onClick={handleGetStarted}
               disabled={isLoading}
-              className="px-8 py-4 text-lg font-semibold bg-white text-blue-600 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              className="px-8 py-4 text-lg font-semibold bg-white text-blue-900 hover:bg-gray-100 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
             >
               {isLoading ? 'Getting Started...' : 'Start Free Trial'}
             </Button>
             <Button
               variant="outline"
               onClick={handleDemo}
-              className="px-8 py-4 text-lg font-semibold border-2 border-white text-blue-300 hover:bg-white hover:text-blue-600 transition-all duration-300"
+              className="px-8 py-4 text-lg font-semibold border-2 border-white text-blue-900 hover:bg-white hover:text-blue-900 transition-all duration-300"
             >
               Schedule Demo
             </Button>

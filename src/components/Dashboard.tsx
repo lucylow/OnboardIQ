@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Progress } from './ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   BarChart3, 
   Users, 
@@ -34,7 +35,23 @@ import {
   Unlock,
   Calendar,
   Filter,
-  Search
+  Search,
+  Rocket,
+  Award,
+  Lightbulb,
+  TrendingDown,
+  Timer,
+  PieChart,
+  LineChart,
+  BarChart,
+  Target as TargetIcon,
+  ChevronRight,
+  ChevronUp,
+  ChevronDown,
+  RefreshCw,
+  Plus,
+  Minus,
+  EyeOff
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +61,13 @@ export const Dashboard: React.FC = () => {
   const [authState, setAuthState] = useState(authService.getAuthState());
   const [activeTab, setActiveTab] = useState('overview');
   const [isLoading, setIsLoading] = useState(true);
+  const [hoveredStat, setHoveredStat] = useState<string | null>(null);
+  const [showDetails, setShowDetails] = useState<string | null>(null);
+  const [realTimeData, setRealTimeData] = useState({
+    activeUsers: 0,
+    recentActivity: 0,
+    systemHealth: 100
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,466 +85,599 @@ export const Dashboard: React.FC = () => {
       setAuthState(authService.getAuthState());
     }, 1000);
 
-    return () => clearInterval(interval);
+    // Simulate real-time data updates
+    const realTimeInterval = setInterval(() => {
+      setRealTimeData(prev => ({
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 3) - 1,
+        recentActivity: prev.recentActivity + Math.floor(Math.random() * 5),
+        systemHealth: Math.max(95, Math.min(100, prev.systemHealth + Math.floor(Math.random() * 6) - 3))
+      }));
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(realTimeInterval);
+    };
   }, [authState.isAuthenticated, navigate]);
 
   const stats = [
     {
+      id: 'users',
       title: 'Total Users',
       value: '1,234',
       change: '+12%',
       icon: <Users className="h-5 w-5" />,
       color: 'from-blue-500 to-cyan-500',
       bgColor: 'bg-gradient-to-br from-blue-100 to-cyan-100',
-      trend: 'up'
+      trend: 'up',
+      details: {
+        newUsers: 45,
+        activeUsers: 890,
+        churnedUsers: 12,
+        conversionRate: '78%'
+      }
     },
     {
+      id: 'documents',
       title: 'Documents Generated',
       value: '456',
       change: '+8%',
       icon: <FileText className="h-5 w-5" />,
       color: 'from-green-500 to-emerald-500',
       bgColor: 'bg-gradient-to-br from-green-100 to-emerald-100',
-      trend: 'up'
+      trend: 'up',
+      details: {
+        templates: 15,
+        customDocs: 341,
+        signedDocs: 234,
+        pendingReview: 67
+      }
     },
     {
+      id: 'videos',
       title: 'Video Sessions',
       value: '89',
       change: '+15%',
       icon: <Video className="h-5 w-5" />,
       color: 'from-purple-500 to-pink-500',
       bgColor: 'bg-gradient-to-br from-purple-100 to-pink-100',
-      trend: 'up'
+      trend: 'up',
+      details: {
+        scheduled: 23,
+        completed: 66,
+        cancelled: 8,
+        avgDuration: '32min'
+      }
     },
     {
+      id: 'sms',
       title: 'SMS Verifications',
       value: '2,567',
       change: '+5%',
       icon: <Smartphone className="h-5 w-5" />,
       color: 'from-orange-500 to-red-500',
       bgColor: 'bg-gradient-to-br from-orange-100 to-red-100',
-      trend: 'up'
-    }
-  ];
-
-  const quickActions = [
-    {
-      title: 'Adaptive Onboarding',
-      description: 'AI-powered recommendations',
-      icon: <Brain className="h-6 w-6" />,
-      color: 'from-purple-500 to-pink-500',
-      href: '/adaptive-onboarding',
-      badge: 'New'
-    },
-    {
-      title: 'Risk Monitoring',
-      description: 'Security threat detection',
-      icon: <Activity className="h-6 w-6" />,
-      color: 'from-red-500 to-orange-500',
-      href: '/risk-monitoring'
-    },
-    {
-      title: 'Document Generation',
-      description: 'Create contracts & forms',
-      icon: <FileText className="h-6 w-6" />,
-      color: 'from-blue-500 to-cyan-500',
-      href: '/documents'
-    },
-    {
-      title: 'Video Onboarding',
-      description: 'Interactive sessions',
-      icon: <Video className="h-6 w-6" />,
-      color: 'from-green-500 to-emerald-500',
-      href: '/video-onboarding'
+      trend: 'up',
+      details: {
+        sent: 2567,
+        delivered: 2489,
+        verified: 2341,
+        failed: 78
+      }
     }
   ];
 
   const recentActivities = [
     {
       id: 1,
-      type: 'Document Generated',
-      description: 'Contract agreement for John Doe',
+      user: 'John Doe',
+      action: 'completed onboarding',
       time: '2 minutes ago',
-      status: 'success',
-      icon: <FileText className="h-4 w-4" />,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100'
+      icon: <CheckCircle className="h-4 w-4 text-green-600" />,
+      type: 'success'
     },
     {
       id: 2,
-      type: 'Video Session',
-      description: 'Onboarding call with Sarah Smith',
-      time: '15 minutes ago',
-      status: 'success',
-      icon: <Video className="h-4 w-4" />,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100'
+      user: 'Sarah Wilson',
+      action: 'generated document',
+      time: '5 minutes ago',
+      icon: <FileText className="h-4 w-4 text-blue-600" />,
+      type: 'info'
     },
     {
       id: 3,
-      type: 'SMS Verification',
-      description: 'Phone verification for Mike Johnson',
-      time: '1 hour ago',
-      status: 'success',
-      icon: <Smartphone className="h-4 w-4" />,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100'
+      user: 'Mike Johnson',
+      action: 'scheduled video call',
+      time: '8 minutes ago',
+      icon: <Video className="h-4 w-4 text-purple-600" />,
+      type: 'info'
     },
     {
       id: 4,
-      type: 'User Registration',
-      description: 'New user account created',
-      time: '2 hours ago',
-      status: 'success',
-      icon: <Users className="h-4 w-4" />,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100'
-    },
-    {
-      id: 5,
-      type: 'Security Alert',
-      description: 'Suspicious login attempt detected',
-      time: '3 hours ago',
-      status: 'warning',
-      icon: <AlertCircle className="h-4 w-4" />,
-      color: 'text-red-600',
-      bgColor: 'bg-red-100'
+      user: 'Lisa Chen',
+      action: 'verified phone number',
+      time: '12 minutes ago',
+      icon: <Smartphone className="h-4 w-4 text-orange-600" />,
+      type: 'success'
     }
   ];
 
-  const performanceMetrics = [
+  const quickActions = [
     {
-      label: 'Onboarding Completion',
-      value: 87,
-      target: 90,
-      color: 'bg-gradient-to-r from-green-500 to-emerald-500'
+      title: 'Generate Document',
+      description: 'Create a new document',
+      icon: <FileText className="h-6 w-6" />,
+      color: 'from-blue-500 to-blue-600',
+      action: () => navigate('/foxit-workflow')
     },
     {
-      label: 'User Satisfaction',
-      value: 92,
-      target: 95,
-      color: 'bg-gradient-to-r from-blue-500 to-cyan-500'
+      title: 'Schedule Call',
+      description: 'Book a video session',
+      icon: <Video className="h-6 w-6" />,
+      color: 'from-purple-500 to-purple-600',
+      action: () => navigate('/video-onboarding')
     },
     {
-      label: 'Security Score',
-      value: 99,
-      target: 100,
-      color: 'bg-gradient-to-r from-purple-500 to-pink-500'
+      title: 'View Analytics',
+      description: 'Check performance metrics',
+      icon: <BarChart3 className="h-6 w-6" />,
+      color: 'from-green-500 to-green-600',
+      action: () => navigate('/analytics')
     },
     {
-      label: 'Response Time',
-      value: 78,
-      target: 80,
-      color: 'bg-gradient-to-r from-orange-500 to-red-500'
+      title: 'Team Settings',
+      description: 'Manage team members',
+      icon: <Users className="h-6 w-6" />,
+      color: 'from-orange-500 to-orange-600',
+      action: () => navigate('/team')
     }
   ];
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex items-center justify-center min-h-screen"
+      >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-700">Loading your dashboard...</h2>
-          <p className="text-gray-500">Preparing your personalized experience</p>
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-6"
+          />
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-2xl font-bold text-gray-900 mb-2"
+          >
+            Loading Dashboard...
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="text-gray-600"
+          >
+            Preparing your personalized experience
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">
-                Welcome back, {authState.user?.firstName || 'User'}! Here's what's happening today.
-              </p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <BackendHealthCheck />
-              <div className="relative">
-                <Input
-                  type="search"
-                  placeholder="Search dashboard..."
-                  className="w-64 pl-10"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              </div>
-              <Button variant="outline" size="sm">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
-              <Button size="sm" onClick={() => navigate('/settings')}>
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card 
-              key={stat.title}
-              className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 shadow-lg"
-              style={{ animationDelay: `${index * 100}ms` }}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="space-y-6 p-6"
+    >
+      {/* Enhanced Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <motion.h1 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-3xl font-bold text-gray-900 flex items-center gap-3"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
-                    <div className={`text-white bg-gradient-to-br ${stat.color}`}>
-                      {stat.icon}
-                    </div>
-                  </div>
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs font-medium ${
-                      stat.trend === 'up' ? 'text-green-600 bg-green-100' : 'text-red-600 bg-red-100'
-                    }`}
-                  >
-                    {stat.change}
-                  </Badge>
-                </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                <div className="text-sm text-gray-600">{stat.title}</div>
-              </CardContent>
-            </Card>
-          ))}
+              <Zap className="w-8 h-8 text-blue-600" />
+            </motion.div>
+            Welcome back, {authState.user?.firstName || 'User'}!
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="text-gray-600 mt-2"
+          >
+            Here's what's happening with your OnboardIQ platform
+          </motion.p>
         </div>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.5, type: "spring" }}
+          className="flex items-center gap-3"
+        >
+          <Badge variant="secondary" className="flex items-center gap-2 bg-green-100 text-green-700 border-green-200">
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-2 h-2 bg-green-500 rounded-full"
+            />
+            System Healthy
+          </Badge>
+          <Button variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+        </motion.div>
+      </motion.div>
 
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
-            <Button variant="ghost" size="sm">
-              View All
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickActions.map((action, index) => (
-              <Card 
-                key={action.title}
-                className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 shadow-md"
-                onClick={() => navigate(action.href)}
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
+      {/* Enhanced Stats Grid */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        <AnimatePresence>
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 * index }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+              }}
+              onHoverStart={() => setHoveredStat(stat.id)}
+              onHoverEnd={() => setHoveredStat(null)}
+            >
+              <Card className={`transition-all duration-300 cursor-pointer ${
+                hoveredStat === stat.id ? 'ring-2 ring-blue-200' : ''
+              }`}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300`}>
-                      {action.icon}
-                    </div>
-                    {action.badge && (
-                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                        {action.badge}
-                      </Badge>
-                    )}
+                    <motion.div
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.5 }}
+                      className={`p-3 rounded-lg ${stat.bgColor}`}
+                    >
+                      {stat.icon}
+                    </motion.div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2 * index }}
+                      className={`flex items-center gap-1 text-sm font-medium ${
+                        stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                      }`}
+                    >
+                      {stat.trend === 'up' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      {stat.change}
+                    </motion.div>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                    {action.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">{action.description}</p>
-                  <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
+                    <motion.div 
+                      className="text-2xl font-bold text-gray-900"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.3 * index, type: "spring" }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                  </div>
+                  
+                  {/* Enhanced Details on Hover */}
+                  <AnimatePresence>
+                    {hoveredStat === stat.id && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mt-4 pt-4 border-t border-gray-100"
+                      >
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          {Object.entries(stat.details).map(([key, value]) => (
+                            <div key={key} className="flex justify-between">
+                              <span className="text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                              <span className="font-medium">{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
-        {/* Main Content Tabs */}
+      {/* Enhanced Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+      >
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-sm">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
+          <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <BarChart3 className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="performance" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Performance
+            <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <Activity className="w-4 h-4 mr-2" />
+              Activity
             </TabsTrigger>
-            <TabsTrigger value="activities" className="flex items-center gap-2">
-              <Activity className="h-4 w-4" />
-              Activities
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Analytics
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Security
+            <TabsTrigger value="actions" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <Rocket className="w-4 h-4 mr-2" />
+              Quick Actions
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Performance Metrics */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Performance Metrics
-                  </CardTitle>
-                  <CardDescription>
-                    Track key performance indicators
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {performanceMetrics.map((metric) => (
-                    <div key={metric.label} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium text-gray-700">{metric.label}</span>
-                        <span className="text-gray-600">{metric.value}% / {metric.target}%</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Activity */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 }}
+                className="lg:col-span-2"
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Recent Activity
+                    </CardTitle>
+                    <CardDescription>Latest user actions and system events</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <AnimatePresence>
+                        {recentActivities.map((activity, index) => (
+                          <motion.div
+                            key={activity.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 * index }}
+                            whileHover={{ x: 5 }}
+                            className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            <motion.div
+                              whileHover={{ scale: 1.2 }}
+                              transition={{ type: "spring" }}
+                            >
+                              {activity.icon}
+                            </motion.div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium">
+                                <span className="text-gray-900">{activity.user}</span>
+                                <span className="text-gray-600"> {activity.action}</span>
+                              </p>
+                              <p className="text-xs text-gray-500">{activity.time}</p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* System Health */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.9 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      System Health
+                    </CardTitle>
+                    <CardDescription>Real-time system status</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium">Overall Health</span>
+                        <span className="text-sm font-bold text-green-600">{realTimeData.systemHealth}%</span>
                       </div>
-                      <div className="relative">
-                        <Progress 
-                          value={metric.value} 
-                          className="h-2"
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${realTimeData.systemHealth}%` }}
+                        transition={{ duration: 1, delay: 1.0 }}
+                        className="h-2 bg-gray-200 rounded-full overflow-hidden"
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1, delay: 1.2 }}
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600"
                         />
-                        <div className={`absolute inset-0 rounded-full ${metric.color} opacity-20`}></div>
+                      </motion.div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Active Users</span>
+                        <span className="font-medium">{realTimeData.activeUsers}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>Recent Activity</span>
+                        <span className="font-medium">{realTimeData.recentActivity}</span>
                       </div>
                     </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Recent Activities */}
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
-                    Recent Activities
-                  </CardTitle>
-                  <CardDescription>
-                    Latest system activities and events
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivities.slice(0, 5).map((activity) => (
-                      <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className={`w-8 h-8 rounded-lg ${activity.bgColor} flex items-center justify-center flex-shrink-0`}>
-                          <div className={activity.color}>
-                            {activity.icon}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{activity.type}</p>
-                          <p className="text-sm text-gray-600">{activity.description}</p>
-                          <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                        </div>
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs ${
-                            activity.status === 'success' 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-red-100 text-red-700'
-                          }`}
-                        >
-                          {activity.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
           </TabsContent>
 
-          <TabsContent value="performance" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Performance Analytics
-                </CardTitle>
-                <CardDescription>
-                  Detailed performance metrics and trends
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Performance Analytics</h3>
-                  <p className="text-gray-600">Detailed performance charts and analytics coming soon.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activities" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
-                  Activity Log
-                </CardTitle>
-                <CardDescription>
-                  Complete activity history and audit trail
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                      <div className={`w-10 h-10 rounded-lg ${activity.bgColor} flex items-center justify-center flex-shrink-0`}>
-                        <div className={activity.color}>
-                          {activity.icon}
-                        </div>
+          <TabsContent value="activity" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="w-5 h-5" />
+                    Activity Timeline
+                  </CardTitle>
+                  <CardDescription>Detailed activity breakdown</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    {/* Activity Chart Placeholder */}
+                    <div className="h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <BarChart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">Activity chart will be displayed here</p>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{activity.type}</p>
-                        <p className="text-sm text-gray-600">{activity.description}</p>
-                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                      </div>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs ${
-                          activity.status === 'success' 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {activity.status}
-                      </Badge>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
 
-          <TabsContent value="security" className="space-y-6">
-            <Card className="border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Security Overview
-                </CardTitle>
-                <CardDescription>
-                  Security status and threat monitoring
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12">
-                  <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Security Dashboard</h3>
-                  <p className="text-gray-600">Security monitoring and threat detection features coming soon.</p>
-                  <Button 
-                    className="mt-4"
-                    onClick={() => navigate('/risk-monitoring')}
-                  >
-                    View Security Monitoring
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="analytics" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Performance Analytics
+                  </CardTitle>
+                  <CardDescription>Key performance indicators and trends</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Conversion Rate */}
+                    <div className="space-y-3">
+                      <h3 className="font-semibold">Conversion Rate</h3>
+                      <div className="text-3xl font-bold text-green-600">78.5%</div>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: "78.5%" }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        className="h-3 bg-gray-200 rounded-full overflow-hidden"
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1, delay: 0.7 }}
+                          className="h-full bg-gradient-to-r from-green-500 to-green-600"
+                        />
+                      </motion.div>
+                    </div>
+                    
+                    {/* User Engagement */}
+                    <div className="space-y-3">
+                      <h3 className="font-semibold">User Engagement</h3>
+                      <div className="text-3xl font-bold text-blue-600">92.3%</div>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: "92.3%" }}
+                        transition={{ duration: 1, delay: 0.6 }}
+                        className="h-3 bg-gray-200 rounded-full overflow-hidden"
+                      >
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: "100%" }}
+                          transition={{ duration: 1, delay: 0.8 }}
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600"
+                        />
+                      </motion.div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="actions" className="space-y-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Rocket className="w-5 h-5" />
+                    Quick Actions
+                  </CardTitle>
+                  <CardDescription>Common tasks and shortcuts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <AnimatePresence>
+                      {quickActions.map((action, index) => (
+                        <motion.div
+                          key={action.title}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.1 * index }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            onClick={action.action}
+                            className={`w-full h-24 flex flex-col items-center justify-center gap-2 bg-gradient-to-r ${action.color} hover:shadow-lg transition-all duration-200`}
+                          >
+                            <motion.div
+                              whileHover={{ rotate: 360 }}
+                              transition={{ duration: 0.5 }}
+                            >
+                              {action.icon}
+                            </motion.div>
+                            <div className="text-center">
+                              <div className="font-semibold">{action.title}</div>
+                              <div className="text-xs opacity-90">{action.description}</div>
+                            </div>
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </TabsContent>
         </Tabs>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

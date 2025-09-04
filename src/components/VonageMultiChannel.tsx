@@ -300,6 +300,11 @@ const VonageMultiChannel: React.FC = () => {
       setMessage(template.content);
       setSelectedChannels(template.channels);
       setSelectedTemplate(templateId);
+      setActiveTab('compose'); // Switch to compose tab
+      setSuccess(`Template "${template.name}" applied successfully!`);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(''), 3000);
     }
   };
 

@@ -653,4 +653,270 @@ router.get('/analytics', (req, res) => {
   }
 });
 
+// Mock data for the 4 AI agents
+const mockAIAgents = [
+  {
+    id: 'intake-agent',
+    name: 'Intake Agent',
+    type: 'intake',
+    status: 'active',
+    accuracy: 98.5,
+    decisions: 1247,
+    trainedDate: '1/15/2024',
+    performance: {
+      last24h: 45,
+      last7d: 312,
+      last30d: 1247,
+      improvement: 2.3
+    },
+    capabilities: ['Document Processing', 'Data Extraction', 'Form Recognition', 'Quality Validation'],
+    currentTask: 'Processing onboarding documents',
+    confidence: 0.985
+  },
+  {
+    id: 'personalization-agent',
+    name: 'Personalization Agent',
+    type: 'personalization',
+    status: 'active',
+    accuracy: 96.2,
+    decisions: 892,
+    trainedDate: '1/14/2024',
+    performance: {
+      last24h: 32,
+      last7d: 224,
+      last30d: 892,
+      improvement: 1.8
+    },
+    capabilities: ['User Profiling', 'Content Adaptation', 'Learning Path Optimization', 'Preference Learning'],
+    currentTask: 'Optimizing user experience',
+    confidence: 0.962
+  },
+  {
+    id: 'execution-agent',
+    name: 'Execution Agent',
+    type: 'execution',
+    status: 'active',
+    accuracy: 99.1,
+    decisions: 567,
+    trainedDate: '1/13/2024',
+    performance: {
+      last24h: 18,
+      last7d: 142,
+      last30d: 567,
+      improvement: 3.1
+    },
+    capabilities: ['Workflow Automation', 'Task Execution', 'Process Orchestration', 'Error Handling'],
+    currentTask: 'Executing onboarding workflows',
+    confidence: 0.991
+  },
+  {
+    id: 'monitoring-agent',
+    name: 'Monitoring Agent',
+    type: 'monitoring',
+    status: 'active',
+    accuracy: 97.8,
+    decisions: 2341,
+    trainedDate: '1/16/2024',
+    performance: {
+      last24h: 78,
+      last7d: 586,
+      last30d: 2341,
+      improvement: 1.5
+    },
+    capabilities: ['Performance Tracking', 'Anomaly Detection', 'Alert Management', 'Analytics Reporting'],
+    currentTask: 'Monitoring system performance',
+    confidence: 0.978
+  }
+];
+
+// Get all AI agents
+router.get('/ai-agents', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      agents: mockAIAgents,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching AI agents:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch AI agents'
+    });
+  }
+});
+
+// Get specific AI agent
+router.get('/ai-agents/:agentId', (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const agent = mockAIAgents.find(a => a.id === agentId);
+    
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: 'Agent not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      agent,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching AI agent:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch AI agent'
+    });
+  }
+});
+
+// Perform agent action
+router.post('/ai-agents/:agentId/:action', (req, res) => {
+  try {
+    const { agentId, action } = req.params;
+    const { parameters } = req.body;
+    
+    const agent = mockAIAgents.find(a => a.id === agentId);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: 'Agent not found'
+      });
+    }
+    
+    // Simulate action processing
+    const result = {
+      agentId,
+      action,
+      status: 'completed',
+      result: `Successfully performed ${action} on ${agent.name}`,
+      timestamp: new Date().toISOString(),
+      parameters
+    };
+    
+    res.json({
+      success: true,
+      result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error performing agent action:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform agent action'
+    });
+  }
+});
+
+// Get agent performance
+router.get('/ai-agents/:agentId/performance', (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { period = '7d' } = req.query;
+    
+    const agent = mockAIAgents.find(a => a.id === agentId);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: 'Agent not found'
+      });
+    }
+    
+    const performance = {
+      agentId,
+      metrics: {
+        accuracy: agent.accuracy,
+        decisions: agent.decisions,
+        responseTime: Math.floor(Math.random() * 200) + 100,
+        errorRate: Math.random() * 5
+      },
+      period,
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      performance,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching agent performance:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch agent performance'
+    });
+  }
+});
+
+// Retrain agent
+router.post('/ai-agents/:agentId/retrain', (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { trainingData } = req.body;
+    
+    const agent = mockAIAgents.find(a => a.id === agentId);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: 'Agent not found'
+      });
+    }
+    
+    // Simulate retraining process
+    const result = {
+      agentId,
+      status: 'retraining_completed',
+      newAccuracy: agent.accuracy + Math.random() * 2,
+      trainingData: trainingData || {},
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json({
+      success: true,
+      result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error retraining agent:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to retrain agent'
+    });
+  }
+});
+
+// Update agent status
+router.put('/ai-agents/:agentId/status', (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const { status } = req.body;
+    
+    const agent = mockAIAgents.find(a => a.id === agentId);
+    if (!agent) {
+      return res.status(404).json({
+        success: false,
+        error: 'Agent not found'
+      });
+    }
+    
+    // Update agent status
+    agent.status = status;
+    
+    res.json({
+      success: true,
+      agent,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error updating agent status:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update agent status'
+    });
+  }
+});
+
 module.exports = router;

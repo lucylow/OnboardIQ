@@ -38,6 +38,7 @@ import VideoOnboarding from "./components/VideoOnboarding";
 import DocumentationPage from "./components/DocumentationPage";
 import NotFound from "./pages/NotFound";
 import HelpPage from "./components/HelpPage";
+import DynamicCharts from "./components/DynamicCharts";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +93,7 @@ const AppContent = () => {
           <Route path="/documents" element={<DocumentGeneration userId="demo_user" />} />
           <Route path="/churn-prediction" element={<ChurnPrediction />} />
           <Route path="/video-onboarding" element={<VideoOnboarding />} />
+          <Route path="/dynamic-charts" element={<DynamicCharts />} />
           
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />

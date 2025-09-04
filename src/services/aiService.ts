@@ -60,6 +60,44 @@ export interface AIHealthStatus {
   timestamp: string;
 }
 
+export interface AIAgent {
+  id: string;
+  name: string;
+  type: 'intake' | 'personalization' | 'execution' | 'monitoring';
+  status: 'active' | 'inactive' | 'training';
+  accuracy: number;
+  decisions: number;
+  trainedDate: string;
+  performance: {
+    last24h: number;
+    last7d: number;
+    last30d: number;
+    improvement: number;
+  };
+  capabilities: string[];
+  currentTask?: string;
+  confidence: number;
+}
+
+export interface AgentAction {
+  agentId: string;
+  action: string;
+  timestamp: string;
+  parameters?: any;
+}
+
+export interface AgentPerformance {
+  agentId: string;
+  metrics: {
+    accuracy: number;
+    decisions: number;
+    responseTime: number;
+    errorRate: number;
+  };
+  period: '24h' | '7d' | '30d';
+  timestamp: string;
+}
+
 export interface CacheStats {
   size: number;
   keys: string[];
@@ -195,6 +233,82 @@ class AIService {
     } catch (error) {
       console.error('Error in adaptive behavior analysis:', error);
       return this.getFallbackBehaviorAnalysis();
+    }
+  }
+
+  // AI Agent Management
+  async getAgents(): Promise<AIAgent[]> {
+    try {
+      const response = await api.get(`${this.baseUrl}/ai-agents`);
+      return response.data.agents;
+    } catch (error) {
+      console.error('Error fetching AI agents:', error);
+      return this.getFallbackAgents();
+    }
+  }
+
+  async getAgentById(agentId: string): Promise<AIAgent> {
+    try {
+      const response = await api.get(`${this.baseUrl}/ai-agents/${agentId}`);
+      return response.data.agent;
+    } catch (error) {
+      console.error('Error fetching agent:', error);
+      throw new Error(`Agent ${agentId} not found`);
+    }
+  }
+
+  async performAgentAction(agentId: string, action: string, parameters?: any): Promise<any> {
+    try {
+      const response = await api.post(`${this.baseUrl}/ai-agents/${agentId}/${action}`, {
+        agentId,
+        action,
+        parameters,
+        timestamp: new Date().toISOString()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error performing agent action:', error);
+      throw new Error(`Failed to perform ${action} on agent ${agentId}`);
+    }
+  }
+
+  async getAgentPerformance(agentId: string, period: '24h' | '7d' | '30d' = '7d'): Promise<AgentPerformance> {
+    try {
+      const response = await api.get(`${this.baseUrl}/ai-agents/${agentId}/performance`, {
+        params: { period }
+      });
+      return response.data.performance;
+    } catch (error) {
+      console.error('Error fetching agent performance:', error);
+      return this.getFallbackAgentPerformance(agentId, period);
+    }
+  }
+
+  async retrainAgent(agentId: string, trainingData?: any): Promise<any> {
+    try {
+      const response = await api.post(`${this.baseUrl}/ai-agents/${agentId}/retrain`, {
+        agentId,
+        trainingData,
+        timestamp: new Date().toISOString()
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error retraining agent:', error);
+      throw new Error(`Failed to retrain agent ${agentId}`);
+    }
+  }
+
+  async updateAgentStatus(agentId: string, status: 'active' | 'inactive' | 'training'): Promise<AIAgent> {
+    try {
+      const response = await api.put(`${this.baseUrl}/ai-agents/${agentId}/status`, {
+        agentId,
+        status,
+        timestamp: new Date().toISOString()
+      });
+      return response.data.agent;
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      throw new Error(`Failed to update status for agent ${agentId}`);
     }
   }
 
@@ -390,6 +504,97 @@ class AIService {
         priority: 'high'
       }
     ];
+  }
+
+  private getFallbackAgents(): AIAgent[] {
+    return [
+      {
+        id: 'intake-agent',
+        name: 'Intake Agent',
+        type: 'intake',
+        status: 'active',
+        accuracy: 98.5,
+        decisions: 1247,
+        trainedDate: '1/15/2024',
+        performance: {
+          last24h: 45,
+          last7d: 312,
+          last30d: 1247,
+          improvement: 2.3
+        },
+        capabilities: ['Document Processing', 'Data Extraction', 'Form Recognition', 'Quality Validation'],
+        currentTask: 'Processing onboarding documents',
+        confidence: 0.985
+      },
+      {
+        id: 'personalization-agent',
+        name: 'Personalization Agent',
+        type: 'personalization',
+        status: 'active',
+        accuracy: 96.2,
+        decisions: 892,
+        trainedDate: '1/14/2024',
+        performance: {
+          last24h: 32,
+          last7d: 224,
+          last30d: 892,
+          improvement: 1.8
+        },
+        capabilities: ['User Profiling', 'Content Adaptation', 'Learning Path Optimization', 'Preference Learning'],
+        currentTask: 'Optimizing user experience',
+        confidence: 0.962
+      },
+      {
+        id: 'execution-agent',
+        name: 'Execution Agent',
+        type: 'execution',
+        status: 'active',
+        accuracy: 99.1,
+        decisions: 567,
+        trainedDate: '1/13/2024',
+        performance: {
+          last24h: 18,
+          last7d: 142,
+          last30d: 567,
+          improvement: 3.1
+        },
+        capabilities: ['Workflow Automation', 'Task Execution', 'Process Orchestration', 'Error Handling'],
+        currentTask: 'Executing onboarding workflows',
+        confidence: 0.991
+      },
+      {
+        id: 'monitoring-agent',
+        name: 'Monitoring Agent',
+        type: 'monitoring',
+        status: 'active',
+        accuracy: 97.8,
+        decisions: 2341,
+        trainedDate: '1/16/2024',
+        performance: {
+          last24h: 78,
+          last7d: 586,
+          last30d: 2341,
+          improvement: 1.5
+        },
+        capabilities: ['Performance Tracking', 'Anomaly Detection', 'Alert Management', 'Analytics Reporting'],
+        currentTask: 'Monitoring system performance',
+        confidence: 0.978
+      }
+    ];
+  }
+
+  private getFallbackAgentPerformance(agentId: string, period: '24h' | '7d' | '30d'): AgentPerformance {
+    return {
+      agentId,
+      metrics: {
+        accuracy: 95.0,
+        decisions: 100,
+        responseTime: 250,
+        errorRate: 2.5
+      },
+      period,
+      timestamp: new Date().toISOString()
+    };
   }
 
   // Utility methods

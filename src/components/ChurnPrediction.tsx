@@ -22,9 +22,13 @@ import {
   Shield,
   Zap,
   Calendar,
-  Filter
+  Filter,
+  Download,
+  FileText,
+  Printer
 } from 'lucide-react';
 import { aiAPI } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChurnPredictionData {
   churnRisk: number;
@@ -67,6 +71,9 @@ const ChurnPrediction: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedTimeframe, setSelectedTimeframe] = useState('30d');
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const [reportGenerated, setReportGenerated] = useState(false);
+  const { toast } = useToast();
 
   const fetchChurnData = async () => {
     try {
@@ -200,6 +207,154 @@ const ChurnPrediction: React.FC = () => {
       case 'decreasing': return <TrendingDown className="h-4 w-4 text-green-500" />;
       case 'stable': return <Activity className="h-4 w-4 text-blue-500" />;
       default: return <Activity className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const generateReport = async () => {
+    if (!data) return;
+    
+    setGeneratingReport(true);
+    
+    try {
+      // Simulate report generation delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create comprehensive report content
+      const reportContent = {
+        title: 'Churn Prediction Analytics Report',
+        generatedAt: new Date().toISOString(),
+        executiveSummary: {
+          overallChurnRisk: `${(data.churnRisk * 100).toFixed(1)}%`,
+          riskLevel: data.riskLevel.toUpperCase(),
+          confidence: `${(data.confidence * 100).toFixed(0)}%`,
+          totalUsers: data.userSegments.reduce((sum, seg) => sum + seg.userCount, 0),
+          keyInsight: data.churnRisk > 0.25 ? 'High churn risk detected - immediate action required' : 'Moderate churn risk - monitor closely'
+        },
+        keyMetrics: {
+          engagementScore: `${(data.features.engagementScore * 100).toFixed(0)}%`,
+          featureAdoption: `${(data.features.featureAdoption * 100).toFixed(0)}%`,
+          supportHealth: `${(data.features.supportTickets * 100).toFixed(0)}%`,
+          usageFrequency: `${(data.features.usageFrequency * 100).toFixed(0)}%`,
+          paymentHistory: `${(data.features.paymentHistory * 100).toFixed(0)}%`
+        },
+        riskFactors: data.keyFactors.map(factor => ({
+          factor: factor.factor,
+          impact: `${(factor.impact * 100).toFixed(0)}%`,
+          description: factor.description,
+          priority: factor.impact > 0.3 ? 'HIGH' : factor.impact > 0.2 ? 'MEDIUM' : 'LOW'
+        })),
+        recommendations: data.recommendations.map(rec => ({
+          action: rec.action,
+          priority: rec.priority.toUpperCase(),
+          impact: `+${(rec.impact * 100).toFixed(0)}%`,
+          description: rec.description,
+          estimatedEffort: rec.priority === 'high' ? '2-4 weeks' : rec.priority === 'medium' ? '4-6 weeks' : '6-8 weeks'
+        })),
+        userSegments: data.userSegments.map(segment => ({
+          segment: segment.segment,
+          churnRisk: `${(segment.churnRisk * 100).toFixed(1)}%`,
+          userCount: segment.userCount,
+          trend: segment.trend,
+          riskLevel: segment.churnRisk > 0.3 ? 'HIGH' : segment.churnRisk > 0.2 ? 'MEDIUM' : 'LOW'
+        })),
+        historicalTrend: {
+          last30Days: data.historicalData.slice(-30),
+          averageChurnRisk: (data.historicalData.slice(-30).reduce((sum, point) => sum + point.churnRisk, 0) / 30).toFixed(3),
+          trendDirection: data.historicalData.slice(-7).reduce((sum, point) => sum + point.churnRisk, 0) / 7 > 
+                         data.historicalData.slice(-14, -7).reduce((sum, point) => sum + point.churnRisk, 0) / 7 ? 'INCREASING' : 'DECREASING'
+        },
+        nextSteps: [
+          'Review high-priority recommendations',
+          'Implement immediate retention strategies',
+          'Monitor key metrics daily',
+          'Schedule follow-up analysis in 7 days'
+        ]
+      };
+
+      // Create downloadable report as JSON
+      const reportBlob = new Blob([JSON.stringify(reportContent, null, 2)], {
+        type: 'application/json'
+      });
+      
+      // Create download link
+      const url = URL.createObjectURL(reportBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `churn-prediction-report-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Also create a human-readable text version
+      const textReport = `
+CHURN PREDICTION ANALYTICS REPORT
+Generated: ${new Date().toLocaleString()}
+
+EXECUTIVE SUMMARY
+================
+Overall Churn Risk: ${(data.churnRisk * 100).toFixed(1)}%
+Risk Level: ${data.riskLevel.toUpperCase()}
+Confidence: ${(data.confidence * 100).toFixed(0)}%
+Total Users: ${data.userSegments.reduce((sum, seg) => sum + seg.userCount, 0)}
+
+KEY METRICS
+==========
+Engagement Score: ${(data.features.engagementScore * 100).toFixed(0)}%
+Feature Adoption: ${(data.features.featureAdoption * 100).toFixed(0)}%
+Support Health: ${(data.features.supportTickets * 100).toFixed(0)}%
+Usage Frequency: ${(data.features.usageFrequency * 100).toFixed(0)}%
+
+TOP RISK FACTORS
+===============
+${data.keyFactors.map((factor, index) => `${index + 1}. ${factor.factor} (${(factor.impact * 100).toFixed(0)}% impact)`).join('\n')}
+
+RECOMMENDATIONS
+==============
+${data.recommendations.map((rec, index) => `${index + 1}. ${rec.action} (${rec.priority.toUpperCase()} priority, +${(rec.impact * 100).toFixed(0)}% impact)`).join('\n')}
+
+USER SEGMENTS
+============
+${data.userSegments.map(segment => `${segment.segment}: ${(segment.churnRisk * 100).toFixed(1)}% risk (${segment.userCount} users)`).join('\n')}
+
+NEXT STEPS
+==========
+1. Review high-priority recommendations
+2. Implement immediate retention strategies  
+3. Monitor key metrics daily
+4. Schedule follow-up analysis in 7 days
+      `.trim();
+
+      const textBlob = new Blob([textReport], { type: 'text/plain' });
+      const textUrl = URL.createObjectURL(textBlob);
+      const textLink = document.createElement('a');
+      textLink.href = textUrl;
+      textLink.download = `churn-prediction-summary-${new Date().toISOString().split('T')[0]}.txt`;
+      document.body.appendChild(textLink);
+      textLink.click();
+      document.body.removeChild(textLink);
+      URL.revokeObjectURL(textUrl);
+
+      // Show success toast
+      toast({
+        title: "Report Generated Successfully!",
+        description: "Two files downloaded: Detailed JSON report and human-readable summary",
+        duration: 5000,
+      });
+      
+      // Set success state
+      setReportGenerated(true);
+      setTimeout(() => setReportGenerated(false), 3000); // Reset after 3 seconds
+      
+    } catch (error) {
+      console.error('Report generation failed:', error);
+      toast({
+        title: "Report Generation Failed",
+        description: "Failed to generate report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingReport(false);
     }
   };
 
@@ -469,19 +624,48 @@ const ChurnPrediction: React.FC = () => {
       </Tabs>
 
       {/* Action Buttons */}
-      <div className="mt-8 flex space-x-4">
+      <div className="mt-8 space-y-4">
+        {generatingReport && (
+          <div className="flex items-center space-x-2 text-sm text-blue-600">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span>Generating comprehensive report...</span>
+          </div>
+        )}
+        <div className="flex space-x-4">
         <Button onClick={fetchChurnData} variant="outline">
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh Data
         </Button>
-        <Button>
-          <Target className="h-4 w-4 mr-2" />
-          Generate Report
+        <Button 
+          onClick={generateReport} 
+          disabled={generatingReport || !data}
+          className={
+            generatingReport 
+              ? 'bg-blue-600 hover:bg-blue-700' 
+              : reportGenerated 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : ''
+          }
+        >
+          {generatingReport ? (
+            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          ) : reportGenerated ? (
+            <CheckCircle className="h-4 w-4 mr-2" />
+          ) : (
+            <FileText className="h-4 w-4 mr-2" />
+          )}
+          {generatingReport 
+            ? 'Generating Report...' 
+            : reportGenerated 
+              ? 'Report Generated!' 
+              : 'Generate Report'
+          }
         </Button>
         <Button variant="outline">
           <Filter className="h-4 w-4 mr-2" />
           Export Data
         </Button>
+        </div>
       </div>
     </div>
   );

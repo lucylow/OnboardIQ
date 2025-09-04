@@ -586,7 +586,7 @@ const ModernLandingPage: React.FC = () => {
             <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-full border border-yellow-200">
               <Award className="h-5 w-5 text-yellow-600" />
               <span className="text-yellow-800 font-semibold">
-                Competing for multiple hackathon prizes with cutting-edge integrations
+                Built with enterprise-grade technology partners for unmatched reliability
               </span>
               <Sparkles className="h-5 w-5 text-yellow-600" />
             </div>

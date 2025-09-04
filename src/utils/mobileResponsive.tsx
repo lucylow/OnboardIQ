@@ -165,15 +165,16 @@ export const MOBILE_UTILITIES = {
 
 // Hook for detecting mobile devices
 export const useIsMobile = () => {
-  if (typeof window === 'undefined') return false;
-  
   const checkIsMobile = () => {
+    if (typeof window === 'undefined') return false;
     return window.innerWidth < 768; // md breakpoint
   };
   
   const [isMobile, setIsMobile] = React.useState(checkIsMobile);
   
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleResize = () => {
       setIsMobile(checkIsMobile());
     };

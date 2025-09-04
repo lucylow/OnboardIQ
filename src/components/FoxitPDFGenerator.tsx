@@ -22,20 +22,46 @@ import {
   Phone,
   Upload,
   File,
-  Compress,
+  Minus,
   Shield,
   Eye
 } from 'lucide-react';
-import { foxitApiService } from '../services/foxitApiService';
+import { foxitApiService, DocumentGenerationResponse } from '../services/foxitApiService';
 
 interface FoxitPDFGeneratorProps {
   userId: string;
 }
 
+interface GeneratedDocument extends DocumentGenerationResponse {
+  pages: number;
+  template_used: string;
+  metadata: {
+    customer_name: string;
+    company_name: string;
+    generated_by: string;
+    version: string;
+    demo_mode?: boolean;
+  };
+}
+
+interface ProcessedDocument {
+  id: string;
+  originalName: string;
+  processedName: string;
+  originalSize: string;
+  processedSize: string;
+  compressionRatio: number;
+  watermarkApplied: boolean;
+  encryptionApplied: boolean;
+  processingTime: string;
+  processedAt: string;
+  downloadUrl: string;
+}
+
 const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [generatedDocument, setGeneratedDocument] = useState<any>(null);
+  const [generatedDocument, setGeneratedDocument] = useState<GeneratedDocument | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // File upload states
@@ -43,7 +69,7 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
-  const [processedDocument, setProcessedDocument] = useState<any>(null);
+  const [processedDocument, setProcessedDocument] = useState<ProcessedDocument | null>(null);
   const [processingError, setProcessingError] = useState<string | null>(null);
   
   // Processing options
@@ -215,7 +241,7 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
         clearInterval(progressInterval);
         setProcessingProgress(100);
         
-        const mockProcessedDocument = {
+        const mockProcessedDocument: ProcessedDocument = {
           id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           originalName: uploadedFile.name,
           processedName: `processed_${uploadedFile.name}`,
@@ -340,16 +366,8 @@ startxref
 
       if (response.success) {
         // Enhanced mock response with realistic data
-        const mockResponse = {
-          success: true,
-          document_id: `DOC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          document_url: `https://foxit-api.com/documents/${Date.now()}.pdf`,
-          file_size: '2.4 MB',
-          generated_at: new Date().toISOString(),
-          processing_time: '2.3 seconds',
-          compression_ratio: 0.85,
-          watermark_applied: true,
-          security_level: 'standard',
+        const mockResponse: GeneratedDocument = {
+          ...response,
           pages: 8,
           template_used: formData.templateId,
           metadata: {
@@ -371,7 +389,7 @@ startxref
         setProgress(100);
         
         // Enhanced mock response with realistic data
-        const mockResponse = {
+        const mockResponse: GeneratedDocument = {
           success: true,
           document_id: `DOC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           document_url: `https://demo-foxit-api.com/documents/${Date.now()}.pdf`,
@@ -755,7 +773,7 @@ startxref
                       }
                     />
                     <Label htmlFor="compress" className="text-sm flex items-center gap-2">
-                      <Compress className="h-4 w-4" />
+                      <Minus className="h-4 w-4" />
                       Compress PDF (reduce file size)
                     </Label>
                   </div>

@@ -31,8 +31,15 @@ import {
   BarChart3,
   Smartphone,
   Video,
-  BookOpen
+  BookOpen,
+  ChevronDown
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // Import mock data
 import { mockDashboardData, mockAIAnalytics } from '@/services/mockData';
@@ -54,11 +61,12 @@ const ModernLandingPage: React.FC = () => {
     }, 1000);
   };
 
-  const handleDemo = () => {
-    toast({
-      title: "Demo Requested",
-      description: "We'll contact you shortly to schedule a personalized demo.",
-    });
+  const handleFoxitDemo = () => {
+    window.location.href = '/foxit-demo';
+  };
+
+  const handleVonageDemo = () => {
+    window.location.href = '/vonage-demo';
   };
 
   const features = [
@@ -218,14 +226,45 @@ const ModernLandingPage: React.FC = () => {
                 )}
               </Button>
               
-              <Button
-                variant="outline"
-                onClick={handleDemo}
-                className="px-8 py-4 text-lg font-semibold border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
-              >
-                <Play className="mr-2 h-5 w-5" />
-                Watch Demo
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="px-8 py-4 text-lg font-semibold border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 transition-all duration-300"
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    Watch Demo
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center" className="w-56 mt-2">
+                  <div className="px-2 py-1.5 text-sm font-medium text-gray-500 uppercase tracking-wide border-b">
+                    Quick Actions
+                  </div>
+                  <DropdownMenuItem 
+                    onClick={handleFoxitDemo}
+                    className="py-3 px-3 cursor-pointer hover:bg-orange-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                        <FileText className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium">Try Foxit Demo</span>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleVonageDemo}
+                    className="py-3 px-3 cursor-pointer hover:bg-blue-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                        <MessageSquare className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium">Try Vonage Demo</span>
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Stats */}
@@ -665,13 +704,44 @@ const ModernLandingPage: React.FC = () => {
             >
               {isLoading ? 'Getting Started...' : 'Start Free Trial'}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleDemo}
-              className="px-8 py-4 text-lg font-semibold border-2 border-white text-blue-900 hover:bg-white hover:text-blue-900 transition-all duration-300"
-            >
-              Schedule Demo
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-blue-900 transition-all duration-300"
+                >
+                  Schedule Demo
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="w-56 mt-2">
+                <div className="px-2 py-1.5 text-sm font-medium text-gray-500 uppercase tracking-wide border-b">
+                  Quick Actions
+                </div>
+                <DropdownMenuItem 
+                  onClick={handleFoxitDemo}
+                  className="py-3 px-3 cursor-pointer hover:bg-orange-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">Try Foxit Demo</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleVonageDemo}
+                  className="py-3 px-3 cursor-pointer hover:bg-blue-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                      <MessageSquare className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">Try Vonage Demo</span>
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </section>

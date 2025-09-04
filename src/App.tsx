@@ -39,6 +39,10 @@ import DocumentationPage from "./components/DocumentationPage";
 import NotFound from "./pages/NotFound";
 import HelpPage from "./components/HelpPage";
 import DynamicCharts from "./components/DynamicCharts";
+import BillingAndPricing from "./components/BillingAndPricing";
+import CustomerSuccess from "./components/CustomerSuccess";
+import SalesPipeline from "./components/SalesPipeline";
+import EnterpriseFeatures from "./components/EnterpriseFeatures";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +98,12 @@ const AppContent = () => {
           <Route path="/churn-prediction" element={<ChurnPrediction />} />
           <Route path="/video-onboarding" element={<VideoOnboarding />} />
           <Route path="/dynamic-charts" element={<DynamicCharts />} />
+          
+          {/* Business Features Routes */}
+          <Route path="/billing" element={<BillingAndPricing />} />
+          <Route path="/customer-success" element={<CustomerSuccess />} />
+          <Route path="/sales-pipeline" element={<SalesPipeline />} />
+          <Route path="/enterprise" element={<EnterpriseFeatures />} />
           
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />

@@ -74,7 +74,8 @@ import {
   CheckCircle,
   AlertTriangle,
   RefreshCw,
-  Network
+  Network,
+  DollarSign
 } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
 import BackendHealthCheck from './BackendHealthCheck';
@@ -262,6 +263,38 @@ const Navigation: React.FC<NavigationProps> = ({
           href: '/video-onboarding',
           icon: <Video className="h-4 w-4" />,
           description: 'Interactive sessions'
+        }
+      ]
+    },
+
+    // Business Features
+    {
+      section: 'Business Features',
+      items: [
+        {
+          label: 'Billing & Pricing',
+          href: '/billing',
+          icon: <DollarSign className="h-4 w-4" />,
+          description: 'Manage subscriptions & billing',
+          badge: 'Enterprise'
+        },
+        {
+          label: 'Customer Success',
+          href: '/customer-success',
+          icon: <Users className="h-4 w-4" />,
+          description: 'Monitor customer health'
+        },
+        {
+          label: 'Sales Pipeline',
+          href: '/sales-pipeline',
+          icon: <Target className="h-4 w-4" />,
+          description: 'Track deals & revenue'
+        },
+        {
+          label: 'Enterprise Features',
+          href: '/enterprise',
+          icon: <Shield className="h-4 w-4" />,
+          description: 'Security & compliance'
         }
       ]
     },

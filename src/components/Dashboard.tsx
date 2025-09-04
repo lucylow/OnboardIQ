@@ -51,11 +51,13 @@ import {
   RefreshCw,
   Plus,
   Minus,
-  EyeOff
+  EyeOff,
+  DollarSign
 } from 'lucide-react';
 import { authService } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import BackendHealthCheck from './BackendHealthCheck';
+import BusinessMetrics from './BusinessMetrics';
 
 export const Dashboard: React.FC = () => {
   const [authState, setAuthState] = useState(authService.getAuthState());
@@ -64,9 +66,12 @@ export const Dashboard: React.FC = () => {
   const [hoveredStat, setHoveredStat] = useState<string | null>(null);
   const [showDetails, setShowDetails] = useState<string | null>(null);
   const [realTimeData, setRealTimeData] = useState({
-    activeUsers: 0,
-    recentActivity: 0,
-    systemHealth: 100
+    activeUsers: 847,
+    recentActivity: 156,
+    systemHealth: 98,
+    revenue: 125000,
+    customers: 234,
+    deals: 45
   });
   const navigate = useNavigate();
 
@@ -90,7 +95,10 @@ export const Dashboard: React.FC = () => {
       setRealTimeData(prev => ({
         activeUsers: prev.activeUsers + Math.floor(Math.random() * 3) - 1,
         recentActivity: prev.recentActivity + Math.floor(Math.random() * 5),
-        systemHealth: Math.max(95, Math.min(100, prev.systemHealth + Math.floor(Math.random() * 6) - 3))
+        systemHealth: Math.max(95, Math.min(100, prev.systemHealth + Math.floor(Math.random() * 6) - 3)),
+        revenue: prev.revenue + Math.floor(Math.random() * 1000),
+        customers: prev.customers + Math.floor(Math.random() * 2),
+        deals: prev.deals + Math.floor(Math.random() * 1)
       }));
     }, 3000);
 
@@ -101,6 +109,54 @@ export const Dashboard: React.FC = () => {
   }, [authState.isAuthenticated, navigate]);
 
   const stats = [
+    {
+      id: 'revenue',
+      title: 'Monthly Revenue',
+      value: `$${realTimeData.revenue.toLocaleString()}`,
+      change: '+18%',
+      icon: <DollarSign className="h-5 w-5" />,
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-gradient-to-br from-green-100 to-emerald-100',
+      trend: 'up',
+      details: {
+        mrr: '$125,000',
+        arr: '$1,500,000',
+        growth: '18%',
+        churn: '2.3%'
+      }
+    },
+    {
+      id: 'customers',
+      title: 'Active Customers',
+      value: realTimeData.customers.toLocaleString(),
+      change: '+8%',
+      icon: <Users className="h-5 w-5" />,
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-blue-100 to-cyan-100',
+      trend: 'up',
+      details: {
+        enterprise: 45,
+        professional: 156,
+        starter: 33,
+        healthScore: '78%'
+      }
+    },
+    {
+      id: 'deals',
+      title: 'Active Deals',
+      value: realTimeData.deals.toString(),
+      change: '+12%',
+      icon: <Target className="h-5 w-5" />,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-gradient-to-br from-purple-100 to-pink-100',
+      trend: 'up',
+      details: {
+        pipeline: '$755,000',
+        avgDealSize: '$151,000',
+        winRate: '68%',
+        cycleLength: '45 days'
+      }
+    },
     {
       id: 'users',
       title: 'Total Users',
@@ -438,6 +494,9 @@ export const Dashboard: React.FC = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
+            {/* Business Metrics */}
+            <BusinessMetrics />
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Activity */}
               <motion.div

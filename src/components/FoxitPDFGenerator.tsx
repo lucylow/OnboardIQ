@@ -32,6 +32,23 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
   const [generatedDocument, setGeneratedDocument] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   
+  // File upload states
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [processedDocument, setProcessedDocument] = useState<any>(null);
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  
+  // Processing options
+  const [processingOptions, setProcessingOptions] = useState({
+    compress: false,
+    watermark: false,
+    encrypt: false,
+    watermarkText: '',
+    password: ''
+  });
+  
   const [formData, setFormData] = useState({
     templateId: 'welcome_packet',
     customerName: 'Sarah Chen',

@@ -322,6 +322,54 @@ const VideoOnboarding: React.FC = () => {
     }
   };
 
+  const handleJoinMeeting = (session: VideoSession) => {
+    toast({
+      title: "Join Meeting",
+      description: `Joining meeting for session: ${session.title}`,
+    });
+    // Implement navigation or modal for joining meeting
+  };
+
+  const handleDownloadRecording = (session: VideoSession) => {
+    toast({
+      title: "Download Recording",
+      description: `Downloading recording for session: ${session.title}`,
+    });
+    // Implement download logic
+  };
+
+  const handleViewTranscript = (session: VideoSession) => {
+    toast({
+      title: "View Transcript",
+      description: `Viewing transcript for session: ${session.title}`,
+    });
+    // Implement transcript viewing logic
+  };
+
+  const handleEditSession = (session: VideoSession) => {
+    toast({
+      title: "Edit Session",
+      description: `Editing session: ${session.title}`,
+    });
+    // Implement edit logic
+  };
+
+  const handleShareSession = (session: VideoSession) => {
+    toast({
+      title: "Share Session",
+      description: `Sharing session: ${session.title}`,
+    });
+    // Implement share logic
+  };
+
+  const handleDeleteSession = (session: VideoSession) => {
+    toast({
+      title: "Delete Session",
+      description: `Deleting session: ${session.title}`,
+    });
+    // Implement delete logic
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
@@ -597,32 +645,56 @@ const VideoOnboarding: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           {session.meetingUrl && (
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleJoinMeeting(session)}
+                            >
                               <Play className="h-4 w-4 mr-2" />
                               Join Meeting
                             </Button>
                           )}
                           {session.recordingUrl && (
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDownloadRecording(session)}
+                            >
                               <Download className="h-4 w-4 mr-2" />
                               Download Recording
                             </Button>
                           )}
                           {session.transcript && (
-                            <Button size="sm" variant="outline">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleViewTranscript(session)}
+                            >
                               <FileText className="h-4 w-4 mr-2" />
                               View Transcript
                             </Button>
                           )}
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleEditSession(session)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleShareSession(session)}
+                          >
                             <Share2 className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleDeleteSession(session)}
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>

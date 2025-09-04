@@ -595,6 +595,948 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+// ===== CORE FOXIT FEATURES =====
+
+// 1. E-Signature Workflow Management
+router.post('/esign/initiate', async (req, res) => {
+  try {
+    const { envelopeName, recipients, documents, options = {} } = req.body;
+    
+    console.log(`📝 Foxit E-Signature Initiated: ${envelopeName}`);
+    
+    const envelopeId = `envelope_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      id: envelopeId,
+      name: envelopeName,
+      status: 'sent',
+      recipients: recipients.map((recipient, index) => ({
+        ...recipient,
+        id: `recipient_${index}`,
+        status: 'pending'
+      })),
+      documents: documents.map((doc, index) => ({
+        id: `doc_${index}`,
+        name: doc.name,
+        url: doc.url,
+        pages: Math.floor(Math.random() * 10) + 1
+      })),
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + (options.expiresIn || 30) * 24 * 60 * 60 * 1000).toISOString(),
+      callback_url: options.callbackUrl
+    };
+    
+    console.log(`✅ Foxit E-Signature Created: ${envelopeId}`);
+    
+    res.json({
+      success: true,
+      envelope: response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit E-Signature Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to initiate e-signature',
+      message: error.message
+    });
+  }
+});
+
+router.get('/esign/status/:envelopeId', async (req, res) => {
+  try {
+    const { envelopeId } = req.params;
+    console.log(`📊 Foxit E-Signature Status Requested: ${envelopeId}`);
+    
+    // Mock status response
+    const status = {
+      id: envelopeId,
+      name: 'Onboarding Agreement',
+      status: Math.random() > 0.5 ? 'signed' : 'sent',
+      recipients: [
+        {
+          id: 'recipient_0',
+          firstName: 'John',
+          lastName: 'Doe',
+          emailId: 'john.doe@example.com',
+          status: Math.random() > 0.5 ? 'signed' : 'pending',
+          signed_at: Math.random() > 0.5 ? new Date().toISOString() : null
+        }
+      ],
+      documents: [
+        {
+          id: 'doc_0',
+          name: 'Onboarding Agreement',
+          url: 'https://mock-foxit.com/documents/agreement.pdf',
+          pages: 5
+        }
+      ],
+      created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      completed_at: Math.random() > 0.5 ? new Date().toISOString() : null
+    };
+    
+    console.log(`✅ Foxit E-Signature Status Retrieved: ${envelopeId}`);
+    
+    res.json({
+      success: true,
+      envelope: status,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit E-Signature Status Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get e-signature status',
+      message: error.message
+    });
+  }
+});
+
+// 2. Advanced PDF Operations
+router.post('/pdf/operation', async (req, res) => {
+  try {
+    const { operation, documents, options = {} } = req.body;
+    
+    console.log(`🔧 Foxit PDF Operation: ${operation}`);
+    
+    const taskId = `task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const documentId = `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      success: true,
+      taskId,
+      status: 'completed',
+      result: {
+        documentId,
+        documentUrl: `https://mock-foxit.com/processed/${documentId}.pdf`,
+        fileSize: `${Math.floor(Math.random() * 2) + 0.5} MB`,
+        processingTime: `${Math.floor(Math.random() * 3) + 1}s`
+      }
+    };
+    
+    console.log(`✅ Foxit PDF Operation Completed: ${operation}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit PDF Operation Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform PDF operation',
+      message: error.message
+    });
+  }
+});
+
+router.get('/pdf/operation/status/:taskId', async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    console.log(`📊 Foxit PDF Operation Status: ${taskId}`);
+    
+    const status = {
+      success: true,
+      taskId,
+      status: 'completed',
+      result: {
+        documentId: `processed_${Date.now()}`,
+        documentUrl: `https://mock-foxit.com/processed/processed_${Date.now()}.pdf`,
+        fileSize: `${Math.floor(Math.random() * 2) + 0.5} MB`,
+        processingTime: `${Math.floor(Math.random() * 3) + 1}s`
+      }
+    };
+    
+    console.log(`✅ Foxit PDF Operation Status Retrieved: ${taskId}`);
+    
+    res.json({
+      success: true,
+      ...status,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit PDF Operation Status Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get PDF operation status',
+      message: error.message
+    });
+  }
+});
+
+// 3. Embedded Document Viewer
+router.post('/embed/token', async (req, res) => {
+  try {
+    const { documentId, options = {} } = req.body;
+    
+    console.log(`👁️ Foxit Embed Token Requested: ${documentId}`);
+    
+    const token = `token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      success: true,
+      token,
+      viewerUrl: `https://mock-foxit.com/embed/viewer?token=${token}`,
+      expiresAt: new Date(Date.now() + (options.expireIn || 60) * 60 * 1000).toISOString(),
+      permissions: {
+        download: options.allowDownload || false,
+        print: options.allowPrint || false,
+        edit: options.allowEdit || false
+      }
+    };
+    
+    console.log(`✅ Foxit Embed Token Generated: ${token}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Embed Token Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate embed token',
+      message: error.message
+    });
+  }
+});
+
+// 4. Webhook Management
+router.post('/webhooks/register', async (req, res) => {
+  try {
+    const { url, events } = req.body;
+    
+    console.log(`🔗 Foxit Webhook Registration: ${url}`);
+    
+    const webhookId = `webhook_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      id: webhookId,
+      url,
+      events,
+      status: 'active',
+      created_at: new Date().toISOString(),
+      last_triggered: null
+    };
+    
+    console.log(`✅ Foxit Webhook Registered: ${webhookId}`);
+    
+    res.json({
+      success: true,
+      webhook: response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Webhook Registration Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to register webhook',
+      message: error.message
+    });
+  }
+});
+
+router.get('/webhooks', async (req, res) => {
+  try {
+    console.log(`📋 Foxit Webhooks List Requested`);
+    
+    const webhooks = [
+      {
+        id: 'webhook_1',
+        url: 'https://yourapp.com/webhooks/esign',
+        events: ['document_signed', 'envelope_completed'],
+        status: 'active',
+        created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        last_triggered: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+    
+    console.log(`✅ Foxit Webhooks Retrieved: ${webhooks.length} webhooks`);
+    
+    res.json({
+      success: true,
+      webhooks,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Webhooks List Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get webhooks',
+      message: error.message
+    });
+  }
+});
+
+// 5. Automated Workflow Management
+router.post('/workflows/create', async (req, res) => {
+  try {
+    const { name, trigger, steps } = req.body;
+    
+    console.log(`⚙️ Foxit Workflow Creation: ${name}`);
+    
+    const workflowId = `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      workflowId,
+      status: 'active'
+    };
+    
+    console.log(`✅ Foxit Workflow Created: ${workflowId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Workflow Creation Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create workflow',
+      message: error.message
+    });
+  }
+});
+
+router.post('/workflows/:workflowId/trigger', async (req, res) => {
+  try {
+    const { workflowId } = req.params;
+    const { triggerData } = req.body;
+    
+    console.log(`🚀 Foxit Workflow Triggered: ${workflowId}`);
+    
+    const executionId = `execution_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      success: true,
+      executionId
+    };
+    
+    console.log(`✅ Foxit Workflow Execution Started: ${executionId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Workflow Trigger Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to trigger workflow',
+      message: error.message
+    });
+  }
+});
+
+// ===== ADVANCED PDF OPERATIONS =====
+
+router.post('/pdf/advanced-operation', async (req, res) => {
+  try {
+    const { operation, documents, options = {} } = req.body;
+    
+    console.log(`🔧 Foxit Advanced PDF Operation: ${operation}`);
+    
+    const taskId = `advanced_task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const documentId = `advanced_processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      success: true,
+      taskId,
+      status: 'completed',
+      result: {
+        documentId,
+        documentUrl: `https://mock-foxit.com/advanced-processed/advanced_${Date.now()}.pdf`,
+        fileSize: `${Math.floor(Math.random() * 2) + 0.5} MB`,
+        processingTime: `${Math.floor(Math.random() * 5) + 2}s`
+      }
+    };
+    
+    console.log(`✅ Foxit Advanced PDF Operation Completed: ${operation}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Advanced PDF Operation Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform advanced PDF operation',
+      message: error.message
+    });
+  }
+});
+
+router.post('/pdf/extract-text', async (req, res) => {
+  try {
+    const { documentId, options = {} } = req.body;
+    
+    console.log(`📄 Foxit Text Extraction: ${documentId}`);
+    
+    const response = {
+      text: 'Sample extracted text from PDF document. This is a demonstration of text extraction capabilities.',
+      pages: Math.floor(Math.random() * 10) + 1,
+      confidence: 0.95 + Math.random() * 0.05
+    };
+    
+    console.log(`✅ Foxit Text Extraction Completed: ${documentId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Text Extraction Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to extract text',
+      message: error.message
+    });
+  }
+});
+
+router.post('/pdf/ocr', async (req, res) => {
+  try {
+    const { documentId, language = 'en' } = req.body;
+    
+    console.log(`👁️ Foxit OCR Processing: ${documentId} (${language})`);
+    
+    const response = {
+      text: 'OCR processed text from scanned document. This demonstrates optical character recognition capabilities.',
+      confidence: 0.88 + Math.random() * 0.12,
+      processingTime: Math.floor(Math.random() * 10) + 5
+    };
+    
+    console.log(`✅ Foxit OCR Processing Completed: ${documentId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit OCR Processing Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to process OCR',
+      message: error.message
+    });
+  }
+});
+
+router.post('/pdf/redact', async (req, res) => {
+  try {
+    const { documentId, patterns = [] } = req.body;
+    
+    console.log(`🔒 Foxit PDF Redaction: ${documentId}`);
+    
+    const taskId = `redact_task_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      success: true,
+      taskId,
+      status: 'completed',
+      result: {
+        documentId: `redacted_${Date.now()}`,
+        documentUrl: `https://mock-foxit.com/redacted/redacted_${Date.now()}.pdf`,
+        fileSize: `${Math.floor(Math.random() * 2) + 0.5} MB`,
+        processingTime: `${Math.floor(Math.random() * 3) + 1}s`
+      }
+    };
+    
+    console.log(`✅ Foxit PDF Redaction Completed: ${documentId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit PDF Redaction Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to redact PDF',
+      message: error.message
+    });
+  }
+});
+
+// ===== ADVANCED ANALYTICS =====
+
+router.get('/analytics/document/:documentId', async (req, res) => {
+  try {
+    const { documentId } = req.params;
+    
+    console.log(`📊 Foxit Document Analytics: ${documentId}`);
+    
+    const response = {
+      documentId,
+      usage: {
+        views: Math.floor(Math.random() * 1000) + 100,
+        downloads: Math.floor(Math.random() * 500) + 50,
+        prints: Math.floor(Math.random() * 200) + 20,
+        shares: Math.floor(Math.random() * 100) + 10,
+        timeSpent: Math.floor(Math.random() * 300) + 60,
+        lastAccessed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      performance: {
+        generationTime: Math.floor(Math.random() * 5) + 2,
+        fileSize: Math.floor(Math.random() * 5) + 1,
+        compressionRatio: 0.6 + Math.random() * 0.3,
+        loadTime: Math.floor(Math.random() * 3) + 1
+      },
+      userEngagement: {
+        uniqueUsers: Math.floor(Math.random() * 100) + 20,
+        averageSessionTime: Math.floor(Math.random() * 180) + 60,
+        completionRate: 0.7 + Math.random() * 0.3,
+        bounceRate: Math.random() * 0.3
+      },
+      workflow: {
+        status: 'completed',
+        stepsCompleted: Math.floor(Math.random() * 5) + 3,
+        totalSteps: 5,
+        timeToComplete: Math.floor(Math.random() * 300) + 120
+      }
+    };
+    
+    console.log(`✅ Foxit Document Analytics Retrieved: ${documentId}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Document Analytics Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get document analytics',
+      message: error.message
+    });
+  }
+});
+
+router.get('/analytics/report', async (req, res) => {
+  try {
+    const { period = 'last_30_days' } = req.query;
+    
+    console.log(`📊 Foxit Analytics Report: ${period}`);
+    
+    const now = new Date();
+    const daily = Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(now.getTime() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      documents: Math.floor(Math.random() * 50) + 10,
+      views: Math.floor(Math.random() * 500) + 100
+    }));
+
+    const weekly = Array.from({ length: 12 }, (_, i) => ({
+      week: `Week ${i + 1}`,
+      documents: Math.floor(Math.random() * 200) + 50,
+      views: Math.floor(Math.random() * 2000) + 500
+    }));
+
+    const monthly = Array.from({ length: 12 }, (_, i) => ({
+      month: new Date(2024, i, 1).toLocaleDateString('en-US', { month: 'short' }),
+      documents: Math.floor(Math.random() * 800) + 200,
+      views: Math.floor(Math.random() * 8000) + 2000
+    }));
+
+    const response = {
+      period,
+      summary: {
+        totalDocuments: Math.floor(Math.random() * 5000) + 1000,
+        totalViews: Math.floor(Math.random() * 50000) + 10000,
+        totalDownloads: Math.floor(Math.random() * 20000) + 5000,
+        averageGenerationTime: Math.floor(Math.random() * 5) + 2,
+        averageFileSize: Math.floor(Math.random() * 3) + 1,
+        successRate: 0.95 + Math.random() * 0.05
+      },
+      topDocuments: [
+        {
+          documentId: 'doc_1',
+          name: 'Welcome Packet',
+          views: Math.floor(Math.random() * 1000) + 500,
+          downloads: Math.floor(Math.random() * 500) + 200,
+          averageTimeSpent: Math.floor(Math.random() * 300) + 120
+        },
+        {
+          documentId: 'doc_2',
+          name: 'Service Agreement',
+          views: Math.floor(Math.random() * 800) + 400,
+          downloads: Math.floor(Math.random() * 400) + 150,
+          averageTimeSpent: Math.floor(Math.random() * 250) + 100
+        },
+        {
+          documentId: 'doc_3',
+          name: 'Invoice Template',
+          views: Math.floor(Math.random() * 600) + 300,
+          downloads: Math.floor(Math.random() * 300) + 100,
+          averageTimeSpent: Math.floor(Math.random() * 200) + 80
+        }
+      ],
+      userActivity: {
+        activeUsers: Math.floor(Math.random() * 500) + 100,
+        newUsers: Math.floor(Math.random() * 100) + 20,
+        returningUsers: Math.floor(Math.random() * 400) + 80,
+        averageSessionDuration: Math.floor(Math.random() * 600) + 300
+      },
+      performance: {
+        averageLoadTime: Math.floor(Math.random() * 3) + 1,
+        errorRate: Math.random() * 0.05,
+        uptime: 0.995 + Math.random() * 0.005
+      },
+      trends: { daily, weekly, monthly }
+    };
+    
+    console.log(`✅ Foxit Analytics Report Retrieved: ${period}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Analytics Report Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get analytics report',
+      message: error.message
+    });
+  }
+});
+
+router.post('/analytics/track', async (req, res) => {
+  try {
+    const { documentId, event, metadata } = req.body;
+    
+    console.log(`📈 Foxit Analytics Track: ${event} for ${documentId}`);
+    
+    // In a real implementation, this would store the event in a database
+    const response = {
+      success: true,
+      eventId: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      tracked: true
+    };
+    
+    console.log(`✅ Foxit Analytics Event Tracked: ${event}`);
+    
+    res.json({
+      success: true,
+      ...response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Analytics Tracking Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to track analytics event',
+      message: error.message
+    });
+  }
+});
+
+// ===== WORKFLOW TEMPLATES =====
+
+router.get('/workflows/templates', async (req, res) => {
+  try {
+    console.log(`📋 Foxit Workflow Templates Requested`);
+    
+    const templates = [
+      {
+        id: 'onboarding-complete',
+        name: 'Complete Onboarding Workflow',
+        description: 'End-to-end onboarding process with document generation, e-signature, and notifications',
+        category: 'onboarding',
+        steps: [
+          {
+            id: 'step1',
+            name: 'Generate Welcome Packet',
+            type: 'generate_document',
+            config: { templateId: 'welcome_packet' },
+            estimatedTime: 30
+          },
+          {
+            id: 'step2',
+            name: 'Create Service Agreement',
+            type: 'generate_document',
+            config: { templateId: 'service_agreement' },
+            dependencies: ['step1'],
+            estimatedTime: 45
+          },
+          {
+            id: 'step3',
+            name: 'Initiate E-Signature',
+            type: 'initiate_signature',
+            config: {
+              recipients: [
+                { firstName: '{{customer_name}}', lastName: '', emailId: '{{customer_email}}', role: 'signer' }
+              ]
+            },
+            dependencies: ['step2'],
+            estimatedTime: 60
+          },
+          {
+            id: 'step4',
+            name: 'Send Welcome Email',
+            type: 'send_notification',
+            config: { notificationType: 'email' },
+            dependencies: ['step3'],
+            estimatedTime: 15
+          }
+        ],
+        triggers: [
+          { type: 'user_signup', conditions: { userType: 'new' } }
+        ],
+        estimatedTotalTime: 150,
+        successRate: 0.95,
+        usageCount: Math.floor(Math.random() * 1000) + 500,
+        lastUsed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+        createdBy: 'system',
+        version: '1.0.0'
+      },
+      {
+        id: 'contract-management',
+        name: 'Contract Management Workflow',
+        description: 'Automated contract generation, review, and signature process',
+        category: 'contracts',
+        steps: [
+          {
+            id: 'step1',
+            name: 'Generate Contract',
+            type: 'generate_document',
+            config: { templateId: 'contract_template' },
+            estimatedTime: 60
+          },
+          {
+            id: 'step2',
+            name: 'Add Watermark',
+            type: 'pdf_operation',
+            config: { operation: 'watermark' },
+            dependencies: ['step1'],
+            estimatedTime: 30
+          },
+          {
+            id: 'step3',
+            name: 'Route for Review',
+            type: 'send_notification',
+            config: { notificationType: 'email' },
+            dependencies: ['step2'],
+            estimatedTime: 20
+          },
+          {
+            id: 'step4',
+            name: 'Initiate Signatures',
+            type: 'initiate_signature',
+            config: {
+              recipients: [
+                { firstName: '{{client_name}}', lastName: '', emailId: '{{client_email}}', role: 'signer' },
+                { firstName: '{{manager_name}}', lastName: '', emailId: '{{manager_email}}', role: 'approver' }
+              ]
+            },
+            dependencies: ['step3'],
+            estimatedTime: 90
+          }
+        ],
+        triggers: [
+          { type: 'contract_ready', conditions: { contractType: 'service' } }
+        ],
+        estimatedTotalTime: 200,
+        successRate: 0.92,
+        usageCount: Math.floor(Math.random() * 800) + 300,
+        lastUsed: new Date(Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000).toISOString(),
+        createdBy: 'admin',
+        version: '1.1.0'
+      },
+      {
+        id: 'invoice-processing',
+        name: 'Invoice Processing Workflow',
+        description: 'Automated invoice generation and delivery system',
+        category: 'invoices',
+        steps: [
+          {
+            id: 'step1',
+            name: 'Generate Invoice',
+            type: 'generate_document',
+            config: { templateId: 'invoice_template' },
+            estimatedTime: 45
+          },
+          {
+            id: 'step2',
+            name: 'Compress PDF',
+            type: 'pdf_operation',
+            config: { operation: 'compress' },
+            dependencies: ['step1'],
+            estimatedTime: 25
+          },
+          {
+            id: 'step3',
+            name: 'Send to Customer',
+            type: 'send_notification',
+            config: { notificationType: 'email' },
+            dependencies: ['step2'],
+            estimatedTime: 15
+          },
+          {
+            id: 'step4',
+            name: 'Archive Invoice',
+            type: 'archive_document',
+            config: { archiveLocation: 'invoices/{{year}}/{{month}}' },
+            dependencies: ['step3'],
+            estimatedTime: 10
+          }
+        ],
+        triggers: [
+          { type: 'invoice_due', conditions: { amount: '>1000' } }
+        ],
+        estimatedTotalTime: 95,
+        successRate: 0.98,
+        usageCount: Math.floor(Math.random() * 1500) + 800,
+        lastUsed: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+        createdBy: 'finance',
+        version: '1.0.0'
+      }
+    ];
+    
+    console.log(`✅ Foxit Workflow Templates Retrieved: ${templates.length} templates`);
+    
+    res.json({
+      success: true,
+      templates,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Workflow Templates Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get workflow templates',
+      message: error.message
+    });
+  }
+});
+
+router.post('/workflows/execute', async (req, res) => {
+  try {
+    const { templateId, data } = req.body;
+    
+    console.log(`🚀 Foxit Workflow Execution: ${templateId}`);
+    
+    const executionId = `execution_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const response = {
+      id: executionId,
+      templateId,
+      status: 'running',
+      currentStep: 'step1',
+      progress: 25,
+      startedAt: new Date().toISOString(),
+      steps: [
+        {
+          id: 'step1',
+          status: 'running',
+          startedAt: new Date().toISOString()
+        },
+        {
+          id: 'step2',
+          status: 'pending'
+        },
+        {
+          id: 'step3',
+          status: 'pending'
+        },
+        {
+          id: 'step4',
+          status: 'pending'
+        }
+      ],
+      metadata: data
+    };
+    
+    console.log(`✅ Foxit Workflow Execution Started: ${executionId}`);
+    
+    res.json({
+      success: true,
+      execution: response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Workflow Execution Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to execute workflow',
+      message: error.message
+    });
+  }
+});
+
+router.get('/workflows/execution/:executionId', async (req, res) => {
+  try {
+    const { executionId } = req.params;
+    
+    console.log(`📊 Foxit Workflow Execution Status: ${executionId}`);
+    
+    const response = {
+      id: executionId,
+      templateId: 'onboarding-complete',
+      status: Math.random() > 0.3 ? 'completed' : 'running',
+      currentStep: 'step4',
+      progress: Math.random() > 0.3 ? 100 : Math.floor(Math.random() * 75) + 25,
+      startedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+      completedAt: Math.random() > 0.3 ? new Date().toISOString() : undefined,
+      steps: [
+        {
+          id: 'step1',
+          status: 'completed',
+          startedAt: new Date(Date.now() - 300000).toISOString(),
+          completedAt: new Date(Date.now() - 240000).toISOString(),
+          result: { documentId: 'doc_123', url: 'https://example.com/welcome.pdf' }
+        },
+        {
+          id: 'step2',
+          status: 'completed',
+          startedAt: new Date(Date.now() - 240000).toISOString(),
+          completedAt: new Date(Date.now() - 180000).toISOString(),
+          result: { documentId: 'doc_456', url: 'https://example.com/agreement.pdf' }
+        },
+        {
+          id: 'step3',
+          status: Math.random() > 0.3 ? 'completed' : 'running',
+          startedAt: new Date(Date.now() - 180000).toISOString(),
+          completedAt: Math.random() > 0.3 ? new Date().toISOString() : undefined,
+          result: Math.random() > 0.3 ? { envelopeId: 'env_789', status: 'sent' } : undefined
+        },
+        {
+          id: 'step4',
+          status: Math.random() > 0.3 ? 'completed' : 'pending',
+          startedAt: Math.random() > 0.3 ? new Date().toISOString() : undefined,
+          completedAt: Math.random() > 0.3 ? new Date().toISOString() : undefined
+        }
+      ],
+      metadata: { customerName: 'John Doe', customerEmail: 'john@example.com' }
+    };
+    
+    console.log(`✅ Foxit Workflow Execution Status Retrieved: ${executionId}`);
+    
+    res.json({
+      success: true,
+      execution: response,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('❌ Foxit Workflow Execution Status Failed:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get workflow execution status',
+      message: error.message
+    });
+  }
+});
+
 // Global error handler for Foxit routes
 router.use((error, req, res, next) => {
   console.error('❌ Foxit API Error:', error);

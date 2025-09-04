@@ -1,478 +1,768 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
-import { Alert, AlertDescription } from './ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Textarea } from './ui/textarea';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Loader2, CheckCircle, XCircle, Video, CalendarIcon, Clock, Users, Star } from 'lucide-react';
-import { format } from 'date-fns';
-import { videoOnboardingService, VideoSession, VideoTemplate } from '../services/videoOnboardingService';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Video, 
+  Play, 
+  Pause, 
+  Square, 
+  Mic, 
+  MicOff, 
+  Camera, 
+  CameraOff,
+  Users, 
+  Clock, 
+  Calendar,
+  Star,
+  MessageSquare,
+  Share2,
+  Download,
+  Settings,
+  HelpCircle,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  TrendingUp,
+  BarChart3,
+  Brain,
+  Zap,
+  Shield,
+  FileText,
+  Smartphone,
+  Globe,
+  ArrowRight,
+  RefreshCw,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  Save,
+  Send,
+  Phone,
+  Mail,
+  MapPin,
+  Clock as ClockIcon,
+  Calendar as CalendarIcon,
+  User,
+  Crown,
+  Award,
+  Target,
+  Activity,
+  Heart,
+  ThumbsUp,
+  ThumbsDown,
+  Smile,
+  Frown,
+  Meh
+} from 'lucide-react';
 
-interface VideoOnboardingProps {
-  userId: string;
-  onSessionScheduled?: (session: VideoSession) => void;
-  onSessionStarted?: (session: VideoSession) => void;
-  onSessionCompleted?: (session: VideoSession) => void;
+interface VideoSession {
+  id: string;
+  title: string;
+  type: 'onboarding' | 'training' | 'support' | 'demo';
+  status: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  participant: string;
+  host: string;
+  scheduledAt: Date;
+  startedAt?: Date;
+  endedAt?: Date;
+  duration?: number;
+  satisfaction?: number;
+  notes?: string;
+  meetingUrl?: string;
+  recordingUrl?: string;
+  transcript?: string;
+  tags: string[];
+  priority: 'low' | 'medium' | 'high';
 }
 
-export const VideoOnboarding: React.FC<VideoOnboardingProps> = ({
-  userId,
-  onSessionScheduled,
-  onSessionStarted,
-  onSessionCompleted
-}) => {
+interface VideoTemplate {
+  id: string;
+  name: string;
+  description: string;
+  duration: number;
+  category: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  features: string[];
+  thumbnail: string;
+  popularity: number;
+  rating: number;
+}
+
+const VideoOnboarding: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isRecording, setIsRecording] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentSession, setCurrentSession] = useState<VideoSession | null>(null);
+  const [sessions, setSessions] = useState<VideoSession[]>([]);
   const [templates, setTemplates] = useState<VideoTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [participantName, setParticipantName] = useState('');
-  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
-  const [hostName, setHostName] = useState('');
-  const [sessions, setSessions] = useState<VideoSession[]>([]);
-  const [selectedSession, setSelectedSession] = useState<VideoSession | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [satisfaction, setSatisfaction] = useState<number>(0);
-  const [notes, setNotes] = useState('');
 
-  // Load templates and user sessions on component mount
+  // Mock data
   useEffect(() => {
-    loadTemplates();
-    loadUserSessions();
-  }, [userId]);
-
-  const loadTemplates = async () => {
-    try {
-      const allTemplates = videoOnboardingService.getAllTemplates();
-      setTemplates(allTemplates);
-      if (allTemplates.length > 0) {
-        setSelectedTemplate(allTemplates[0].id);
+    // Load mock sessions
+    setSessions([
+      {
+        id: '1',
+        title: 'Product Onboarding Session',
+        type: 'onboarding',
+        status: 'completed',
+        participant: 'Sarah Johnson',
+        host: 'Alex Chen',
+        scheduledAt: new Date('2024-09-01T10:00:00Z'),
+        startedAt: new Date('2024-09-01T10:05:00Z'),
+        endedAt: new Date('2024-09-01T11:15:00Z'),
+        duration: 70,
+        satisfaction: 5,
+        notes: 'Excellent session, participant showed great engagement',
+        meetingUrl: 'https://meet.google.com/abc-defg-hij',
+        recordingUrl: 'https://recordings.onboardiq.com/session-1',
+        transcript: 'Full transcript available',
+        tags: ['product', 'onboarding', 'feature-demo'],
+        priority: 'high'
+      },
+      {
+        id: '2',
+        title: 'Advanced Features Training',
+        type: 'training',
+        status: 'scheduled',
+        participant: 'Mike Rodriguez',
+        host: 'Lisa Wang',
+        scheduledAt: new Date('2024-09-05T14:00:00Z'),
+        tags: ['training', 'advanced', 'analytics'],
+        priority: 'medium'
+      },
+      {
+        id: '3',
+        title: 'Technical Support Call',
+        type: 'support',
+        status: 'in_progress',
+        participant: 'David Kim',
+        host: 'Tom Wilson',
+        scheduledAt: new Date('2024-09-03T15:30:00Z'),
+        startedAt: new Date('2024-09-03T15:35:00Z'),
+        meetingUrl: 'https://meet.google.com/xyz-uvw-rst',
+        tags: ['support', 'technical', 'urgent'],
+        priority: 'high'
       }
-    } catch (err) {
-      setError('Failed to load templates');
-    }
+    ]);
+
+    // Load mock templates
+    setTemplates([
+      {
+        id: '1',
+        name: 'Complete Product Onboarding',
+        description: 'Comprehensive introduction to all product features and capabilities',
+        duration: 60,
+        category: 'Onboarding',
+        difficulty: 'beginner',
+        features: ['Product Tour', 'Feature Demo', 'Q&A Session', 'Next Steps'],
+        thumbnail: '/api/placeholder/300/200',
+        popularity: 95,
+        rating: 4.8
+      },
+      {
+        id: '2',
+        name: 'Advanced Analytics Training',
+        description: 'Deep dive into advanced analytics and reporting features',
+        duration: 90,
+        category: 'Training',
+        difficulty: 'advanced',
+        features: ['Data Analysis', 'Custom Reports', 'API Integration', 'Best Practices'],
+        thumbnail: '/api/placeholder/300/200',
+        popularity: 78,
+        rating: 4.6
+      },
+      {
+        id: '3',
+        name: 'Security & Compliance Overview',
+        description: 'Understanding security features and compliance requirements',
+        duration: 45,
+        category: 'Training',
+        difficulty: 'intermediate',
+        features: ['Security Features', 'Compliance Overview', 'Best Practices', 'Audit Trail'],
+        thumbnail: '/api/placeholder/300/200',
+        popularity: 82,
+        rating: 4.7
+      }
+    ]);
+  }, []);
+
+  const handleStartSession = (session: VideoSession) => {
+    setCurrentSession(session);
+    setIsRecording(true);
   };
 
-  const loadUserSessions = async () => {
-    try {
-      const userSessions = videoOnboardingService.getSessionsByUserId(userId);
-      setSessions(userSessions);
-    } catch (err) {
-      setError('Failed to load sessions');
-    }
-  };
-
-  const handleScheduleSession = async () => {
-    if (!selectedTemplate || !participantName || !scheduledDate) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const session = await videoOnboardingService.scheduleSession(
-        userId,
-        participantName,
-        scheduledDate,
-        selectedTemplate,
-        hostName
-      );
-      
-      setSessions(prev => [session, ...prev]);
-      setSuccess('Video session scheduled successfully!');
-      onSessionScheduled?.(session);
-      
-      // Reset form
-      setParticipantName('');
-      setScheduledDate(undefined);
-      setHostName('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to schedule session');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleStartSession = async (sessionId: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const session = await videoOnboardingService.startSession(sessionId);
-      setSessions(prev => prev.map(s => s.id === sessionId ? session : s));
-      setSelectedSession(session);
-      setSuccess('Session started!');
-      onSessionStarted?.(session);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to start session');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleEndSession = async (sessionId: string) => {
-    if (!selectedSession) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const session = await videoOnboardingService.endSession(
-        sessionId,
-        undefined, // duration will be calculated automatically
-        satisfaction,
-        notes
-      );
-      
-      setSessions(prev => prev.map(s => s.id === sessionId ? session : s));
-      setSelectedSession(session);
-      setSuccess('Session completed!');
-      onSessionCompleted?.(session);
-      
-      // Reset form
-      setSatisfaction(0);
-      setNotes('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to end session');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancelSession = async (sessionId: string) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const session = await videoOnboardingService.cancelSession(sessionId, 'Cancelled by user');
-      setSessions(prev => prev.map(s => s.id === sessionId ? session : s));
-      setSuccess('Session cancelled');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to cancel session');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleEndSession = () => {
+    setIsRecording(false);
+    setCurrentSession(null);
   };
 
   const getStatusBadge = (status: VideoSession['status']) => {
     switch (status) {
       case 'scheduled':
-        return <Badge variant="default">Scheduled</Badge>;
+        return <Badge variant="secondary">Scheduled</Badge>;
       case 'in_progress':
-        return <Badge variant="default" className="bg-blue-500">In Progress</Badge>;
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Live</Badge>;
       case 'completed':
-        return <Badge variant="default" className="bg-green-500">Completed</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
       case 'cancelled':
         return <Badge variant="destructive">Cancelled</Badge>;
-      case 'no_show':
-        return <Badge variant="destructive">No Show</Badge>;
       default:
-        return <Badge variant="secondary">Unknown</Badge>;
+        return <Badge variant="outline">Unknown</Badge>;
     }
   };
 
-  const getTemplate = (templateId: string) => {
-    return templates.find(t => t.id === templateId);
+  const getPriorityBadge = (priority: VideoSession['priority']) => {
+    switch (priority) {
+      case 'high':
+        return <Badge variant="destructive">High Priority</Badge>;
+      case 'medium':
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Medium</Badge>;
+      case 'low':
+        return <Badge className="bg-gray-500 hover:bg-gray-600">Low</Badge>;
+      default:
+        return <Badge variant="outline">Unknown</Badge>;
+    }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Schedule New Session */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            Schedule Video Session
-          </CardTitle>
-          <CardDescription>
-            Schedule a personalized video onboarding session
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Template Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Session Type</label>
-            <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select session type" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.name} ({template.duration} min)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Participant Name */}
-          <div className="space-y-2">
-            <label htmlFor="participant" className="text-sm font-medium">
-              Participant Name
-            </label>
-            <Input
-              id="participant"
-              placeholder="Enter participant name"
-              value={participantName}
-              onChange={(e) => setParticipantName(e.target.value)}
-            />
-          </div>
-
-          {/* Host Name */}
-          <div className="space-y-2">
-            <label htmlFor="host" className="text-sm font-medium">
-              Host Name (Optional)
-            </label>
-            <Input
-              id="host"
-              placeholder="Enter host name"
-              value={hostName}
-              onChange={(e) => setHostName(e.target.value)}
-            />
-          </div>
-
-          {/* Date Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Scheduled Date & Time</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {scheduledDate ? format(scheduledDate, 'PPP') : 'Pick a date'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={scheduledDate}
-                  onSelect={setScheduledDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          {/* Template Details */}
-          {selectedTemplate && (
-            <div className="p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">Session Details</h4>
-              {(() => {
-                const template = getTemplate(selectedTemplate);
-                if (!template) return null;
-                
-                return (
-                  <div className="text-sm space-y-2">
-                    <div><strong>Duration:</strong> {template.duration} minutes</div>
-                    <div><strong>Agenda:</strong></div>
-                    <ul className="list-disc list-inside ml-2">
-                      {template.agenda.map((item, index) => (
-                        <li key={index}>{item}</li>
-                      ))}
-                    </ul>
-                    <div><strong>Materials:</strong> {template.materials.join(', ')}</div>
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          <Button
-            onClick={handleScheduleSession}
-            disabled={!selectedTemplate || !participantName || !scheduledDate || isLoading}
-            className="w-full"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              'Schedule Session'
-            )}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* User Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Your Sessions
-          </CardTitle>
-          <CardDescription>
-            Manage your scheduled and completed video sessions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sessions.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No sessions scheduled yet
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {sessions.map((session) => (
-                <div key={session.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">{getTemplate(session.type)?.name || 'Default Session'}</h4>
-                    {getStatusBadge(session.status)}
-                  </div>
-                  
-                  <div className="text-sm text-muted-foreground space-y-1 mb-3">
-                    <div>Participant: {session.participant}</div>
-                    <div>Host: {session.host}</div>
-                    <div>Scheduled: {session.scheduledAt.toLocaleString()}</div>
-                    {session.startedAt && (
-                      <div>Started: {session.startedAt.toLocaleString()}</div>
-                    )}
-                    {session.endedAt && (
-                      <div>Ended: {session.endedAt.toLocaleString()}</div>
-                    )}
-                    {session.duration && (
-                      <div>Duration: {session.duration} minutes</div>
-                    )}
-                    {session.satisfaction && (
-                      <div className="flex items-center gap-1">
-                        Satisfaction: 
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${i < session.satisfaction! ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
-                    {session.status === 'scheduled' && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => handleStartSession(session.id)}
-                          disabled={isLoading}
-                        >
-                          Start Session
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleCancelSession(session.id)}
-                          disabled={isLoading}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                    
-                    {session.status === 'in_progress' && (
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedSession(session)}
-                      >
-                        End Session
-                      </Button>
-                    )}
-                    
-                    {session.meetingUrl && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(session.meetingUrl, '_blank')}
-                      >
-                        Join Meeting
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* End Session Modal */}
-      {selectedSession && selectedSession.status === 'in_progress' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>End Session</CardTitle>
-            <CardDescription>
-              Complete the session and provide feedback
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Satisfaction Rating</label>
-              <div className="flex gap-1">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <button
-                    key={rating}
-                    onClick={() => setSatisfaction(rating)}
-                    className="p-1"
-                  >
-                    <Star
-                      className={`h-6 w-6 ${
-                        rating <= satisfaction ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                      }`}
-                    />
-                  </button>
-                ))}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+                <Video className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Video Onboarding</h1>
+                <p className="text-gray-600">AI-powered personalized video sessions</p>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Session Notes</label>
-              <Textarea
-                placeholder="Add notes about the session..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                onClick={() => handleEndSession(selectedSession.id)}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Complete Session'
-                )}
+            <div className="flex items-center space-x-3">
+              <Button variant="outline">
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Help
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedSession(null)}
-              >
-                Cancel
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                New Session
               </Button>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+      </div>
 
-      {/* Error Messages */}
-      {error && (
-        <Alert variant="destructive">
-          <XCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="sessions">Sessions</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
 
-      {/* Success Messages */}
-      {success && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-800">{success}</AlertDescription>
-        </Alert>
+          <TabsContent value="overview" className="space-y-6">
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total Sessions</p>
+                      <p className="text-2xl font-bold text-blue-600">1,247</p>
+                      <p className="text-xs text-green-600">+12% from last month</p>
+                    </div>
+                    <Video className="h-8 w-8 text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Completion Rate</p>
+                      <p className="text-2xl font-bold text-green-600">94.2%</p>
+                      <p className="text-xs text-green-600">+3.1% from last month</p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Avg Satisfaction</p>
+                      <p className="text-2xl font-bold text-purple-600">4.8/5</p>
+                      <p className="text-xs text-green-600">+0.2 from last month</p>
+                    </div>
+                    <Star className="h-8 w-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Active Sessions</p>
+                      <p className="text-2xl font-bold text-orange-600">3</p>
+                      <p className="text-xs text-blue-600">Live now</p>
+                    </div>
+                    <Activity className="h-8 w-8 text-orange-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Sessions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Recent Sessions
+                </CardTitle>
+                <CardDescription>
+                  Your latest video onboarding sessions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {sessions.slice(0, 3).map((session) => (
+                    <div key={session.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                          <Video className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{session.title}</h4>
+                          <p className="text-sm text-gray-500">
+                            {session.participant} • {session.scheduledAt.toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {getStatusBadge(session.status)}
+                        {getPriorityBadge(session.priority)}
+                        <Button size="sm" variant="outline">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Plus className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Schedule New Session</h3>
+                  <p className="text-sm text-gray-600 mb-4">Create a personalized video onboarding session</p>
+                  <Button className="w-full">
+                    Get Started
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <Play className="h-6 w-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Join Live Session</h3>
+                  <p className="text-sm text-gray-600 mb-4">Connect to an ongoing video session</p>
+                  <Button className="w-full" variant="outline">
+                    Join Now
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <BarChart3 className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">View Analytics</h3>
+                  <p className="text-sm text-gray-600 mb-4">Analyze session performance and insights</p>
+                  <Button className="w-full" variant="outline">
+                    View Reports
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="sessions" className="space-y-6">
+            {/* Sessions List */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      All Sessions
+                    </CardTitle>
+                    <CardDescription>
+                      Manage and track all your video onboarding sessions
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="outline" size="sm">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
+                    </Button>
+                    <Button size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Session
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {sessions.map((session) => (
+                    <div key={session.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start space-x-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                            <Video className="h-6 w-6 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 text-lg">{session.title}</h3>
+                            <p className="text-sm text-gray-500">
+                              {session.participant} • Hosted by {session.host}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {session.scheduledAt.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          {getStatusBadge(session.status)}
+                          {getPriorityBadge(session.priority)}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Type</p>
+                          <p className="font-medium capitalize">{session.type}</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Duration</p>
+                          <p className="font-medium">{session.duration || 'N/A'} min</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Satisfaction</p>
+                          <div className="flex items-center justify-center">
+                            {session.satisfaction ? (
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < session.satisfaction! ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-gray-400">N/A</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-500">Tags</p>
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {session.tags.slice(0, 2).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          {session.meetingUrl && (
+                            <Button size="sm" variant="outline">
+                              <Play className="h-4 w-4 mr-2" />
+                              Join Meeting
+                            </Button>
+                          )}
+                          {session.recordingUrl && (
+                            <Button size="sm" variant="outline">
+                              <Download className="h-4 w-4 mr-2" />
+                              Download Recording
+                            </Button>
+                          )}
+                          {session.transcript && (
+                            <Button size="sm" variant="outline">
+                              <FileText className="h-4 w-4 mr-2" />
+                              View Transcript
+                            </Button>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button size="sm" variant="outline">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Share2 className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-6">
+            {/* Templates Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {templates.map((template) => (
+                <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center">
+                      <Video className="h-12 w-12 text-blue-600" />
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                      <Badge variant="outline" className="text-xs">
+                        {template.difficulty}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">{template.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{template.duration} min</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-medium">{template.rating}</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 mb-4">
+                      <p className="text-xs font-medium text-gray-500">Features:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {template.features.slice(0, 3).map((feature) => (
+                          <Badge key={feature} variant="secondary" className="text-xs">
+                            {feature}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button className="w-full">
+                      Use Template
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {/* Analytics Content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Session Trends
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Completion Rate</span>
+                      <span className="font-semibold">94.2%</span>
+                    </div>
+                    <Progress value={94.2} className="h-2" />
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Avg Session Duration</span>
+                      <span className="font-semibold">45 min</span>
+                    </div>
+                    <Progress value={75} className="h-2" />
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Satisfaction Score</span>
+                      <span className="font-semibold">4.8/5</span>
+                    </div>
+                    <Progress value={96} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Popular Templates
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {templates.map((template) => (
+                      <div key={template.id} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">{template.name}</span>
+                        <div className="flex items-center space-x-2">
+                          <Progress value={template.popularity} className="w-20 h-2" />
+                          <span className="text-xs font-medium">{template.popularity}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            {/* Settings Content */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Video Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure your video onboarding preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Recording Settings</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Auto-record sessions</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Save transcripts</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-sm">Enable screen sharing</span>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Notification Settings</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Session reminders</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" defaultChecked className="rounded" />
+                        <span className="text-sm">Completion notifications</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input type="checkbox" className="rounded" />
+                        <span className="text-sm">Analytics reports</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 border-t">
+                  <Button>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Settings
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Video Controls Overlay - Only show when in session */}
+      {currentSession && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm rounded-full px-6 py-3 flex items-center space-x-4 z-50">
+          <Button
+            size="sm"
+            variant={isRecording ? "destructive" : "default"}
+            onClick={() => setIsRecording(!isRecording)}
+          >
+            {isRecording ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </Button>
+          
+          <Button
+            size="sm"
+            variant={isMuted ? "destructive" : "outline"}
+            onClick={() => setIsMuted(!isMuted)}
+          >
+            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
+          
+          <Button
+            size="sm"
+            variant={!isVideoOn ? "destructive" : "outline"}
+            onClick={() => setIsVideoOn(!isVideoOn)}
+          >
+            {!isVideoOn ? <CameraOff className="h-4 w-4" /> : <Camera className="h-4 w-4" />}
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleEndSession}
+          >
+            <XCircle className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   );

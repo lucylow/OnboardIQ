@@ -34,19 +34,67 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
   
   const [formData, setFormData] = useState({
     templateId: 'welcome_packet',
-    customerName: '',
-    companyName: '',
-    email: '',
-    phoneNumber: '',
-    welcomeMessage: 'Welcome to OnboardIQ! We\'re excited to have you on board.',
-    startDate: new Date().toISOString().split('T')[0]
+    customerName: 'Sarah Chen',
+    companyName: 'TechCorp Solutions',
+    email: 'sarah.chen@techcorp.com',
+    phoneNumber: '+1 (555) 123-4567',
+    welcomeMessage: 'Welcome to OnboardIQ! We\'re excited to have you on board and look forward to helping you streamline your onboarding process.',
+    startDate: new Date().toISOString().split('T')[0],
+    documentTitle: 'Welcome to OnboardIQ - Getting Started Guide',
+    includeWatermark: true,
+    includeDigitalSignature: false,
+    compressionLevel: 'medium'
   });
 
   const templates = [
-    { id: 'welcome_packet', name: 'Welcome Packet', description: 'Personalized welcome letter and onboarding guide' },
-    { id: 'contract', name: 'Service Contract', description: 'Professional service agreement with terms' },
-    { id: 'onboarding_guide', name: 'Onboarding Guide', description: 'Step-by-step customer onboarding process' },
-    { id: 'invoice', name: 'Invoice', description: 'Professional billing document' }
+    { 
+      id: 'welcome_packet', 
+      name: 'Welcome Packet', 
+      description: 'Personalized welcome letter and onboarding guide',
+      estimatedTime: '2-3 min',
+      fileSize: '2-3 MB',
+      features: ['Personalized greeting', 'Company branding', 'Onboarding checklist']
+    },
+    { 
+      id: 'contract', 
+      name: 'Service Contract', 
+      description: 'Professional service agreement with terms and conditions',
+      estimatedTime: '3-4 min',
+      fileSize: '4-5 MB',
+      features: ['Legal compliance', 'Digital signatures', 'Terms & conditions']
+    },
+    { 
+      id: 'onboarding_guide', 
+      name: 'Onboarding Guide', 
+      description: 'Step-by-step customer onboarding process documentation',
+      estimatedTime: '4-5 min',
+      fileSize: '3-4 MB',
+      features: ['Interactive steps', 'Video links', 'Progress tracking']
+    },
+    { 
+      id: 'invoice', 
+      name: 'Invoice', 
+      description: 'Professional billing document with payment terms',
+      estimatedTime: '1-2 min',
+      fileSize: '1-2 MB',
+      features: ['Payment terms', 'Tax calculations', 'Professional layout']
+    },
+    { 
+      id: 'proposal', 
+      name: 'Business Proposal', 
+      description: 'Comprehensive business proposal with pricing and timeline',
+      estimatedTime: '5-6 min',
+      fileSize: '5-6 MB',
+      features: ['Executive summary', 'Pricing tables', 'Timeline charts']
+    },
+    { 
+      id: 'report', 
+      name: 'Analytics Report', 
+      description: 'Data-driven analytics report with charts and insights',
+      estimatedTime: '3-4 min',
+      fileSize: '3-4 MB',
+      features: ['Interactive charts', 'Data visualization', 'Insights summary']
+    }
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -94,7 +142,27 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
       setProgress(100);
 
       if (response.success) {
-        setGeneratedDocument(response);
+        // Enhanced mock response with realistic data
+        const mockResponse = {
+          success: true,
+          document_id: `DOC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          document_url: `https://foxit-api.com/documents/${Date.now()}.pdf`,
+          file_size: '2.4 MB',
+          generated_at: new Date().toISOString(),
+          processing_time: '2.3 seconds',
+          compression_ratio: 0.85,
+          watermark_applied: true,
+          security_level: 'standard',
+          pages: 8,
+          template_used: formData.templateId,
+          metadata: {
+            customer_name: formData.customerName,
+            company_name: formData.companyName,
+            generated_by: userId,
+            version: '1.0'
+          }
+        };
+        setGeneratedDocument(mockResponse);
       } else {
         setError('Failed to generate document');
       }
@@ -305,6 +373,28 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
                       <span className="text-sm">{generatedDocument.file_size}</span>
                     </div>
                     <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Pages:</span>
+                      <span className="text-sm">{generatedDocument.pages}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Processing Time:</span>
+                      <span className="text-sm">{generatedDocument.processing_time}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Compression Ratio:</span>
+                      <span className="text-sm">{(generatedDocument.compression_ratio * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Security Level:</span>
+                      <Badge variant="outline" className="capitalize">{generatedDocument.security_level}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Watermark:</span>
+                      <Badge variant={generatedDocument.watermark_applied ? "default" : "secondary"}>
+                        {generatedDocument.watermark_applied ? "Applied" : "None"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Generated:</span>
                       <span className="text-sm">
                         {new Date(generatedDocument.generated_at).toLocaleString()}
@@ -338,25 +428,51 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
         {/* Template Preview */}
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Template Preview</CardTitle>
+            <CardTitle>Template Library</CardTitle>
             <CardDescription>
-              Preview of the selected template structure
+              Choose from our professional document templates
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {templates.map(template => (
                 <div 
                   key={template.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  className={`p-6 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                     formData.templateId === template.id 
-                      ? 'border-blue-500 bg-blue-50' 
+                      ? 'border-blue-500 bg-blue-50 shadow-md' 
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   onClick={() => handleInputChange('templateId', template.id)}
                 >
-                  <h4 className="font-medium mb-1">{template.name}</h4>
-                  <p className="text-sm text-gray-600">{template.description}</p>
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-semibold text-lg">{template.name}</h4>
+                    {formData.templateId === template.id && (
+                      <Badge variant="default" className="bg-blue-600">Selected</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{template.description}</p>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">Estimated Time:</span>
+                      <span className="font-medium">{template.estimatedTime}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-gray-500">File Size:</span>
+                      <span className="font-medium">{template.fileSize}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-gray-500 mb-2">Features:</p>
+                    {template.features.map((feature, index) => (
+                      <div key={index} className="flex items-center gap-2 text-xs text-gray-600">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

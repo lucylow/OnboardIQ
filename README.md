@@ -63,6 +63,7 @@ OnboardIQ is the **only solution that tackles all three crises simultaneously**:
 
 ### Access the Application
 - **Local Development**: `npm run dev` (runs on http://localhost:8083/)
+- **Documentation**: Visit `/docs` for comprehensive guides and API reference
 - **Demo Features**: Visit `/demo` for comprehensive feature showcase
 - **Authentication**: Visit `/signup` or `/login` for user flows
 

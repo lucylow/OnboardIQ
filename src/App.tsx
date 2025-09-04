@@ -35,6 +35,8 @@ import DocumentGeneration from "./components/DocumentGeneration";
 import ChurnPrediction from "./components/ChurnPrediction";
 import UserProfiling from "./components/UserProfiling";
 import NotFound from "./pages/NotFound";
+import HelpPage from "./components/HelpPage";
+import DocumentationPage from "./components/DocumentationPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +94,7 @@ const AppContent = () => {
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />
           <Route path="/foxit-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
+          <Route path="/foxit-pdf-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
           <Route path="/foxit-workflow" element={<FoxitDocumentWorkflow userId="demo_user" />} />
           
           {/* Vonage Integration Routes */}
@@ -115,8 +118,8 @@ const AppContent = () => {
           <Route path="/demo" element={<DemoPage />} />
           
           {/* Resource routes */}
-          <Route path="/docs" element={<NotFound />} />
-          <Route path="/help" element={<NotFound />} />
+          <Route path="/docs" element={<DocumentationPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/tutorials" element={<NotFound />} />
           <Route path="/api" element={<NotFound />} />
           <Route path="/contact" element={<NotFound />} />

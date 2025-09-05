@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Phone, 
   Shield, 
@@ -24,13 +25,7 @@ import {
   Globe,
   Building
 } from 'lucide-react';
-import { 
-  vonageApiService, 
-  VonageVerifyRequest, 
-  VonageVerifyCheckRequest,
-  VonageSimSwapRequest,
-  VonageInsightsRequest
-} from '@/services/vonageApiService';
+import { vonageApi } from '@/services/vonageApi';
 
 interface VerificationStep {
   id: string;
@@ -99,12 +94,7 @@ const VonageAuthentication: React.FC = () => {
       setIsLoading(true);
       setError('');
       
-      const insights: VonageInsightsRequest = {
-        phoneNumber,
-        level: 'standard'
-      };
-
-      const result = await vonageApiService.getPhoneInsights(insights);
+      const result = await vonageApi.getNumberInsights(phoneNumber, 'standard');
       setPhoneInsights(result);
 
       if (!result.valid) {
@@ -131,15 +121,15 @@ const VonageAuthentication: React.FC = () => {
       setIsLoading(true);
       setError('');
 
-      const simSwapRequest: VonageSimSwapRequest = {
-        phoneNumber,
-        country: phoneInsights?.country || 'US'
+      const simSwapRequest = {
+        phone_number: phoneNumber,
+        max_age: 24
       };
 
-      const result = await vonageApiService.checkSimSwap(simSwapRequest);
+      const result = await vonageApi.checkSimSwap(simSwapRequest);
       setSimSwapStatus(result);
 
-      if (result.swapped) {
+      if (result.isSimSwapped) {
         setError('⚠️ SIM swap detected! This may indicate a security risk.');
         updateStepStatus(1, 'failed');
         return false;
@@ -163,26 +153,22 @@ const VonageAuthentication: React.FC = () => {
       setIsLoading(true);
       setError('');
 
-      const verifyRequest: VonageVerifyRequest = {
-        phoneNumber,
+      const verifyRequest = {
+        phone_number: phoneNumber,
         brand: 'OnboardIQ',
-        codeLength: 6,
-        workflowId: 6, // SMS workflow
-        language: 'en-us',
-        pinExpiry: 300, // 5 minutes
-        nextEventWait: 60
+        code_length: 6
       };
 
-      const result = await vonageApiService.startVerification(verifyRequest);
+      const result = await vonageApi.startVerification(verifyRequest);
       
-      if (result.success) {
+      if (result.requestId) {
         setRequestId(result.requestId);
         setVerificationStatus('started');
         updateStepStatus(2, 'completed');
         setCurrentStep(3);
         setSuccess('Verification code sent! Check your phone.');
       } else {
-        throw new Error(result.errorText || 'Failed to start verification');
+        throw new Error(result.message || 'Failed to start verification');
       }
     } catch (error) {
       setError(`Verification failed: ${(error as Error).message}`);
@@ -203,19 +189,19 @@ const VonageAuthentication: React.FC = () => {
       setIsLoading(true);
       setError('');
 
-      const checkRequest: VonageVerifyCheckRequest = {
-        requestId,
+      const checkRequest = {
+        request_id: requestId,
         code: verificationCode
       };
 
-      const result = await vonageApiService.checkVerification(checkRequest);
+      const result = await vonageApi.checkVerification(checkRequest);
       
-      if (result.success && result.status === '0') {
+      if (result.verified) {
         setVerificationStatus('completed');
         updateStepStatus(3, 'completed');
         setSuccess('✅ Authentication successful! Welcome to OnboardIQ.');
       } else {
-        throw new Error(result.errorText || 'Invalid verification code');
+        throw new Error(result.message || 'Invalid verification code');
       }
     } catch (error) {
       setError(`Verification failed: ${(error as Error).message}`);

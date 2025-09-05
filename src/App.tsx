@@ -24,7 +24,7 @@ import ContinuousRiskMonitoring from "./components/ContinuousRiskMonitoring";
 import MuleSoftMCPDashboard from "./components/MuleSoftMCPDashboard";
 import FoxitDemoPage from "./components/FoxitDemoPage";
 import FoxitPDFGenerator from "./components/FoxitPDFGenerator";
-import FoxitDocumentWorkflow from "./components/FoxitDocumentWorkflow";
+import FoxitWorkflow from "./components/FoxitWorkflow";
 import VonageAuthentication from "./components/VonageAuthentication";
 import VonageMultiChannel from "./components/VonageMultiChannel";
 import VonageDemoPage from "./components/VonageDemoPage";
@@ -107,11 +107,14 @@ const AppContent = () => {
           <Route path="/enterprise" element={<EnterpriseFeatures />} />
           <Route path="/activity-chart" element={<ActivityChart />} />
           
+          {/* Document Management Routes */}
+          <Route path="/documents" element={<DocumentGeneration userId="demo_user" />} />
+          
           {/* Foxit Integration Routes */}
           <Route path="/foxit-demo" element={<FoxitDemoPage />} />
           <Route path="/foxit-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
           <Route path="/foxit-pdf-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
-          <Route path="/foxit-workflow" element={<FoxitDocumentWorkflow userId="demo_user" />} />
+          <Route path="/foxit-workflow" element={<FoxitWorkflow />} />
           
           {/* Vonage Integration Routes */}
           <Route path="/vonage-auth" element={<VonageAuthentication />} />

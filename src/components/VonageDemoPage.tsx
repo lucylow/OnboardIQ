@@ -50,6 +50,10 @@ interface LiveDemo {
   action: () => Promise<void>;
   icon: React.ReactNode;
   status: 'idle' | 'running' | 'completed' | 'error';
+  progress?: number;
+  steps?: string[];
+  currentStep?: number;
+  details?: any;
 }
 
 const VonageDemoPage: React.FC = () => {
@@ -137,137 +141,325 @@ const VonageDemoPage: React.FC = () => {
         id: 'verify-demo',
         title: 'Phone Verification Demo',
         description: 'Test the complete verification flow with mock phone number',
+        steps: [
+          'Initializing verification request...',
+          'Validating phone number format...',
+          'Generating secure verification code...',
+          'Sending SMS via Vonage API...',
+          'Tracking delivery status...',
+          'Verification complete!'
+        ],
         action: async () => {
           setLiveDemos(prev => prev.map(d => 
-            d.id === 'verify-demo' ? { ...d, status: 'running' } : d
+            d.id === 'verify-demo' ? { ...d, status: 'running', progress: 0, currentStep: 0 } : d
           ));
+          
           try {
-            const result = await vonageApiService.startVerification({
-              phoneNumber: '+1234567890',
-              brand: 'OnboardIQ Demo',
-              codeLength: 6
-            });
-            setSuccess('Verification code sent! Check the console for details.');
+            // Step 1: Initialize
+            await new Promise(resolve => setTimeout(resolve, 800));
             setLiveDemos(prev => prev.map(d => 
-              d.id === 'verify-demo' ? { ...d, status: 'completed' } : d
+              d.id === 'verify-demo' ? { ...d, progress: 16, currentStep: 1 } : d
+            ));
+            
+            // Step 2: Validate
+            await new Promise(resolve => setTimeout(resolve, 600));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { ...d, progress: 33, currentStep: 2 } : d
+            ));
+            
+            // Step 3: Generate code
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { ...d, progress: 50, currentStep: 3 } : d
+            ));
+            
+            // Step 4: Send SMS
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { ...d, progress: 66, currentStep: 4 } : d
+            ));
+            
+            // Step 5: Track delivery
+            await new Promise(resolve => setTimeout(resolve, 700));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { ...d, progress: 83, currentStep: 5 } : d
+            ));
+            
+            // Step 6: Complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const mockCode = Math.floor(100000 + Math.random() * 900000);
+            const mockRequestId = 'REQ-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            
+            setSuccess(`✅ Verification code sent successfully! Request ID: ${mockRequestId} | Code: ${mockCode} (Demo Mode)`);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { 
+                ...d, 
+                status: 'completed', 
+                progress: 100, 
+                currentStep: 6,
+                details: {
+                  requestId: mockRequestId,
+                  code: mockCode,
+                  phoneNumber: '+1234567890',
+                  deliveryTime: '2.3s',
+                  carrier: 'Verizon Wireless'
+                }
+              } : d
             ));
           } catch (error) {
-            // Simulate successful verification with mock data
-            setTimeout(() => {
-              setSuccess('✅ Verification code sent successfully! Request ID: REQ-123456 | Code: 847291 (Demo Mode)');
-              setLiveDemos(prev => prev.map(d => 
-                d.id === 'verify-demo' ? { ...d, status: 'completed' } : d
-              ));
-            }, 1500);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'verify-demo' ? { ...d, status: 'error' } : d
+            ));
           }
         },
         icon: <Shield className="h-4 w-4" />,
-        status: 'idle'
+        status: 'idle',
+        progress: 0,
+        currentStep: 0
       },
       {
         id: 'sim-swap-demo',
         title: 'SIM Swap Detection Demo',
         description: 'Simulate SIM swap detection for security testing',
+        steps: [
+          'Connecting to carrier database...',
+          'Retrieving SIM card history...',
+          'Analyzing device patterns...',
+          'Checking for suspicious activity...',
+          'Generating security report...',
+          'Security assessment complete!'
+        ],
         action: async () => {
           setLiveDemos(prev => prev.map(d => 
-            d.id === 'sim-swap-demo' ? { ...d, status: 'running' } : d
+            d.id === 'sim-swap-demo' ? { ...d, status: 'running', progress: 0, currentStep: 0 } : d
           ));
+          
           try {
-            const result = await vonageApiService.checkSimSwap({
-              phoneNumber: '+1234567890',
-              country: 'US'
-            });
-            setSuccess('SIM swap check completed! No swap detected.');
+            // Step 1: Connect to carrier
+            await new Promise(resolve => setTimeout(resolve, 900));
             setLiveDemos(prev => prev.map(d => 
-              d.id === 'sim-swap-demo' ? { ...d, status: 'completed' } : d
+              d.id === 'sim-swap-demo' ? { ...d, progress: 16, currentStep: 1 } : d
+            ));
+            
+            // Step 2: Retrieve history
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { ...d, progress: 33, currentStep: 2 } : d
+            ));
+            
+            // Step 3: Analyze patterns
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { ...d, progress: 50, currentStep: 3 } : d
+            ));
+            
+            // Step 4: Check activity
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { ...d, progress: 66, currentStep: 4 } : d
+            ));
+            
+            // Step 5: Generate report
+            await new Promise(resolve => setTimeout(resolve, 600));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { ...d, progress: 83, currentStep: 5 } : d
+            ));
+            
+            // Step 6: Complete
+            await new Promise(resolve => setTimeout(resolve, 400));
+            const riskLevel = Math.random() > 0.7 ? 'HIGH' : Math.random() > 0.3 ? 'MEDIUM' : 'LOW';
+            const lastSwap = riskLevel === 'HIGH' ? '2 days ago' : 'Never';
+            
+            setSuccess(`✅ SIM swap check completed! Status: ${riskLevel === 'HIGH' ? '⚠️ SUSPICIOUS' : '🔒 SECURE'} | Last swap: ${lastSwap} | Risk level: ${riskLevel} (Demo Mode)`);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { 
+                ...d, 
+                status: 'completed', 
+                progress: 100, 
+                currentStep: 6,
+                details: {
+                  riskLevel,
+                  lastSwap,
+                  deviceCount: Math.floor(Math.random() * 3) + 1,
+                  suspiciousActivity: riskLevel === 'HIGH' ? Math.floor(Math.random() * 5) + 1 : 0,
+                  carrier: 'AT&T Mobility'
+                }
+              } : d
             ));
           } catch (error) {
-            // Simulate successful SIM swap check with mock data
-            setTimeout(() => {
-              setSuccess('✅ SIM swap check completed! Status: SECURE | Last swap: Never | Risk level: LOW (Demo Mode)');
-              setLiveDemos(prev => prev.map(d => 
-                d.id === 'sim-swap-demo' ? { ...d, status: 'completed' } : d
-              ));
-            }, 2000);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'sim-swap-demo' ? { ...d, status: 'error' } : d
+            ));
           }
         },
         icon: <Smartphone className="h-4 w-4" />,
-        status: 'idle'
+        status: 'idle',
+        progress: 0,
+        currentStep: 0
       },
       {
         id: 'multi-channel-demo',
         title: 'Multi-Channel Message Demo',
         description: 'Send a message across SMS, WhatsApp, and Email simultaneously',
+        steps: [
+          'Preparing multi-channel message...',
+          'Validating recipient information...',
+          'Sending SMS message...',
+          'Delivering WhatsApp message...',
+          'Queuing email notification...',
+          'All channels delivered!'
+        ],
         action: async () => {
           setLiveDemos(prev => prev.map(d => 
-            d.id === 'multi-channel-demo' ? { ...d, status: 'running' } : d
+            d.id === 'multi-channel-demo' ? { ...d, status: 'running', progress: 0, currentStep: 0 } : d
           ));
+          
           try {
-            const result = await vonageApiService.sendMultiChannelMessage({
-              recipient: {
-                phone: '+1234567890',
-                email: 'demo@onboardiq.com'
-              },
-              channels: ['sms', 'whatsapp'],
-              message: 'Welcome to OnboardIQ! This is a multi-channel demo message.',
-              options: {
-                from: 'OnboardIQ Demo',
-                priority: 'normal'
-              }
-            });
-            setSuccess('Multi-channel message sent successfully!');
+            // Step 1: Prepare message
+            await new Promise(resolve => setTimeout(resolve, 600));
             setLiveDemos(prev => prev.map(d => 
-              d.id === 'multi-channel-demo' ? { ...d, status: 'completed' } : d
+              d.id === 'multi-channel-demo' ? { ...d, progress: 16, currentStep: 1 } : d
+            ));
+            
+            // Step 2: Validate recipient
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { ...d, progress: 33, currentStep: 2 } : d
+            ));
+            
+            // Step 3: Send SMS
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { ...d, progress: 50, currentStep: 3 } : d
+            ));
+            
+            // Step 4: Send WhatsApp
+            await new Promise(resolve => setTimeout(resolve, 700));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { ...d, progress: 66, currentStep: 4 } : d
+            ));
+            
+            // Step 5: Queue email
+            await new Promise(resolve => setTimeout(resolve, 600));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { ...d, progress: 83, currentStep: 5 } : d
+            ));
+            
+            // Step 6: Complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const smsStatus = Math.random() > 0.1 ? 'Delivered' : 'Pending';
+            const whatsappStatus = Math.random() > 0.05 ? 'Delivered' : 'Failed';
+            const emailStatus = Math.random() > 0.2 ? 'Queued' : 'Sent';
+            
+            setSuccess(`✅ Multi-channel message sent! SMS: ${smsStatus} | WhatsApp: ${whatsappStatus} | Email: ${emailStatus} (Demo Mode)`);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { 
+                ...d, 
+                status: 'completed', 
+                progress: 100, 
+                currentStep: 6,
+                details: {
+                  sms: { status: smsStatus, deliveryTime: '1.2s' },
+                  whatsapp: { status: whatsappStatus, deliveryTime: '0.8s' },
+                  email: { status: emailStatus, deliveryTime: '3.1s' },
+                  totalRecipients: 1,
+                  messageId: 'MSG-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+                }
+              } : d
             ));
           } catch (error) {
-            // Simulate successful multi-channel message with mock data
-            setTimeout(() => {
-              setSuccess('✅ Multi-channel message sent! SMS: Delivered | WhatsApp: Delivered | Email: Queued (Demo Mode)');
-              setLiveDemos(prev => prev.map(d => 
-                d.id === 'multi-channel-demo' ? { ...d, status: 'completed' } : d
-              ));
-            }, 1800);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'multi-channel-demo' ? { ...d, status: 'error' } : d
+            ));
           }
         },
         icon: <Zap className="h-4 w-4" />,
-        status: 'idle'
+        status: 'idle',
+        progress: 0,
+        currentStep: 0
       },
       {
         id: 'video-demo',
         title: 'Video Session Demo',
         description: 'Create a video session for customer support',
+        steps: [
+          'Initializing video infrastructure...',
+          'Creating session room...',
+          'Generating access tokens...',
+          'Configuring media settings...',
+          'Setting up recording...',
+          'Video session ready!'
+        ],
         action: async () => {
           setLiveDemos(prev => prev.map(d => 
-            d.id === 'video-demo' ? { ...d, status: 'running' } : d
+            d.id === 'video-demo' ? { ...d, status: 'running', progress: 0, currentStep: 0 } : d
           ));
+          
           try {
-            const session = await vonageApiService.createVideoSession({
-              mediaMode: 'routed',
-              archiveMode: 'manual',
-              location: 'auto'
-            });
-            const token = await vonageApiService.generateVideoToken({
-              sessionId: session.sessionId,
-              role: 'publisher'
-            });
-            setSuccess(`Video session created! Session ID: ${session.sessionId}`);
+            // Step 1: Initialize infrastructure
+            await new Promise(resolve => setTimeout(resolve, 1000));
             setLiveDemos(prev => prev.map(d => 
-              d.id === 'video-demo' ? { ...d, status: 'completed' } : d
+              d.id === 'video-demo' ? { ...d, progress: 16, currentStep: 1 } : d
+            ));
+            
+            // Step 2: Create session room
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { ...d, progress: 33, currentStep: 2 } : d
+            ));
+            
+            // Step 3: Generate tokens
+            await new Promise(resolve => setTimeout(resolve, 600));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { ...d, progress: 50, currentStep: 3 } : d
+            ));
+            
+            // Step 4: Configure media
+            await new Promise(resolve => setTimeout(resolve, 700));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { ...d, progress: 66, currentStep: 4 } : d
+            ));
+            
+            // Step 5: Setup recording
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { ...d, progress: 83, currentStep: 5 } : d
+            ));
+            
+            // Step 6: Complete
+            await new Promise(resolve => setTimeout(resolve, 400));
+            const mockSessionId = 'VS_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            const mockToken = 'TK_' + Math.random().toString(36).substr(2, 16).toUpperCase();
+            const mockArchiveId = 'AR_' + Math.random().toString(36).substr(2, 12).toUpperCase();
+            
+            setSuccess(`✅ Video session created! Session ID: ${mockSessionId} | Token: ${mockToken.substr(0, 8)}... | Archive: ${mockArchiveId} (Demo Mode)`);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { 
+                ...d, 
+                status: 'completed', 
+                progress: 100, 
+                currentStep: 6,
+                details: {
+                  sessionId: mockSessionId,
+                  token: mockToken,
+                  archiveId: mockArchiveId,
+                  maxParticipants: 10,
+                  recordingEnabled: true,
+                  quality: 'HD 720p',
+                  duration: 'Unlimited'
+                }
+              } : d
             ));
           } catch (error) {
-            // Simulate successful video session with mock data
-            setTimeout(() => {
-              const mockSessionId = 'VS_' + Math.random().toString(36).substr(2, 9);
-              const mockToken = 'TK_' + Math.random().toString(36).substr(2, 16);
-              setSuccess(`✅ Video session created! Session ID: ${mockSessionId} | Token: ${mockToken.substr(0, 8)}... (Demo Mode)`);
-              setLiveDemos(prev => prev.map(d => 
-                d.id === 'video-demo' ? { ...d, status: 'completed' } : d
-              ));
-            }, 2200);
+            setLiveDemos(prev => prev.map(d => 
+              d.id === 'video-demo' ? { ...d, status: 'error' } : d
+            ));
           }
         },
         icon: <Video className="h-4 w-4" />,
-        status: 'idle'
+        status: 'idle',
+        progress: 0,
+        currentStep: 0
       }
     ];
     setLiveDemos(demos);
@@ -305,7 +497,13 @@ const VonageDemoPage: React.FC = () => {
   };
 
   const resetDemos = () => {
-    setLiveDemos(prev => prev.map(d => ({ ...d, status: 'idle' })));
+    setLiveDemos(prev => prev.map(d => ({ 
+      ...d, 
+      status: 'idle', 
+      progress: 0, 
+      currentStep: 0,
+      details: undefined
+    })));
     setError('');
     setSuccess('');
   };
@@ -526,36 +724,202 @@ const VonageDemoPage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {liveDemos.map((demo) => (
-              <Card key={demo.id}>
-                <CardHeader>
+              <Card key={demo.id} className="overflow-hidden">
+                <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2">
-                    {demo.icon}
+                    <div className={`p-2 rounded-lg ${demo.status === 'completed' ? 'bg-green-100' : demo.status === 'running' ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                      {demo.icon}
+                    </div>
                     {demo.title}
                   </CardTitle>
                   <CardDescription>{demo.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className={`flex items-center gap-3 p-3 rounded-lg border-2 ${getStatusColor(demo.status)}`}>
+                  {/* Status and Progress */}
+                  <div className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-300 ${getStatusColor(demo.status)}`}>
                     {getStatusIcon(demo.status)}
-                    <span className="font-medium">
-                      {demo.status === 'idle' && 'Ready to run'}
-                      {demo.status === 'running' && 'Running demo...'}
-                      {demo.status === 'completed' && 'Demo completed successfully'}
-                      {demo.status === 'error' && 'Demo completed (Mock Mode)'}
-                    </span>
+                    <div className="flex-1">
+                      <span className="font-medium">
+                        {demo.status === 'idle' && 'Ready to run'}
+                        {demo.status === 'running' && 'Running demo...'}
+                        {demo.status === 'completed' && 'Demo completed successfully'}
+                        {demo.status === 'error' && 'Demo completed (Mock Mode)'}
+                      </span>
+                      {demo.status === 'running' && demo.steps && (
+                        <div className="text-sm text-gray-600 mt-1">
+                          {demo.steps[demo.currentStep || 0]}
+                        </div>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Progress Bar */}
+                  {demo.status === 'running' && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Progress</span>
+                        <span>{demo.progress || 0}%</span>
+                      </div>
+                      <Progress value={demo.progress || 0} className="h-2" />
+                    </div>
+                  )}
+
+                  {/* Step Indicators */}
+                  {demo.status === 'running' && demo.steps && (
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-gray-700">Steps:</div>
+                      <div className="flex flex-wrap gap-1">
+                        {demo.steps.map((step, index) => (
+                          <div
+                            key={index}
+                            className={`px-2 py-1 rounded-full text-xs transition-all duration-300 ${
+                              index <= (demo.currentStep || 0)
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-500'
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Demo Results */}
+                  {demo.status === 'completed' && demo.details && (
+                    <div className="space-y-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="text-sm font-medium text-green-800">Demo Results:</div>
+                      {demo.id === 'verify-demo' && (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Request ID:</span>
+                            <span className="font-mono text-xs">{demo.details.requestId}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Verification Code:</span>
+                            <span className="font-mono font-bold text-green-700">{demo.details.code}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Phone Number:</span>
+                            <span className="font-mono">{demo.details.phoneNumber}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Delivery Time:</span>
+                            <span className="text-green-600">{demo.details.deliveryTime}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Carrier:</span>
+                            <span>{demo.details.carrier}</span>
+                          </div>
+                        </div>
+                      )}
+                      {demo.id === 'sim-swap-demo' && (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Risk Level:</span>
+                            <span className={`font-bold ${demo.details.riskLevel === 'HIGH' ? 'text-red-600' : demo.details.riskLevel === 'MEDIUM' ? 'text-yellow-600' : 'text-green-600'}`}>
+                              {demo.details.riskLevel}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Last Swap:</span>
+                            <span>{demo.details.lastSwap}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Devices:</span>
+                            <span>{demo.details.deviceCount}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Suspicious Activity:</span>
+                            <span className={demo.details.suspiciousActivity > 0 ? 'text-red-600' : 'text-green-600'}>
+                              {demo.details.suspiciousActivity}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Carrier:</span>
+                            <span>{demo.details.carrier}</span>
+                          </div>
+                        </div>
+                      )}
+                      {demo.id === 'multi-channel-demo' && (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Message ID:</span>
+                            <span className="font-mono text-xs">{demo.details.messageId}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">SMS Status:</span>
+                            <span className={demo.details.sms.status === 'Delivered' ? 'text-green-600' : 'text-yellow-600'}>
+                              {demo.details.sms.status} ({demo.details.sms.deliveryTime})
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">WhatsApp Status:</span>
+                            <span className={demo.details.whatsapp.status === 'Delivered' ? 'text-green-600' : 'text-red-600'}>
+                              {demo.details.whatsapp.status} ({demo.details.whatsapp.deliveryTime})
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Email Status:</span>
+                            <span className={demo.details.email.status === 'Sent' ? 'text-green-600' : 'text-blue-600'}>
+                              {demo.details.email.status} ({demo.details.email.deliveryTime})
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Total Recipients:</span>
+                            <span>{demo.details.totalRecipients}</span>
+                          </div>
+                        </div>
+                      )}
+                      {demo.id === 'video-demo' && (
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Session ID:</span>
+                            <span className="font-mono text-xs">{demo.details.sessionId}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Token:</span>
+                            <span className="font-mono text-xs">{demo.details.token.substr(0, 12)}...</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Archive ID:</span>
+                            <span className="font-mono text-xs">{demo.details.archiveId}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Max Participants:</span>
+                            <span>{demo.details.maxParticipants}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Recording:</span>
+                            <span className={demo.details.recordingEnabled ? 'text-green-600' : 'text-gray-600'}>
+                              {demo.details.recordingEnabled ? 'Enabled' : 'Disabled'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Quality:</span>
+                            <span>{demo.details.quality}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600">Duration:</span>
+                            <span>{demo.details.duration}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   <Button
                     onClick={() => runDemo(demo.id)}
                     disabled={demo.status === 'running'}
                     className="w-full"
+                    variant={demo.status === 'completed' ? 'outline' : 'default'}
                   >
                     {demo.status === 'running' ? (
                       <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                     ) : (
                       <Play className="h-4 w-4 mr-2" />
                     )}
-                    {demo.status === 'running' ? 'Running...' : 'Run Demo'}
+                    {demo.status === 'running' ? 'Running...' : demo.status === 'completed' ? 'Run Again' : 'Run Demo'}
                   </Button>
                 </CardContent>
               </Card>

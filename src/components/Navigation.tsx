@@ -536,6 +536,18 @@ const Navigation: React.FC<NavigationProps> = ({
                   <Award className="h-4 w-4 mr-2" />
                   Try Vonage Demo
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    navigate('/mulesoft-demo');
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <Code className="h-4 w-4 mr-2" />
+                  Try MuleSoft Demo
+                </Button>
               </div>
             </div>
 

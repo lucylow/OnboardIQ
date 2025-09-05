@@ -377,11 +377,11 @@ const Navigation: React.FC<NavigationProps> = ({
             </div>
 
             {/* Right side - Notifications and user */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {/* Notifications */}
               <NotificationDropdown />
 
-              {/* Backend Health Check */}
+              {/* Backend Health Check - Minimal */}
               <BackendHealthCheck />
 
               {authState.isAuthenticated ? (
@@ -535,6 +535,18 @@ const Navigation: React.FC<NavigationProps> = ({
                 >
                   <Award className="h-4 w-4 mr-2" />
                   Try Vonage Demo
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => {
+                    navigate('/mulesoft-demo');
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <Code className="h-4 w-4 mr-2" />
+                  Try MuleSoft Demo
                 </Button>
               </div>
             </div>

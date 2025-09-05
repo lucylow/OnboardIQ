@@ -377,11 +377,11 @@ const Navigation: React.FC<NavigationProps> = ({
             </div>
 
             {/* Right side - Notifications and user */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {/* Notifications */}
               <NotificationDropdown />
 
-              {/* Backend Health Check */}
+              {/* Backend Health Check - Minimal */}
               <BackendHealthCheck />
 
               {authState.isAuthenticated ? (

@@ -69,18 +69,15 @@ export const BackendHealthCheck: React.FC<BackendHealthCheckProps> = ({
 
   if (!showDetails) {
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
+      <div className={`flex items-center gap-1 ${className}`}>
         {getStatusIcon()}
-        <span className="text-sm font-medium">
-          {isConnected ? 'Backend Connected' : 'Backend Disconnected'}
-        </span>
-        {getStatusBadge()}
         <Button
           variant="ghost"
           size="sm"
           onClick={checkBackendHealth}
           disabled={isChecking}
-          className="h-6 w-6 p-0"
+          className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
+          title={isConnected ? 'Backend connected' : 'Backend disconnected - Click to retry'}
         >
           <RefreshCw className={`h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
         </Button>

@@ -182,7 +182,7 @@ class DocumentGenerationService {
         document.status = 'completed';
         document.completedAt = new Date();
         document.fileUrl = foxitResponse.document_url || '';
-        document.fileSize = parseInt(foxitResponse.file_size as string) || 0;
+        document.fileSize = parseInt(foxitResponse.file_size?.replace(/[^\d.]/g, '') || '0') || 0;
         document.quality.score = 0.9; // Default quality score
 
         this.analytics.successful++;
@@ -273,7 +273,7 @@ class DocumentGenerationService {
   }
 
   // Download document
-  async downloadDocument(documentId: string): Promise<{ url: string; filename: string }> {
+  async downloadDocument(documentId: string): Promise<{ url: string; filename: string; isBlob: boolean }> {
     const document = this.documents.get(documentId);
     
     if (!document || document.status !== 'completed') {
@@ -291,7 +291,8 @@ class DocumentGenerationService {
     if (document.fileUrl) {
       return {
         url: document.fileUrl,
-        filename
+        filename,
+        isBlob: false
       };
     }
 
@@ -348,7 +349,8 @@ startxref
     
     return {
       url: url,
-      filename
+      filename,
+      isBlob: true
     };
   }
 

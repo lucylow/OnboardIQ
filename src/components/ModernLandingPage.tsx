@@ -32,7 +32,8 @@ import {
   Smartphone,
   Video,
   BookOpen,
-  ChevronDown
+  ChevronDown,
+  Code
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -67,6 +68,10 @@ const ModernLandingPage: React.FC = () => {
 
   const handleVonageDemo = () => {
     window.location.href = '/vonage-demo';
+  };
+
+  const handleMuleSoftDemo = () => {
+    window.location.href = '/mulesoft-demo';
   };
 
   const features = [
@@ -261,6 +266,17 @@ const ModernLandingPage: React.FC = () => {
                         <MessageSquare className="h-4 w-4 text-white" />
                       </div>
                       <span className="font-medium">Try Vonage Demo</span>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={handleMuleSoftDemo}
+                    className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                        <Code className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium">Try MuleSoft Demo</span>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -738,6 +754,17 @@ const ModernLandingPage: React.FC = () => {
                       <MessageSquare className="h-4 w-4 text-white" />
                     </div>
                     <span className="font-medium">Try Vonage Demo</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleMuleSoftDemo}
+                  className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                      <Code className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">Try MuleSoft Demo</span>
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>

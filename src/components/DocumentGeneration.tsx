@@ -126,18 +126,41 @@ export const DocumentGeneration: React.FC<DocumentGenerationProps> = ({
 
   const handleDownloadDocument = async (documentId: string) => {
     try {
+      setError(null);
+      setSuccess(null);
+      
       const downloadInfo = await documentGenerationService.downloadDocument(documentId);
       
       // Create a temporary link to download the file
       const link = document.createElement('a');
       link.href = downloadInfo.url;
       link.download = downloadInfo.filename;
+      link.target = '_blank';
+      link.style.display = 'none';
       document.body.appendChild(link);
+      
+      // Trigger download
       link.click();
+      
+      // Clean up
       document.body.removeChild(link);
       
-      setSuccess('Document downloaded successfully!');
+      // If it's a blob URL, clean it up after a delay
+      if (downloadInfo.isBlob) {
+        setTimeout(() => {
+          URL.revokeObjectURL(downloadInfo.url);
+        }, 2000);
+      }
+      
+      setSuccess(`Document "${downloadInfo.filename}" downloaded successfully!`);
+      
+      // Refresh the document list to show updated download count
+      setTimeout(() => {
+        loadUserDocuments();
+      }, 500);
+      
     } catch (err) {
+      console.error('Download error:', err);
       setError(err instanceof Error ? err.message : 'Failed to download document');
     }
   };

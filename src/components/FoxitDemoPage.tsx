@@ -69,6 +69,90 @@ const FoxitDemoPage: React.FC = () => {
   });
   const { toast } = useToast();
 
+  const handleDownloadDocument = async () => {
+    if (!generatedDoc) {
+      toast({
+        title: "No Document Available",
+        description: "Please generate a document first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a mock PDF content
+      const mockPdfContent = `%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj  
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 300 >>
+stream
+BT
+/F1 12 Tf
+50 700 Td
+(Foxit Demo Document) Tj
+0 -20 Td
+(Customer: ${formData.customerName}) Tj  
+0 -20 Td
+(Company: ${formData.companyName}) Tj
+0 -20 Td
+(Document ID: ${generatedDoc.document_id}) Tj
+0 -20 Td
+(Generated: ${new Date().toLocaleString()}) Tj
+0 -40 Td
+(This is a demo PDF from Foxit integration) Tj
+0 -20 Td
+(Template: ${formData.documentType}) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000265 00000 n 
+0000000600 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+700
+%%EOF`;
+
+      const blob = new Blob([mockPdfContent], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${formData.customerName.replace(/\s+/g, '_')}_${formData.documentType}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download Started",
+        description: "Your document is being downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the document.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const addApiCall = (call: Omit<ApiCall, 'id' | 'timestamp'>) => {
     const newCall: ApiCall = {
       ...call,
@@ -632,7 +716,7 @@ const FoxitDemoPage: React.FC = () => {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1">
+                        <Button size="sm" className="flex-1" onClick={handleDownloadDocument}>
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </Button>

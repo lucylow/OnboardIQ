@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,7 +24,12 @@ import {
   File,
   Minus,
   Shield,
-  Eye
+  Eye,
+  BarChart3,
+  Receipt,
+  Plus,
+  Trash2,
+  DollarSign
 } from 'lucide-react';
 import { foxitApiService } from '../services/foxitApiService';
 
@@ -75,6 +80,40 @@ interface ProcessingOptions {
   password: string;
 }
 
+interface ReportData {
+  reportType: string;
+  dataSource: string;
+  metrics: string[];
+  dateRange: {
+    startDate: string;
+    endDate: string;
+  };
+  summary: string;
+  insights: string[];
+  charts: string[];
+}
+
+interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+interface InvoiceData {
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  paymentTerms: string;
+  notes: string;
+}
+
 const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -110,6 +149,49 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
     includeWatermark: true,
     includeDigitalSignature: false,
     compressionLevel: 'medium'
+  });
+
+  // Report data state
+  const [reportData, setReportData] = useState<ReportData>({
+    reportType: 'analytics',
+    dataSource: 'Google Analytics',
+    metrics: ['page_views', 'conversions', 'bounce_rate'],
+    dateRange: {
+      startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0]
+    },
+    summary: 'Monthly performance overview showing key metrics and trends.',
+    insights: ['Traffic increased by 15%', 'Conversion rate improved by 8%', 'Mobile traffic now represents 65% of total visits'],
+    charts: ['line_chart', 'pie_chart', 'bar_chart']
+  });
+
+  // Invoice data state
+  const [invoiceData, setInvoiceData] = useState<InvoiceData>({
+    invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,
+    issueDate: new Date().toISOString().split('T')[0],
+    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    items: [
+      {
+        id: '1',
+        description: 'Professional Consulting Services',
+        quantity: 40,
+        unitPrice: 150,
+        total: 6000
+      },
+      {
+        id: '2',
+        description: 'Software Development',
+        quantity: 20,
+        unitPrice: 200,
+        total: 4000
+      }
+    ],
+    subtotal: 10000,
+    taxRate: 8.5,
+    taxAmount: 850,
+    total: 10850,
+    paymentTerms: 'Net 30',
+    notes: 'Thank you for your business!'
   });
 
   const templates = [
@@ -169,6 +251,144 @@ const FoxitPDFGenerator: React.FC<FoxitPDFGeneratorProps> = ({ userId }) => {
       [field]: value
     }));
   };
+
+  // Report data handlers
+  const handleReportDataChange = (field: keyof ReportData, value: any) => {
+    setReportData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addReportMetric = () => {
+    setReportData(prev => ({
+      ...prev,
+      metrics: [...prev.metrics, '']
+    }));
+  };
+
+  const removeReportMetric = (index: number) => {
+    setReportData(prev => ({
+      ...prev,
+      metrics: prev.metrics.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateReportMetric = (index: number, value: string) => {
+    setReportData(prev => ({
+      ...prev,
+      metrics: prev.metrics.map((metric, i) => i === index ? value : metric)
+    }));
+  };
+
+  const addReportInsight = () => {
+    setReportData(prev => ({
+      ...prev,
+      insights: [...prev.insights, '']
+    }));
+  };
+
+  const removeReportInsight = (index: number) => {
+    setReportData(prev => ({
+      ...prev,
+      insights: prev.insights.filter((_, i) => i !== index)
+    }));
+  };
+
+  const updateReportInsight = (index: number, value: string) => {
+    setReportData(prev => ({
+      ...prev,
+      insights: prev.insights.map((insight, i) => i === index ? value : insight)
+    }));
+  };
+
+  // Invoice data handlers
+  const handleInvoiceDataChange = (field: keyof InvoiceData, value: any) => {
+    setInvoiceData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const addInvoiceItem = () => {
+    const newItem: InvoiceItem = {
+      id: Date.now().toString(),
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      total: 0
+    };
+    setInvoiceData(prev => ({
+      ...prev,
+      items: [...prev.items, newItem]
+    }));
+  };
+
+  const removeInvoiceItem = (id: string) => {
+    setInvoiceData(prev => {
+      const updatedItems = prev.items.filter(item => item.id !== id);
+      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
+      const taxAmount = subtotal * (prev.taxRate / 100);
+      const total = subtotal + taxAmount;
+      
+      return {
+        ...prev,
+        items: updatedItems,
+        subtotal,
+        taxAmount,
+        total
+      };
+    });
+  };
+
+  const updateInvoiceItem = (id: string, field: keyof InvoiceItem, value: any) => {
+    setInvoiceData(prev => {
+      const updatedItems = prev.items.map(item => 
+        item.id === id 
+          ? { 
+              ...item, 
+              [field]: value,
+              ...(field === 'quantity' || field === 'unitPrice' 
+                ? { total: (field === 'quantity' ? value : item.quantity) * (field === 'unitPrice' ? value : item.unitPrice) }
+                : {})
+            }
+          : item
+      );
+      
+      // Calculate totals immediately
+      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
+      const taxAmount = subtotal * (prev.taxRate / 100);
+      const total = subtotal + taxAmount;
+      
+      return {
+        ...prev,
+        items: updatedItems,
+        subtotal,
+        taxAmount,
+        total
+      };
+    });
+  };
+
+  const calculateInvoiceTotals = () => {
+    setInvoiceData(prev => {
+      const subtotal = prev.items.reduce((sum, item) => sum + item.total, 0);
+      const taxAmount = subtotal * (prev.taxRate / 100);
+      const total = subtotal + taxAmount;
+      
+      return {
+        ...prev,
+        subtotal,
+        taxAmount,
+        total
+      };
+    });
+  };
+
+  // Initialize invoice totals on component mount
+  useEffect(() => {
+    calculateInvoiceTotals();
+  }, []);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -362,19 +582,55 @@ startxref
     }, 200);
 
     try {
+      // Prepare data based on template type
+      let templateData: Record<string, any> = {
+        customer_name: formData.customerName,
+        company_name: formData.companyName,
+        email: formData.email,
+        phone_number: formData.phoneNumber,
+        welcome_message: formData.welcomeMessage,
+        start_date: formData.startDate,
+        document_title: formData.documentTitle,
+        generated_by: userId
+      };
+
+      // Add template-specific data
+      if (formData.templateId === 'report') {
+        templateData = {
+          ...templateData,
+          report_type: reportData.reportType,
+          data_source: reportData.dataSource,
+          metrics: reportData.metrics,
+          date_range: reportData.dateRange,
+          summary: reportData.summary,
+          insights: reportData.insights,
+          charts: reportData.charts
+        };
+      } else if (formData.templateId === 'invoice') {
+        templateData = {
+          ...templateData,
+          invoice_number: invoiceData.invoiceNumber,
+          issue_date: invoiceData.issueDate,
+          due_date: invoiceData.dueDate,
+          items: invoiceData.items,
+          subtotal: invoiceData.subtotal,
+          tax_rate: invoiceData.taxRate,
+          tax_amount: invoiceData.taxAmount,
+          total: invoiceData.total,
+          payment_terms: invoiceData.paymentTerms,
+          notes: invoiceData.notes
+        };
+      }
+
       // Call Foxit API
       const response = await foxitApiService.generateDocument({
         templateId: formData.templateId,
-        data: {
-          customer_name: formData.customerName,
-          company_name: formData.companyName,
-          email: formData.email,
-          phone_number: formData.phoneNumber,
-          welcome_message: formData.welcomeMessage,
-          start_date: formData.startDate
-        },
+        data: templateData,
         options: {
-          includeWatermark: true
+          includeWatermark: formData.includeWatermark,
+          compression: formData.compressionLevel !== 'none',
+          security: 'standard',
+          format: 'pdf'
         }
       });
 
@@ -574,6 +830,24 @@ startxref
           phoneNumber: '+1 (555) 321-0987',
           welcomeMessage: 'Welcome to Innovation Labs! This comprehensive onboarding guide will help you get started with our platform and maximize your productivity.'
         };
+      case 'report':
+        return {
+          ...sampleData,
+          customerName: 'Analytics Team',
+          companyName: 'DataCorp Analytics',
+          email: 'analytics@datacorp.com',
+          phoneNumber: '+1 (555) 555-0123',
+          welcomeMessage: 'Monthly Analytics Report - Comprehensive data analysis and insights for business decision making.'
+        };
+      case 'proposal':
+        return {
+          ...sampleData,
+          customerName: 'Sarah Williams',
+          companyName: 'Enterprise Solutions Inc',
+          email: 'sarah.williams@enterprise.com',
+          phoneNumber: '+1 (555) 777-8888',
+          welcomeMessage: 'Business Proposal - Comprehensive solution offering with detailed pricing and implementation timeline.'
+        };
       default:
         return sampleData;
     }
@@ -698,6 +972,327 @@ startxref
                   className="resize-none"
                 />
               </div>
+
+              {/* Report-specific fields */}
+              {formData.templateId === 'report' && (
+                <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Report Configuration</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="reportType" className="text-sm">Report Type</Label>
+                      <Select 
+                        value={reportData.reportType} 
+                        onValueChange={(value) => handleReportDataChange('reportType', value)}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select report type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="analytics">Analytics Report</SelectItem>
+                          <SelectItem value="financial">Financial Report</SelectItem>
+                          <SelectItem value="performance">Performance Report</SelectItem>
+                          <SelectItem value="marketing">Marketing Report</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="dataSource" className="text-sm">Data Source</Label>
+                      <Input
+                        id="dataSource"
+                        value={reportData.dataSource}
+                        onChange={(e) => handleReportDataChange('dataSource', e.target.value)}
+                        placeholder="Google Analytics, Salesforce, etc."
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="startDate" className="text-sm">Start Date</Label>
+                      <Input
+                        id="startDate"
+                        type="date"
+                        value={reportData.dateRange.startDate}
+                        onChange={(e) => handleReportDataChange('dateRange', { ...reportData.dateRange, startDate: e.target.value })}
+                        className="h-9"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="endDate" className="text-sm">End Date</Label>
+                      <Input
+                        id="endDate"
+                        type="date"
+                        value={reportData.dateRange.endDate}
+                        onChange={(e) => handleReportDataChange('dateRange', { ...reportData.dateRange, endDate: e.target.value })}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Key Metrics</Label>
+                    <div className="space-y-2">
+                      {reportData.metrics.map((metric, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={metric}
+                            onChange={(e) => updateReportMetric(index, e.target.value)}
+                            placeholder="Enter metric name..."
+                            className="h-9 flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeReportMetric(index)}
+                            className="h-9 px-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addReportMetric}
+                        className="h-9"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Metric
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="summary" className="text-sm">Executive Summary</Label>
+                    <Textarea
+                      id="summary"
+                      value={reportData.summary}
+                      onChange={(e) => handleReportDataChange('summary', e.target.value)}
+                      placeholder="Brief summary of the report findings..."
+                      rows={2}
+                      className="resize-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Key Insights</Label>
+                    <div className="space-y-2">
+                      {reportData.insights.map((insight, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            value={insight}
+                            onChange={(e) => updateReportInsight(index, e.target.value)}
+                            placeholder="Enter key insight..."
+                            className="h-9 flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeReportInsight(index)}
+                            className="h-9 px-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addReportInsight}
+                        className="h-9"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Insight
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Invoice-specific fields */}
+              {formData.templateId === 'invoice' && (
+                <div className="space-y-4 p-4 border rounded-lg bg-green-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Receipt className="h-5 w-5 text-green-600" />
+                    <h3 className="font-semibold text-green-900">Invoice Details</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="invoiceNumber" className="text-sm">Invoice Number</Label>
+                      <Input
+                        id="invoiceNumber"
+                        value={invoiceData.invoiceNumber}
+                        onChange={(e) => handleInvoiceDataChange('invoiceNumber', e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="issueDate" className="text-sm">Issue Date</Label>
+                      <Input
+                        id="issueDate"
+                        type="date"
+                        value={invoiceData.issueDate}
+                        onChange={(e) => handleInvoiceDataChange('issueDate', e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="dueDate" className="text-sm">Due Date</Label>
+                      <Input
+                        id="dueDate"
+                        type="date"
+                        value={invoiceData.dueDate}
+                        onChange={(e) => handleInvoiceDataChange('dueDate', e.target.value)}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Invoice Items</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addInvoiceItem}
+                        className="h-8"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Item
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {invoiceData.items.map((item, index) => (
+                        <div key={item.id} className="grid grid-cols-12 gap-2 items-center p-3 border rounded-lg bg-white">
+                          <div className="col-span-5">
+                            <Input
+                              value={item.description}
+                              onChange={(e) => updateInvoiceItem(item.id, 'description', e.target.value)}
+                              placeholder="Item description..."
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <Input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateInvoiceItem(item.id, 'quantity', parseInt(e.target.value) || 0)}
+                              placeholder="Qty"
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <Input
+                              type="number"
+                              value={item.unitPrice}
+                              onChange={(e) => updateInvoiceItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)}
+                              placeholder="Price"
+                              className="h-8 text-sm"
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <div className="h-8 flex items-center justify-center text-sm font-medium">
+                              ${item.total.toFixed(2)}
+                            </div>
+                          </div>
+                          <div className="col-span-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeInvoiceItem(item.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="taxRate" className="text-sm">Tax Rate (%)</Label>
+                      <Input
+                        id="taxRate"
+                        type="number"
+                        value={invoiceData.taxRate}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          setInvoiceData(prev => {
+                            const taxAmount = prev.subtotal * (rate / 100);
+                            const total = prev.subtotal + taxAmount;
+                            return {
+                              ...prev,
+                              taxRate: rate,
+                              taxAmount,
+                              total
+                            };
+                          });
+                        }}
+                        className="h-9"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="paymentTerms" className="text-sm">Payment Terms</Label>
+                      <Input
+                        id="paymentTerms"
+                        value={invoiceData.paymentTerms}
+                        onChange={(e) => handleInvoiceDataChange('paymentTerms', e.target.value)}
+                        placeholder="Net 30, Due on receipt, etc."
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes" className="text-sm">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      value={invoiceData.notes}
+                      onChange={(e) => handleInvoiceDataChange('notes', e.target.value)}
+                      placeholder="Additional notes or terms..."
+                      rows={2}
+                      className="resize-none"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-white border rounded-lg">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Subtotal:</span>
+                        <span>${invoiceData.subtotal.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tax ({invoiceData.taxRate}%):</span>
+                        <span>${invoiceData.taxAmount.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-base border-t pt-2">
+                        <span>Total:</span>
+                        <span>${invoiceData.total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <Button 
                 onClick={handleGenerateDocument}

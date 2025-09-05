@@ -724,7 +724,7 @@ const ModernLandingPage: React.FC = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="px-8 py-4 text-lg font-semibold border-2 border-white text-white hover:bg-white hover:text-blue-900 transition-all duration-300"
+                  className="px-8 py-4 text-lg font-semibold border-2 border-white text-blue-900 hover:bg-white hover:text-blue-900 transition-all duration-300"
                 >
                   Schedule Demo
                   <ChevronDown className="ml-2 h-4 w-4" />

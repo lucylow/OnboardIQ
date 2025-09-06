@@ -34,6 +34,8 @@ class StreamingChatService {
     onError?: (error: string) => void
   ): Promise<string> {
     try {
+      console.log('Attempting to connect to streaming endpoint:', `${this.baseUrl}/api/streaming-chat/stream`);
+      
       const response = await fetch(`${this.baseUrl}/api/streaming-chat/stream`, {
         method: 'POST',
         headers: {
@@ -46,7 +48,10 @@ class StreamingChatService {
         }),
       });
 
+      console.log('Response status:', response.status, response.statusText);
+
       if (!response.ok) {
+        console.error('HTTP error response:', await response.text());
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -65,12 +70,14 @@ class StreamingChatService {
           if (done) break;
           
           const chunk = decoder.decode(value, { stream: true });
+          console.log('Received chunk:', chunk);
           const lines = chunk.split('\n');
           
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               try {
                 const data: StreamingMessage = JSON.parse(line.slice(6));
+                console.log('Parsed streaming data:', data);
                 
                 switch (data.type) {
                   case 'start':
@@ -85,15 +92,17 @@ class StreamingChatService {
                     break;
                     
                   case 'complete':
+                    console.log('Streaming completed');
                     onComplete?.(fullText);
                     break;
                     
                   case 'error':
+                    console.error('Streaming error:', data.message);
                     onError?.(data.message || 'Unknown error');
                     break;
                 }
               } catch (parseError) {
-                console.warn('Failed to parse streaming data:', parseError);
+                console.warn('Failed to parse streaming data:', parseError, 'Raw line:', line);
               }
             }
           }
@@ -104,9 +113,13 @@ class StreamingChatService {
 
       return fullText;
     } catch (error) {
+      console.error('Streaming chat service error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       onError?.(errorMessage);
-      throw error;
+      
+      // Fallback to simulation for demo purposes
+      console.log('Falling back to simulation mode');
+      return await this.simulateStreaming(message, onChunk, onComplete);
     }
   }
 

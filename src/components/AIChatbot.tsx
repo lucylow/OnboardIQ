@@ -22,6 +22,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { aiService } from '@/services/aiService';
+import { streamingChatService } from '@/services/streamingChatService';
 
 interface Message {
   id: string;
@@ -29,6 +30,7 @@ interface Message {
   sender: 'user' | 'bot';
   timestamp: Date;
   type: 'text' | 'quick_reply' | 'document' | 'video' | 'action';
+  isStreaming?: boolean;
   metadata?: {
     action?: string;
     documentId?: string;
@@ -148,6 +150,121 @@ const AIChatbot: React.FC = () => {
     }
   };
 
+  const simulateStreamingAIResponse = async (userMessage: string): Promise<void> => {
+    const messageId = Date.now().toString();
+    
+    // Create initial streaming message
+    const streamingMessage: Message = {
+      id: messageId,
+      content: '',
+      sender: 'bot',
+      timestamp: new Date(),
+      type: 'text',
+      isStreaming: true,
+      metadata: {
+        quickReplies: []
+      }
+    };
+
+    // Add streaming message to chat
+    setMessages(prev => [...prev, streamingMessage]);
+
+    try {
+      // Check if streaming service is available
+      const isStreamingAvailable = await streamingChatService.checkHealth();
+      
+      if (isStreamingAvailable) {
+        // Use real streaming service
+        await streamingChatService.sendStreamingMessage(
+          userMessage,
+          { 
+            messages: messages.slice(-5),
+            userProfile: { firstName: 'User', companyName: 'Demo Company', planTier: 'free' }
+          },
+          // onChunk
+          (chunk: string, fullText: string, progress: number) => {
+            setMessages(prev => prev.map(msg => 
+              msg.id === messageId 
+                ? { ...msg, content: fullText }
+                : msg
+            ));
+          },
+          // onComplete
+          (fullText: string) => {
+            const quickReplies = generateQuickReplies(userMessage, fullText);
+            setMessages(prev => prev.map(msg => 
+              msg.id === messageId 
+                ? { 
+                    ...msg, 
+                    content: fullText, 
+                    isStreaming: false,
+                    metadata: { quickReplies }
+                  }
+                : msg
+            ));
+          },
+          // onError
+          (error: string) => {
+            console.error('Streaming error:', error);
+            setMessages(prev => prev.map(msg => 
+              msg.id === messageId 
+                ? { 
+                    ...msg, 
+                    content: "I'm here to help you with OnboardIQ! How can I assist you today?",
+                    isStreaming: false,
+                    metadata: { 
+                      quickReplies: ["Onboarding help", "Document generation", "Video session", "Security questions"]
+                    }
+                  }
+                : msg
+            ));
+          }
+        );
+      } else {
+        // Fallback to simulated streaming
+        await streamingChatService.simulateStreaming(
+          userMessage,
+          // onChunk
+          (chunk: string, fullText: string, progress: number) => {
+            setMessages(prev => prev.map(msg => 
+              msg.id === messageId 
+                ? { ...msg, content: fullText }
+                : msg
+            ));
+          },
+          // onComplete
+          (fullText: string) => {
+            const quickReplies = generateQuickReplies(userMessage, fullText);
+            setMessages(prev => prev.map(msg => 
+              msg.id === messageId 
+                ? { 
+                    ...msg, 
+                    content: fullText, 
+                    isStreaming: false,
+                    metadata: { quickReplies }
+                  }
+                : msg
+            ));
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error in streaming response:', error);
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { 
+              ...msg, 
+              content: "I'm here to help you with OnboardIQ! How can I assist you today?",
+              isStreaming: false,
+              metadata: { 
+                quickReplies: ["Onboarding help", "Document generation", "Video session", "Security questions"]
+              }
+            }
+          : msg
+      ));
+    }
+  };
+
   const generateQuickReplies = (userMessage: string, aiResponse: string): string[] => {
     const lowerMessage = userMessage.toLowerCase();
     const lowerResponse = aiResponse.toLowerCase();
@@ -181,8 +298,8 @@ const AIChatbot: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const aiResponse = await simulateAIResponse(content);
-      setMessages(prev => [...prev, aiResponse]);
+      // Use streaming response for better UX
+      await simulateStreamingAIResponse(content);
     } catch (error) {
       console.error('Error getting AI response:', error);
     } finally {
@@ -302,9 +419,17 @@ const AIChatbot: React.FC = () => {
                             : 'bg-gray-100 text-gray-900'
                         }`}
                       >
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm">
+                          {message.content}
+                          {message.isStreaming && (
+                            <span className="inline-block w-2 h-4 bg-blue-500 ml-1 animate-pulse"></span>
+                          )}
+                        </p>
                         <p className="text-xs opacity-70 mt-1">
                           {formatTime(message.timestamp)}
+                          {message.isStreaming && (
+                            <span className="ml-2 text-blue-500">Streaming...</span>
+                          )}
                         </p>
                         
                         {/* Quick Replies */}

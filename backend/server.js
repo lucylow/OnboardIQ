@@ -40,20 +40,20 @@ const DocumentAIEngine = require('./ai/documentAIEngine');
 const ChurnPredictor = require('./ai/churnPredictor');
 const MultiAgentOrchestrator = require('./ai/multiAgentOrchestrator');
 const mcpRoutes = require('./routes/mcp');
-const vonageRoutes = require('./routes/vonage');
+const communicationRoutes = require('./routes/communication');
 
 // Import API integrations
-const VonageIntegration = require('./integrations/vonageIntegration');
-const FoxitIntegration = require('./integrations/foxitIntegration');
-const MuleSoftIntegration = require('./integrations/muleSoftIntegration');
+const CommunicationIntegration = require('./integrations/communicationIntegration');
+const DocumentIntegration = require('./integrations/documentIntegration');
+const IntegrationPlatformIntegration = require('./integrations/integrationPlatformIntegration');
 
 // Import routes
 const authRoutes = require('./routes/auth');
 const onboardingRoutes = require('./routes/onboarding');
 const aiRoutes = require('./routes/ai');
-const documentRoutes = require('./routes/documents');
-const foxitRoutes = require('./routes/foxit');
+const documentRoutes = require('./routes/document');
 const aiAgentsRoutes = require('./routes/ai-agents');
+const streamingChatRoutes = require('./routes/streaming-chat');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -162,23 +162,23 @@ try {
 }
 
 // Initialize API integrations with error handling
-let vonageIntegration, foxitIntegration, muleSoftIntegration;
+let communicationIntegration, documentIntegration, integrationPlatformIntegration;
 
 try {
-  vonageIntegration = new VonageIntegration({
-    apiKey: process.env.VONAGE_API_KEY,
-    apiSecret: process.env.VONAGE_API_SECRET
+  communicationIntegration = new CommunicationIntegration({
+    apiKey: process.env.COMMUNICATION_API_KEY,
+    apiSecret: process.env.COMMUNICATION_API_SECRET
   });
 
-  foxitIntegration = new FoxitIntegration({
-    apiKey: process.env.FOXIT_API_KEY,
-    baseUrl: process.env.FOXIT_API_BASE_URL
+  documentIntegration = new DocumentIntegration({
+    apiKey: process.env.DOCUMENT_API_KEY,
+    baseUrl: process.env.DOCUMENT_API_BASE_URL
   });
 
-  muleSoftIntegration = new MuleSoftIntegration({
-    baseUrl: process.env.MULESOFT_BASE_URL,
-    clientId: process.env.MULESOFT_CLIENT_ID,
-    clientSecret: process.env.MULESOFT_CLIENT_SECRET
+  integrationPlatformIntegration = new IntegrationPlatformIntegration({
+    baseUrl: process.env.INTEGRATION_PLATFORM_BASE_URL,
+    clientId: process.env.INTEGRATION_PLATFORM_CLIENT_ID,
+    clientSecret: process.env.INTEGRATION_PLATFORM_CLIENT_SECRET
   });
   
   logger.info('API integrations initialized successfully');
@@ -197,9 +197,9 @@ try {
     securityAI,
     documentAI,
     churnPredictor,
-    vonageIntegration,
-    foxitIntegration,
-    muleSoftIntegration
+    communicationIntegration,
+    documentIntegration,
+    integrationPlatformIntegration
   });
   
   logger.info('Multi-agent orchestrator initialized successfully');
@@ -219,9 +219,9 @@ app.use((req, res, next) => {
     orchestrator: orchestrator
   };
   req.integrations = {
-    vonage: vonageIntegration,
-    foxit: foxitIntegration,
-    muleSoft: muleSoftIntegration
+    communication: communicationIntegration,
+    document: documentIntegration,
+    integrationPlatform: integrationPlatformIntegration
   };
   req.logger = logger;
   next();
@@ -256,10 +256,11 @@ app.use('/api/auth', authRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/documents', documentRoutes);
-app.use('/api/foxit', foxitRoutes);
+app.use('/api/document', documentRoutes);
 app.use('/api/ai-agents', aiAgentsRoutes);
 app.use('/api/mcp', mcpRoutes);
-app.use('/api/vonage', vonageRoutes);
+app.use('/api/communication', communicationRoutes);
+app.use('/api/streaming-chat', streamingChatRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

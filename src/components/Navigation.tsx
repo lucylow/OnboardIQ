@@ -132,6 +132,19 @@ const Navigation: React.FC<NavigationProps> = ({
 
   // Unified navigation items - everything in one menu
   const unifiedNavItems = [
+    // Featured - Chat First
+    {
+      section: 'Featured',
+      items: [
+        {
+          label: 'AI Streaming Chat',
+          href: '/streaming-chat',
+          icon: <MessageSquare className="h-4 w-4" />,
+          description: 'Real-time AI chat with OpenAI GPT-4',
+          badge: 'Featured'
+        }
+      ]
+    },
     // Main Dashboard
     {
       section: 'Main',
@@ -192,20 +205,20 @@ const Navigation: React.FC<NavigationProps> = ({
           description: 'Manage contracts'
         },
         {
-          label: 'Foxit PDF Generator',
-          href: '/foxit-pdf-generator',
+          label: 'Document PDF Generator',
+          href: '/document-pdf-generator',
           icon: <FileCheck className="h-4 w-4" />,
           description: 'Generate PDFs'
         },
         {
-          label: 'Foxit Demo',
-          href: '/foxit-demo',
+          label: 'Document Demo',
+          href: '/document-demo',
           icon: <Play className="h-4 w-4" />,
           description: 'PDF features demo'
         },
         {
           label: 'Document Workflow',
-          href: '/foxit-workflow',
+          href: '/document-workflow',
           icon: <Workflow className="h-4 w-4" />,
           description: 'Automated processing'
         }
@@ -223,14 +236,14 @@ const Navigation: React.FC<NavigationProps> = ({
               badge: 'New'
             },
             {
-              label: 'MuleSoft Demo',
-              href: '/mulesoft-demo',
+              label: 'Integration Platform Demo',
+              href: '/integration-platform-demo',
               icon: <Code className="h-4 w-4" />,
               description: 'Anypoint Platform demo'
             },
             {
               label: 'MCP Dashboard',
-              href: '/mulesoft-mcp',
+              href: '/integration-platform-mcp',
               icon: <Network className="h-4 w-4" />,
               description: 'Model Context Protocol'
             }
@@ -247,14 +260,14 @@ const Navigation: React.FC<NavigationProps> = ({
           description: 'Enhanced security'
         },
         {
-          label: 'Vonage Multi-Channel',
-          href: '/vonage-multichannel',
+          label: 'Communication Multi-Channel',
+          href: '/communication-multichannel',
           icon: <MessageSquare className="h-4 w-4" />,
           description: 'Multi-channel messaging'
         },
         {
-          label: 'Vonage Demo',
-          href: '/vonage-demo',
+          label: 'Communication Demo',
+          href: '/communication-demo',
           icon: <Award className="h-4 w-4" />,
           description: 'Communication demo'
         },
@@ -263,6 +276,40 @@ const Navigation: React.FC<NavigationProps> = ({
           href: '/video-onboarding',
           icon: <Video className="h-4 w-4" />,
           description: 'Interactive sessions'
+        }
+      ]
+    },
+
+    // Blockchain Features
+    {
+      section: 'Blockchain Features',
+      items: [
+        {
+          label: 'Blockchain Dashboard',
+          href: '/blockchain',
+          icon: <Network className="h-4 w-4" />,
+          description: 'Complete Web3 overview',
+          badge: 'New'
+        },
+        {
+          label: 'ZK Identity Verification',
+          href: '/zk-identity',
+          icon: <Shield className="h-4 w-4" />,
+          description: 'Zero-knowledge identity proofs',
+          badge: 'New'
+        },
+        {
+          label: 'NFT Gallery',
+          href: '/nft-gallery',
+          icon: <Award className="h-4 w-4" />,
+          description: 'Mint & trade achievement NFTs',
+          badge: 'New'
+        },
+        {
+          label: 'Wallet Connection',
+          href: '/wallet',
+          icon: <Wallet className="h-4 w-4" />,
+          description: 'Connect & manage wallet'
         }
       ]
     },
@@ -293,7 +340,7 @@ const Navigation: React.FC<NavigationProps> = ({
         {
           label: 'Enterprise Features',
           href: '/enterprise',
-          icon: <Shield className="h-4 w-4" />,
+          icon: <Settings2 className="h-4 w-4" />,
           description: 'Security & compliance'
         }
       ]
@@ -496,7 +543,14 @@ const Navigation: React.FC<NavigationProps> = ({
                         </div>
                       </div>
                       {item.badge && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge 
+                          variant="secondary" 
+                          className={`text-xs ${
+                            item.badge === 'Featured' 
+                              ? 'bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 font-semibold' 
+                              : ''
+                          }`}
+                        >
                           {item.badge}
                         </Badge>
                       )}
@@ -515,38 +569,50 @@ const Navigation: React.FC<NavigationProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
+                  className="w-full justify-start bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:bg-green-100"
+                  onClick={() => {
+                    navigate('/streaming-chat');
+                    setIsSidebarOpen(false);
+                  }}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2 text-green-600" />
+                  Try AI Chat Demo
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full justify-start"
                   onClick={() => {
-                    navigate('/foxit-demo');
+                    navigate('/document-demo');
                     setIsSidebarOpen(false);
                   }}
                 >
                   <Play className="h-4 w-4 mr-2" />
-                  Try Foxit Demo
+                  Try Document Demo
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => {
-                    navigate('/vonage-demo');
+                    navigate('/communication-demo');
                     setIsSidebarOpen(false);
                   }}
                 >
                   <Award className="h-4 w-4 mr-2" />
-                  Try Vonage Demo
+                  Try Communication Demo
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="w-full justify-start"
                   onClick={() => {
-                    navigate('/mulesoft-demo');
+                    navigate('/integration-platform-demo');
                     setIsSidebarOpen(false);
                   }}
                 >
                   <Code className="h-4 w-4 mr-2" />
-                  Try MuleSoft Demo
+                  Try Integration Platform Demo
                 </Button>
               </div>
             </div>

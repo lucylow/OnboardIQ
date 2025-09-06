@@ -44,6 +44,11 @@ import CustomerSuccess from "./components/CustomerSuccess";
 import SalesPipeline from "./components/SalesPipeline";
 import EnterpriseFeatures from "./components/EnterpriseFeatures";
 import ActivityChart from "./components/ActivityChart";
+import ZKIdentityVerification from "./components/ZKIdentityVerification";
+import NFTGallery from "./components/NFTGallery";
+import WalletConnection from "./components/WalletConnection";
+import BlockchainDashboard from "./components/BlockchainDashboard";
+import StreamingChatPage from "./components/StreamingChatPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,20 +115,20 @@ const AppContent = () => {
           {/* Document Management Routes */}
           <Route path="/documents" element={<DocumentGeneration userId="demo_user" />} />
           
-          {/* Foxit Integration Routes */}
-          <Route path="/foxit-demo" element={<FoxitDemoPage />} />
-          <Route path="/foxit-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
-          <Route path="/foxit-pdf-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
-          <Route path="/foxit-workflow" element={<FoxitWorkflow />} />
+          {/* Document Integration Routes */}
+          <Route path="/document-demo" element={<FoxitDemoPage />} />
+          <Route path="/document-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
+          <Route path="/document-pdf-generator" element={<FoxitPDFGenerator userId="demo_user" />} />
+          <Route path="/document-workflow" element={<FoxitWorkflow />} />
           
-          {/* Vonage Integration Routes */}
-          <Route path="/vonage-auth" element={<VonageAuthentication />} />
-          <Route path="/vonage-multichannel" element={<VonageMultiChannel />} />
-          <Route path="/vonage-demo" element={<VonageDemoPage />} />
+          {/* Communication Integration Routes */}
+          <Route path="/communication-auth" element={<VonageAuthentication />} />
+          <Route path="/communication-multichannel" element={<VonageMultiChannel />} />
+          <Route path="/communication-demo" element={<VonageDemoPage />} />
           
-          {/* MuleSoft Integration Routes */}
-          <Route path="/mulesoft-demo" element={<MuleSoftDemoPage />} />
-          <Route path="/mulesoft-mcp" element={<MuleSoftMCPDashboard />} />
+          {/* Integration Platform Routes */}
+          <Route path="/integration-platform-demo" element={<MuleSoftDemoPage />} />
+          <Route path="/integration-platform-mcp" element={<MuleSoftMCPDashboard />} />
           
           {/* OnboardIQ Integration Routes */}
           <Route path="/onboardiq" element={<OnboardIQ />} />
@@ -136,12 +141,21 @@ const AppContent = () => {
           {/* Demo route */}
           <Route path="/demo" element={<DemoPage />} />
           
+          {/* Blockchain Features Routes */}
+          <Route path="/blockchain" element={<BlockchainDashboard />} />
+          <Route path="/zk-identity" element={<ZKIdentityVerification />} />
+          <Route path="/nft-gallery" element={<NFTGallery />} />
+          <Route path="/wallet" element={<WalletConnection />} />
+          
           {/* Resource routes */}
           <Route path="/docs" element={<DocumentationPage />} />
           <Route path="/help" element={<HelpPage />} />
           <Route path="/tutorials" element={<NotFound />} />
           <Route path="/api" element={<NotFound />} />
           <Route path="/contact" element={<NotFound />} />
+          
+          {/* Streaming Chat */}
+          <Route path="/streaming-chat" element={<StreamingChatPage />} />
           
           {/* 404 fallback */}
           <Route path="*" element={<NotFound />} />

@@ -2,10 +2,10 @@
 export const ENV_CONFIG = {
   // API endpoints
   BACKEND_URL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000',
-  VONAGE_API_URL: process.env.REACT_APP_VONAGE_API_URL || 'http://localhost:5000/api/vonage',
+  COMMUNICATION_API_URL: process.env.REACT_APP_COMMUNICATION_API_URL || 'http://localhost:5000/api/communication',
   
   // Feature flags
-  ENABLE_VONAGE: process.env.REACT_APP_ENABLE_VONAGE !== 'false',
+  ENABLE_COMMUNICATION: process.env.REACT_APP_ENABLE_COMMUNICATION !== 'false',
   ENABLE_MOCK_MODE: process.env.REACT_APP_ENABLE_MOCK_MODE === 'true',
   
   // Development flags
@@ -27,9 +27,9 @@ export const validateEnvironment = () => {
     console.info('Using local backend:', ENV_CONFIG.BACKEND_URL);
   }
   
-  // Check Vonage configuration
-  if (!ENV_CONFIG.ENABLE_VONAGE) {
-    issues.push('Vonage API is disabled');
+  // Check Communication configuration
+  if (!ENV_CONFIG.ENABLE_COMMUNICATION) {
+    issues.push('Communication API is disabled');
   }
   
   if (ENV_CONFIG.ENABLE_MOCK_MODE) {
@@ -48,8 +48,8 @@ export const getApiUrl = (endpoint: string) => {
   return `${ENV_CONFIG.BACKEND_URL}${endpoint}`;
 };
 
-export const getVonageApiUrl = (endpoint: string) => {
-  return `${ENV_CONFIG.VONAGE_API_URL}${endpoint}`;
+export const getCommunicationApiUrl = (endpoint: string) => {
+  return `${ENV_CONFIG.COMMUNICATION_API_URL}${endpoint}`;
 };
 
 // Error handling helpers

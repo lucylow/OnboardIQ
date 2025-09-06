@@ -1,8 +1,8 @@
-# Foxit API Integration for OnboardIQ
+# Document API Integration for OnboardIQ
 
 ## Overview
 
-This document describes the comprehensive integration of Foxit's Document Generation API and PDF Services API into the OnboardIQ customer onboarding platform. The integration enables automated, personalized document creation and processing workflows.
+This document describes the comprehensive integration of Document Generation API and PDF Services API into the OnboardIQ customer onboarding platform. The integration enables automated, personalized document creation and processing workflows.
 
 ## Features
 
@@ -16,32 +16,32 @@ This document describes the comprehensive integration of Foxit's Document Genera
 ## Architecture
 
 ```
-Frontend (React) → Backend (Flask) → Foxit APIs → Document Delivery
+Frontend (React) → Backend (Flask) → Document APIs → Document Delivery
 ```
 
 ### Components
 
-1. **Foxit Service** (`backend/src/services/foxit_service.py`)
-   - Handles API communication with Foxit
+1. **Document Service** (`backend/src/services/document_service.py`)
+   - Handles API communication with Document APIs
    - Manages authentication and error handling
    - Implements document generation and processing workflows
 
-2. **Foxit Routes** (`backend/src/routes/foxit_routes.py`)
+2. **Document Routes** (`backend/src/routes/document_routes.py`)
    - RESTful API endpoints for document operations
    - Request validation using Marshmallow schemas
    - Async support for long-running operations
 
-3. **Frontend Service** (`src/services/foxitApi.ts`)
+3. **Frontend Service** (`src/services/documentApi.ts`)
    - TypeScript service for frontend integration
    - Type-safe API calls with comprehensive interfaces
    - Utility methods for document handling
 
 ## Setup
 
-### 1. Foxit Account Setup
+### 1. Document Service Account Setup
 
-1. Sign up for a Foxit developer account
-2. Obtain API credentials from the Foxit dashboard
+1. Sign up for a Document Service developer account
+2. Obtain API credentials from the Document Service dashboard
 3. Create document templates for:
    - Welcome packets
    - Contracts
@@ -53,36 +53,36 @@ Frontend (React) → Backend (Flask) → Foxit APIs → Document Delivery
 Add the following to your `.env` file:
 
 ```bash
-# Foxit Configuration
-FOXIT_API_BASE_URL=https://api.foxit.com
-FOXIT_API_KEY=your_foxit_api_key
-FOXIT_API_SECRET=your_foxit_api_secret
-FOXIT_WELCOME_TEMPLATE_ID=template-welcome-123
-FOXIT_CONTRACT_TEMPLATE_ID=template-contract-456
-FOXIT_GUIDE_TEMPLATE_ID=template-guide-789
-FOXIT_INVOICE_TEMPLATE_ID=template-invoice-101
+# Document API Configuration
+DOCUMENT_API_BASE_URL=https://api.document-service.com
+DOCUMENT_API_KEY=your_document_api_key
+DOCUMENT_API_SECRET=your_document_api_secret
+DOCUMENT_WELCOME_TEMPLATE_ID=template-welcome-123
+DOCUMENT_CONTRACT_TEMPLATE_ID=template-contract-456
+DOCUMENT_GUIDE_TEMPLATE_ID=template-guide-789
+DOCUMENT_INVOICE_TEMPLATE_ID=template-invoice-101
 ```
 
 ### 3. Backend Installation
 
-The Foxit service is already integrated into the backend. No additional installation required.
+The Document service is already integrated into the backend. No additional installation required.
 
 ### 4. Frontend Integration
 
-The frontend service is available at `src/services/foxitApi.ts` and can be imported directly.
+The frontend service is available at `src/services/documentApi.ts` and can be imported directly.
 
 ## API Endpoints
 
 ### Health Check
 ```http
-GET /api/foxit/health
+GET /api/document/health
 ```
 
 **Response:**
 ```json
 {
   "success": true,
-  "service": "foxit",
+  "service": "document",
   "status": "healthy",
   "api_key_configured": true,
   "templates_configured": true,
@@ -93,7 +93,7 @@ GET /api/foxit/health
 
 ### Get Templates
 ```http
-GET /api/foxit/templates
+GET /api/document/templates
 ```
 
 **Response:**
@@ -106,10 +106,10 @@ GET /api/foxit/templates
     "onboarding_guide": "template-guide-789",
     "invoice": "template-invoice-101"
   },
-  "api_base_url": "https://api.foxit.com",
+  "api_base_url": "https://api.document-service.com",
   "endpoints": {
-    "document_generation": "https://api.foxit.com/docgen/v1/generate",
-    "pdf_services": "https://api.foxit.com/pdfservices/v1/workflow"
+    "document_generation": "https://api.document-service.com/docgen/v1/generate",
+    "pdf_services": "https://api.document-service.com/pdfservices/v1/workflow"
   },
   "status": "configured"
 }
@@ -117,7 +117,7 @@ GET /api/foxit/templates
 
 ### Generate Document
 ```http
-POST /api/foxit/generate-document
+POST /api/document/generate-document
 ```
 
 **Request:**
@@ -138,7 +138,7 @@ POST /api/foxit/generate-document
 ```json
 {
   "success": true,
-  "document_url": "https://api.foxit.com/documents/abc123/download",
+  "document_url": "https://api.document-service.com/documents/abc123/download",
   "document_id": "doc_abc123",
   "file_size": 245760,
   "generated_at": "2024-01-15T10:30:00Z"
@@ -147,15 +147,15 @@ POST /api/foxit/generate-document
 
 ### Process PDF Workflow
 ```http
-POST /api/foxit/process-pdf-workflow
+POST /api/document/process-pdf-workflow
 ```
 
 **Request:**
 ```json
 {
   "document_urls": [
-    "https://api.foxit.com/documents/welcome.pdf",
-    "https://api.foxit.com/documents/contract.pdf"
+    "https://api.document-service.com/documents/welcome.pdf",
+    "https://api.document-service.com/documents/contract.pdf"
   ],
   "workflow_config": {
     "compress": true,
@@ -175,7 +175,7 @@ POST /api/foxit/process-pdf-workflow
 ```json
 {
   "success": true,
-  "final_document_url": "https://api.foxit.com/documents/final_abc123.pdf",
+  "final_document_url": "https://api.document-service.com/documents/final_abc123.pdf",
   "workflow_id": "workflow_xyz789",
   "processing_time": 2.45,
   "file_size": 184320,
@@ -185,7 +185,7 @@ POST /api/foxit/process-pdf-workflow
 
 ### Create Welcome Packet
 ```http
-POST /api/foxit/create-welcome-packet
+POST /api/document/create-welcome-packet
 ```
 
 **Request:**
@@ -204,9 +204,9 @@ POST /api/foxit/create-welcome-packet
 ```json
 {
   "success": true,
-  "final_document_url": "https://api.foxit.com/documents/welcome_packet_abc123.pdf",
-  "welcome_document_url": "https://api.foxit.com/documents/welcome_abc123.pdf",
-  "contract_document_url": "https://api.foxit.com/documents/contract_abc123.pdf",
+  "final_document_url": "https://api.document-service.com/documents/welcome_packet_abc123.pdf",
+  "welcome_document_url": "https://api.document-service.com/documents/welcome_abc123.pdf",
+  "contract_document_url": "https://api.document-service.com/documents/contract_abc123.pdf",
   "workflow_id": "workflow_xyz789",
   "user_data": {
     "customer_name": "Sarah Connor",
@@ -222,10 +222,10 @@ POST /api/foxit/create-welcome-packet
 ### Basic Document Generation
 
 ```typescript
-import { foxitApiService } from '@/services/foxitApi';
+import { documentApiService } from '@/services/documentApi';
 
 // Generate a simple document
-const result = await foxitApiService.generateDocument({
+const result = await documentApiService.generateDocument({
   template_id: 'template-welcome-123',
   data: {
     customer_name: 'Sarah Connor',
@@ -237,7 +237,7 @@ const result = await foxitApiService.generateDocument({
 
 if (result.success) {
   // Download the document
-  await foxitApiService.downloadDocument(result.document_url!, 'welcome.pdf');
+  await documentApiService.downloadDocument(result.document_url!, 'welcome.pdf');
 }
 ```
 
@@ -245,7 +245,7 @@ if (result.success) {
 
 ```typescript
 // Create a complete welcome packet
-const welcomePacket = await foxitApiService.createWelcomePacketForUser({
+const welcomePacket = await documentApiService.createWelcomePacketForUser({
   name: 'Sarah Connor',
   company: 'Cyberdyne Systems',
   plan: 'Premium Team Plan',
@@ -256,7 +256,7 @@ const welcomePacket = await foxitApiService.createWelcomePacketForUser({
 
 if (welcomePacket.success) {
   // Open the final document in a new tab
-  await foxitApiService.openDocumentInNewTab(welcomePacket.final_document_url!);
+  await documentApiService.openDocumentInNewTab(welcomePacket.final_document_url!);
 }
 ```
 
@@ -264,10 +264,10 @@ if (welcomePacket.success) {
 
 ```typescript
 // Process multiple documents with a predefined workflow
-const workflowResult = await foxitApiService.processDocumentsWithWorkflow(
+const workflowResult = await documentApiService.processDocumentsWithWorkflow(
   [
-    'https://api.foxit.com/documents/doc1.pdf',
-    'https://api.foxit.com/documents/doc2.pdf'
+    'https://api.document-service.com/documents/doc1.pdf',
+    'https://api.document-service.com/documents/doc2.pdf'
   ],
   'welcome_packet'
 );
@@ -281,7 +281,7 @@ if (workflowResult.success) {
 
 ```typescript
 // Generate multiple documents in batch
-const batchResult = await foxitApiService.batchGenerateDocuments({
+const batchResult = await documentApiService.batchGenerateDocuments({
   documents: [
     {
       request_id: 'req1',
@@ -321,11 +321,11 @@ The integration includes comprehensive error handling:
 
 ```typescript
 try {
-  const result = await foxitApiService.createWelcomePacket(request);
+  const result = await documentApiService.createWelcomePacket(request);
   if (result.success) {
     // Handle success
   } else {
-    console.error('Foxit API error:', result.error, result.details);
+    console.error('Document API error:', result.error, result.details);
   }
 } catch (error) {
   console.error('Network or unexpected error:', error);
@@ -364,12 +364,12 @@ console.error('Document generation failed:', error);
 
 ### Health Check
 ```bash
-curl http://localhost:5000/api/foxit/health
+curl http://localhost:5000/api/document/health
 ```
 
 ### Generate Test Document
 ```bash
-curl -X POST http://localhost:5000/api/foxit/generate-document \
+curl -X POST http://localhost:5000/api/document/generate-document \
   -H "Content-Type: application/json" \
   -d '{
     "template_id": "template-welcome-123",
@@ -385,16 +385,16 @@ curl -X POST http://localhost:5000/api/foxit/generate-document \
 ### Common Issues
 
 1. **API Key Not Configured**
-   - Ensure `FOXIT_API_KEY` is set in environment variables
-   - Check API key validity in Foxit dashboard
+   - Ensure `DOCUMENT_API_KEY` is set in environment variables
+   - Check API key validity in Document Service dashboard
 
 2. **Template Not Found**
    - Verify template IDs are correct
-   - Ensure templates exist in your Foxit account
+   - Ensure templates exist in your Document Service account
 
 3. **Network Errors**
    - Check internet connectivity
-   - Verify Foxit API endpoints are accessible
+   - Verify Document API endpoints are accessible
 
 4. **Document Generation Fails**
    - Validate request data format
@@ -416,7 +416,7 @@ LOG_LEVEL=DEBUG
 const user = await signupUser(userData);
 
 // 2. Generate welcome packet
-const welcomePacket = await foxitApiService.createWelcomePacketForUser({
+const welcomePacket = await documentApiService.createWelcomePacketForUser({
   name: user.name,
   company: user.company,
   plan: user.plan,
@@ -428,7 +428,7 @@ const welcomePacket = await foxitApiService.createWelcomePacketForUser({
 await sendWelcomeEmail(user.email, welcomePacket.final_document_url);
 
 // 4. Generate onboarding guide
-const guide = await foxitApiService.createOnboardingGuideForUser({
+const guide = await documentApiService.createOnboardingGuideForUser({
   name: user.name,
   company: user.company,
   plan: user.plan,
@@ -442,4 +442,4 @@ await saveUserDocuments(user.id, {
 });
 ```
 
-This comprehensive Foxit integration provides a robust foundation for automated document generation and processing in the OnboardIQ platform, enabling personalized customer onboarding experiences with professional document workflows.
+This comprehensive Document API integration provides a robust foundation for automated document generation and processing in the OnboardIQ platform, enabling personalized customer onboarding experiences with professional document workflows.

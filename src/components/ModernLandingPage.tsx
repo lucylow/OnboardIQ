@@ -76,6 +76,16 @@ const ModernLandingPage: React.FC = () => {
 
   const features = [
     {
+      icon: <MessageSquare className="h-6 w-6" />,
+      title: "AI Streaming Chat",
+      description: "Real-time conversational AI with instant streaming responses powered by OpenAI GPT-4",
+      stats: "99.9% uptime",
+      color: "from-green-500 to-emerald-500",
+      gradient: "bg-gradient-to-br from-green-500 to-emerald-500",
+      badge: "Featured",
+      onClick: () => window.location.href = '/streaming-chat'
+    },
+    {
       icon: <Brain className="h-6 w-6" />,
       title: "AI-Powered Profiling",
       description: "Intelligent user segmentation and personalized onboarding paths",
@@ -84,20 +94,12 @@ const ModernLandingPage: React.FC = () => {
       gradient: "bg-gradient-to-br from-purple-500 to-pink-500"
     },
     {
-      icon: <MessageSquare className="h-6 w-6" />,
-      title: "Multi-Channel Communication",
-      description: "Seamless communication across email, SMS, WhatsApp, and voice",
-      stats: `${mockAIAnalytics.conversational.totalConversations.toLocaleString()} conversations`,
-      color: "from-blue-500 to-cyan-500",
-      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500"
-    },
-    {
       icon: <Shield className="h-6 w-6" />,
       title: "Advanced Security",
       description: "Real-time risk assessment and adaptive authentication",
       stats: `${mockAIAnalytics.security.totalAssessments.toLocaleString()} assessments`,
-      color: "from-green-500 to-emerald-500",
-      gradient: "bg-gradient-to-br from-green-500 to-emerald-500"
+      color: "from-blue-500 to-cyan-500",
+      gradient: "bg-gradient-to-br from-blue-500 to-cyan-500"
     },
     {
       icon: <FileText className="h-6 w-6" />,
@@ -231,6 +233,16 @@ const ModernLandingPage: React.FC = () => {
                 )}
               </Button>
               
+              {/* Prominent Chat Demo Button */}
+              <Button
+                onClick={() => window.location.href = '/streaming-chat'}
+                className="group relative px-8 py-4 text-lg font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+              >
+                <MessageSquare className="mr-2 h-5 w-5 group-hover:animate-pulse" />
+                Try AI Chat Demo
+                <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
+              </Button>
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -246,6 +258,17 @@ const ModernLandingPage: React.FC = () => {
                   <div className="px-2 py-1.5 text-sm font-medium text-gray-500 uppercase tracking-wide border-b">
                     Quick Actions
                   </div>
+                  <DropdownMenuItem 
+                    onClick={() => window.location.href = '/streaming-chat'}
+                    className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                        <MessageSquare className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="font-medium">Try AI Chat Demo</span>
+                    </div>
+                  </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleFoxitDemo}
                     className="py-3 px-3 cursor-pointer hover:bg-orange-50"
@@ -270,10 +293,10 @@ const ModernLandingPage: React.FC = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleMuleSoftDemo}
-                    className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                    className="py-3 px-3 cursor-pointer hover:bg-purple-50"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                         <Code className="h-4 w-4 text-white" />
                       </div>
                       <span className="font-medium">Try MuleSoft Demo</span>
@@ -332,10 +355,19 @@ const ModernLandingPage: React.FC = () => {
             {features.map((feature, index) => (
               <Card 
                 key={feature.title}
-                className="group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
+                className={`group relative overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${feature.onClick ? 'cursor-pointer' : ''}`}
                 style={{ animationDelay: `${index * 200}ms` }}
+                onClick={feature.onClick}
               >
                 <div className={`absolute inset-0 ${feature.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                {feature.badge && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <Badge className="bg-gradient-to-r from-green-400 to-emerald-400 text-green-900 font-semibold">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {feature.badge}
+                    </Badge>
+                  </div>
+                )}
                 <CardHeader className="pb-4">
                   <div className={`w-12 h-12 rounded-xl ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <div className="text-white">
@@ -601,7 +633,7 @@ const ModernLandingPage: React.FC = () => {
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                   <MessageSquare className="h-8 w-8 text-white" />
@@ -612,9 +644,17 @@ const ModernLandingPage: React.FC = () => {
               
               <div className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                  <MessageSquare className="h-8 w-8 text-white" />
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">2. AI Chat Interface</h4>
+                <p className="text-sm text-gray-600">Real-time streaming chat powered by OpenAI GPT-4</p>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                   <Brain className="h-8 w-8 text-white" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">2. AI Processing</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">3. AI Processing</h4>
                 <p className="text-sm text-gray-600">OpenAI analyzes customer data for personalization</p>
               </div>
               
@@ -622,15 +662,15 @@ const ModernLandingPage: React.FC = () => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
                   <FileText className="h-8 w-8 text-white" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">3. Document Generation</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">4. Document Generation</h4>
                 <p className="text-sm text-gray-600">Foxit creates personalized compliance documents</p>
               </div>
               
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
                   <Zap className="h-8 w-8 text-white" />
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">4. System Integration</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">5. System Integration</h4>
                 <p className="text-sm text-gray-600">MuleSoft orchestrates all enterprise systems</p>
               </div>
             </div>
@@ -735,6 +775,17 @@ const ModernLandingPage: React.FC = () => {
                   Quick Actions
                 </div>
                 <DropdownMenuItem 
+                  onClick={() => window.location.href = '/streaming-chat'}
+                  className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                      <MessageSquare className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="font-medium">Try AI Chat Demo</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
                   onClick={handleFoxitDemo}
                   className="py-3 px-3 cursor-pointer hover:bg-orange-50"
                 >
@@ -758,10 +809,10 @@ const ModernLandingPage: React.FC = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={handleMuleSoftDemo}
-                  className="py-3 px-3 cursor-pointer hover:bg-green-50"
+                  className="py-3 px-3 cursor-pointer hover:bg-purple-50"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
                       <Code className="h-4 w-4 text-white" />
                     </div>
                     <span className="font-medium">Try MuleSoft Demo</span>

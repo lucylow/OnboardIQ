@@ -1,19 +1,19 @@
-# MuleSoft MCP (Model Context Protocol) Integration
+# Integration Platform MCP (Model Context Protocol) Integration
 
 ## Overview
 
-This document describes the implementation of MuleSoft MCP (Model Context Protocol) integration for the OnboardIQ platform. The MCP integration enables AI agents to communicate with and control MuleSoft APIs programmatically, providing a foundation for multi-agent orchestration and intelligent automation.
+This document describes the implementation of Integration Platform MCP (Model Context Protocol) integration for the OnboardIQ platform. The MCP integration enables AI agents to communicate with and control Integration Platform APIs programmatically, providing a foundation for multi-agent orchestration and intelligent automation.
 
 ## Architecture
 
 ### Components
 
-1. **MuleSoftMCPServer** (`backend/mulesoft/MuleSoftMCPServer.js`)
+1. **IntegrationPlatformMCPServer** (`backend/integration-platform/IntegrationPlatformMCPServer.js`)
    - Express.js server implementing MCP protocol
    - Exposes OnboardIQ capabilities to AI agents
    - Handles resource discovery, tool execution, and command processing
 
-2. **MuleSoftMCPClient** (`backend/mulesoft/MuleSoftMCPClient.js`)
+2. **IntegrationPlatformMCPClient** (`backend/integration-platform/IntegrationPlatformMCPClient.js`)
    - Client for interacting with MCP servers
    - Provides methods for AI agents to connect and communicate
    - Handles session management and error handling
@@ -28,7 +28,7 @@ This document describes the implementation of MuleSoft MCP (Model Context Protoc
    - Frontend integration points
    - Health monitoring and status reporting
 
-5. **MCP Dashboard** (`src/components/MuleSoftMCPDashboard.tsx`)
+5. **MCP Dashboard** (`src/components/IntegrationPlatformMCPDashboard.tsx`)
    - React component for managing MCP connections
    - Real-time monitoring of agents and workflows
    - User interface for orchestration control
@@ -47,9 +47,9 @@ The MCP server exposes the following capabilities:
 ### Available Resources
 
 ```
-mcp://onboardiq/apis/vonage      - Vonage communication APIs
-mcp://onboardiq/apis/foxit       - Foxit document APIs
-mcp://onboardiq/apis/ai          - AI-powered analytics APIs
+mcp://onboardiq/apis/communication - Communication APIs
+mcp://onboardiq/apis/document      - Document APIs
+mcp://onboardiq/apis/ai           - AI-powered analytics APIs
 mcp://onboardiq/workflows/onboarding - Customer onboarding workflow
 mcp://onboardiq/workflows/security   - Security monitoring workflow
 mcp://onboardiq/ai-agents/behavior-analyzer     - Behavior analysis agent
@@ -60,7 +60,7 @@ mcp://onboardiq/ai-agents/workflow-orchestrator - Workflow orchestration
 ### Available Tools
 
 1. **analyze_user_behavior**
-   - Analyzes user behavior patterns using MuleSoft AI
+   - Analyzes user behavior patterns using Integration Platform AI
    - Parameters: userId, timeRange, metrics
    - Returns: Analysis results, insights, recommendations
 
@@ -82,7 +82,7 @@ mcp://onboardiq/ai-agents/workflow-orchestrator - Workflow orchestration
 ### Available Commands
 
 1. **deploy_workflow**
-   - Deploys workflows to MuleSoft environment
+   - Deploys workflows to Integration Platform environment
    - Parameters: workflowId, environment
 
 2. **update_api**
@@ -185,13 +185,13 @@ POST /api/mcp/ai/security-monitor  - Monitor security
 POST /api/mcp/ai/orchestrate       - Orchestrate workflow
 ```
 
-### MuleSoft Operations
+### Integration Platform Operations
 
 ```
-POST /api/mcp/mulesoft/deploy      - Deploy workflow to MuleSoft
-PUT  /api/mcp/mulesoft/api/:apiId  - Update API configuration
-POST /api/mcp/mulesoft/train-agent - Train AI agent
-POST /api/mcp/mulesoft/monitor     - Monitor performance
+POST /api/mcp/integration-platform/deploy      - Deploy workflow to Integration Platform
+PUT  /api/mcp/integration-platform/api/:apiId  - Update API configuration
+POST /api/mcp/integration-platform/train-agent - Train AI agent
+POST /api/mcp/integration-platform/monitor     - Monitor performance
 ```
 
 ## Configuration
@@ -203,11 +203,11 @@ POST /api/mcp/mulesoft/monitor     - Monitor performance
 MCP_SERVER_URL=http://localhost:3001
 MCP_SERVER_PORT=3001
 
-# MuleSoft Configuration
-MULESOFT_ACCESS_TOKEN=your_access_token
-MULESOFT_ORG_ID=your_organization_id
-MULESOFT_ENV_ID=your_environment_id
-MULESOFT_BASE_URL=https://anypoint.mulesoft.com
+# Integration Platform Configuration
+INTEGRATION_PLATFORM_ACCESS_TOKEN=your_access_token
+INTEGRATION_PLATFORM_ORG_ID=your_organization_id
+INTEGRATION_PLATFORM_ENV_ID=your_environment_id
+INTEGRATION_PLATFORM_BASE_URL=https://anypoint.integration-platform.com
 
 # AI Configuration
 AI_ENABLED=true
@@ -225,11 +225,11 @@ STEP_UP_AUTH_ENABLED=true
 
 ```javascript
 // Start MCP Server
-const MuleSoftMCPServer = require('./mulesoft/MuleSoftMCPServer');
-const mcpServer = new MuleSoftMCPServer({
+const IntegrationPlatformMCPServer = require('./integration-platform/IntegrationPlatformMCPServer');
+const mcpServer = new IntegrationPlatformMCPServer({
   port: 3001,
-  mulesoftBaseUrl: process.env.MULESOFT_BASE_URL,
-  accessToken: process.env.MULESOFT_ACCESS_TOKEN
+  integrationPlatformBaseUrl: process.env.INTEGRATION_PLATFORM_BASE_URL,
+  accessToken: process.env.INTEGRATION_PLATFORM_ACCESS_TOKEN
 });
 
 mcpServer.start().then(() => {
@@ -244,9 +244,9 @@ mcpServer.start().then(() => {
 ### Connecting to MCP Server
 
 ```javascript
-const MuleSoftMCPClient = require('./mulesoft/MuleSoftMCPClient');
+const IntegrationPlatformMCPClient = require('./integration-platform/IntegrationPlatformMCPClient');
 
-const client = new MuleSoftMCPClient({
+const client = new IntegrationPlatformMCPClient({
   serverUrl: 'http://localhost:3001'
 });
 
@@ -305,7 +305,7 @@ The MCP Dashboard provides a comprehensive interface for managing MCP connection
 - System health monitoring
 - Analytics and reporting
 
-**Access:** Navigate to `/mulesoft-mcp` in the application
+**Access:** Navigate to `/integration-platform-mcp` in the application
 
 ### Key Components
 
@@ -333,7 +333,7 @@ The MCP Dashboard provides a comprehensive interface for managing MCP connection
 
 ### Authentication and Authorization
 
-- MCP server requires valid MuleSoft access tokens
+- MCP server requires valid Integration Platform access tokens
 - All API endpoints are protected with authentication
 - Session management with secure token handling
 
@@ -424,7 +424,7 @@ For issues and support:
    - Advanced error handling
 
 3. **Integration Extensions**
-   - Additional MuleSoft connectors
+   - Additional Integration Platform connectors
    - Third-party AI service integration
    - Custom agent development framework
 
@@ -442,6 +442,6 @@ For issues and support:
 
 ## Conclusion
 
-The MuleSoft MCP integration provides a robust foundation for AI-powered automation and orchestration in the OnboardIQ platform. By implementing the MCP protocol, we enable seamless communication between AI agents and MuleSoft APIs, creating a powerful ecosystem for intelligent business process automation.
+The Integration Platform MCP integration provides a robust foundation for AI-powered automation and orchestration in the OnboardIQ platform. By implementing the MCP protocol, we enable seamless communication between AI agents and Integration Platform APIs, creating a powerful ecosystem for intelligent business process automation.
 
 The implementation includes comprehensive monitoring, security features, and a user-friendly dashboard for managing the entire system. This integration positions OnboardIQ as a cutting-edge solution for AI-powered customer onboarding and security management.

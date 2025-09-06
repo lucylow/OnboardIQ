@@ -21,7 +21,10 @@ import {
   Search,
   ExternalLink,
   Award,
-  Star
+  Star,
+  FileText,
+  Shield,
+  Trophy
 } from 'lucide-react';
 import { web3Service } from '@/services/web3Service';
 import { nftService, NFT, NFTCollection, NFTMetadata } from '@/services/nftService';

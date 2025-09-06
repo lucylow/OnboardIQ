@@ -68,6 +68,7 @@ import {
   Download,
   Upload,
   Edit,
+  Wallet,
   Trash2,
   Eye,
   EyeOff,

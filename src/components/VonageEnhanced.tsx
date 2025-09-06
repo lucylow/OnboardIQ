@@ -38,13 +38,13 @@ import {
   Mic,
   Camera,
   Share,
-  Record,
-  Translate,
   TrendingUp,
   Target,
   Filter,
   Bot,
-  Sparkles
+  Sparkles,
+  Lock,
+  Activity
 } from 'lucide-react';
 
 // Enhanced interfaces for advanced features
@@ -780,7 +780,7 @@ const VonageEnhanced: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <Label htmlFor="recording" className="flex items-center gap-2">
-                        <Record className="h-4 w-4" />
+                        <Activity className="h-4 w-4" />
                         Session Recording
                       </Label>
                       <Checkbox
@@ -936,7 +936,7 @@ const VonageEnhanced: React.FC = () => {
 
                     <div className="flex items-center justify-between">
                       <Label htmlFor="translation" className="flex items-center gap-2">
-                        <Translate className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         Auto Translation
                       </Label>
                       <Checkbox

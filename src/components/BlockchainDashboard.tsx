@@ -24,7 +24,8 @@ import {
   FileText,
   Building,
   Globe,
-  GraduationCap
+  GraduationCap,
+  Loader2
 } from 'lucide-react';
 import { web3Service } from '@/services/web3Service';
 import { zkIdentityService, IdentityClaim } from '@/services/zkIdentityService';
@@ -428,11 +429,11 @@ const BlockchainDashboard: React.FC = () => {
                             alt={nft.metadata.name}
                             className="w-full h-full object-cover"
                           />
-                          <Badge 
-                            className={`absolute top-2 right-2 ${getRarityColor(getNFTRarity(nft))}`}
-                          >
-                            {getNFTRarity(nft)}
-                          </Badge>
+          <Badge 
+            className={`absolute top-2 right-2 ${getRarityColor(String(getNFTRarity(nft)))}`}
+          >
+            {String(getNFTRarity(nft))}
+          </Badge>
                         </div>
                         <CardContent className="p-4">
                           <h3 className="font-semibold truncate mb-1">{nft.metadata.name}</h3>

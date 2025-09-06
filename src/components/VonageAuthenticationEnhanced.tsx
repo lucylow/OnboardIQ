@@ -531,7 +531,7 @@ const VonageAuthenticationEnhanced: React.FC = () => {
                       <Checkbox
                         id="sim-swap"
                         checked={enableSimSwapDetection}
-                        onCheckedChange={setEnableSimSwapDetection}
+                        onCheckedChange={(checked) => setEnableSimSwapDetection(checked === true)}
                       />
                     </div>
                     
@@ -540,7 +540,7 @@ const VonageAuthenticationEnhanced: React.FC = () => {
                       <Checkbox
                         id="device-fp"
                         checked={enableDeviceFingerprinting}
-                        onCheckedChange={setEnableDeviceFingerprinting}
+                        onCheckedChange={(checked) => setEnableDeviceFingerprinting(checked === true)}
                       />
                     </div>
                   </div>
@@ -551,7 +551,7 @@ const VonageAuthenticationEnhanced: React.FC = () => {
                       <Checkbox
                         id="behavior"
                         checked={enableBehaviorAnalysis}
-                        onCheckedChange={setEnableBehaviorAnalysis}
+                        onCheckedChange={(checked) => setEnableBehaviorAnalysis(checked === true)}
                       />
                     </div>
                     
@@ -560,7 +560,7 @@ const VonageAuthenticationEnhanced: React.FC = () => {
                       <Checkbox
                         id="risk"
                         checked={enableRiskScoring}
-                        onCheckedChange={setEnableRiskScoring}
+                        onCheckedChange={(checked) => setEnableRiskScoring(checked === true)}
                       />
                     </div>
                   </div>

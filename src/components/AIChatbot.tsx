@@ -178,7 +178,7 @@ const AIChatbot: React.FC = () => {
         await streamingChatService.sendStreamingMessage(
           userMessage,
           { 
-            messages: messages.slice(-5),
+            messages: messages.slice(-5).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.content || '' })),
             userProfile: { firstName: 'User', companyName: 'Demo Company', planTier: 'free' }
           },
           // onChunk
